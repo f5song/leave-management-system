@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id          Int       @id @default(autoincrement())
+  user_id     Int
+  google_id   String    @unique
+  email       String    @unique
+  approved_by Int?
+  approved_at DateTime?
+  created_at  DateTime  @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  user       UserInfo  @relation(fields: [user_id], references: [id])
+  approvedBy UserInfo? @relation("AccountApprovedBy", fields: [approved_by], references: [id])
+
+  @@map("accounts")
+}
+
+model UserInfo {
+  id            Int    @id @default(autoincrement())
+  first_name    String
+  last_name     String
+  email         String @unique
+  role_id       Int
+  job_title_id  String
+  department_id String
+
+  role       Role       @relation(fields: [role_id], references: [id])
+  jobTitle   JobTitle   @relation(fields: [job_title_id], references: [id])
+  department Department @relation(fields: [department_id], references: [id])
+
+  leaves           Leave[]   @relation("UserLeaves")
+  createdLeaves    Leave[]   @relation("LeaveCreatedBy")
+  createdRoles     Role[]    @relation("RoleCreatedBy")
+  accounts         Account[]
+  approvedAccounts Account[] @relation("AccountApprovedBy")
+  createdHolidays  Holiday[] @relation("HolidayCreatedBy")
+
+  created_at  DateTime  @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  @@map("userinfo")
+}
+
+model Holiday {
+  id          Int       @id @default(autoincrement())
+  title       String
+  start_date  DateTime
+  end_date    DateTime
+  total_days  Int
+  color       String
+  created_by  Int?
+  created_at  DateTime  @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  createdBy UserInfo? @relation("HolidayCreatedBy", fields: [created_by], references: [id])
+
+  @@map("holidays")
+}
+
+
+model Role {
+  id         Int    @id @default(autoincrement())
+  name       String
+  created_by Int?
+
+  user      UserInfo[]
+  createdBy UserInfo?   @relation("RoleCreatedBy", fields: [created_by], references: [id])
+
+  created_at  DateTime  @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  @@map("roles")
+}
+
+
+model JobTitle {
+  id          String     @id @db.VarChar(20)
+  name        String
+  users       UserInfo[]
+  created_at  DateTime   @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  @@map("jobtitles")
+}
+
+model Department {
+  id          String     @id @db.VarChar(20)
+  name        String
+  users       UserInfo[]
+  created_at  DateTime   @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  @@map("departments")
+}
+
+model LeaveType {
+  id          String    @id @db.VarChar(20)
+  name        String
+  leaves      Leave[]   @relation("LeaveTypeLeaves")
+  created_at  DateTime  @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  @@map("leavetypes")
+}
+
+model Leave {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  leave_type_id String
+  start_date    DateTime
+  end_date      DateTime
+  reason        String
+  status        String   @default("pending")
+  created_by    Int?
+
+  userInfo  UserInfo  @relation("UserLeaves", fields: [user_id], references: [id])
+  leaveType LeaveType @relation("LeaveTypeLeaves", fields: [leave_type_id], references: [id])
+  createdBy UserInfo?  @relation("LeaveCreatedBy", fields: [created_by], references: [id])
+
+  created_at  DateTime  @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  @@map("leaves")
+}
+
