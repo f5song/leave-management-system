@@ -11,9 +11,12 @@ import { HolidayModule } from './holiday/holiday.module';
 import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [DepartmentModule, JobTitleModule, UserModule, AccountModule, LeaveTypeModule, LeaveModule, HolidayModule, RoleModule, PermissionModule, AuthModule],
+  imports: [DepartmentModule, JobTitleModule, UserModule, AccountModule, LeaveTypeModule, LeaveModule, HolidayModule, RoleModule, PermissionModule, AuthModule, ConfigModule.forRoot({
+    isGlobal: true,
+  })],
   controllers: [AppController],
   providers: [AppService],
 })

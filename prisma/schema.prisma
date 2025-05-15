@@ -9,7 +9,7 @@ datasource db {
 
 model Account {
   id          Int       @id @default(autoincrement())
-  user_id     Int
+  user_id     Int?
   google_id   String    @unique
   email       String    @unique
   approved_by Int?
@@ -18,24 +18,25 @@ model Account {
   update_time DateTime?
   delete_time DateTime?
 
-  user       UserInfo  @relation(fields: [user_id], references: [id])
+  user       UserInfo?  @relation(fields: [user_id], references: [id])
   approvedBy UserInfo? @relation("AccountApprovedBy", fields: [approved_by], references: [id])
 
   @@map("accounts")
 }
 
 model UserInfo {
-  id            Int    @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   first_name    String
   last_name     String
-  email         String @unique
-  role_id       Int
-  job_title_id  String
-  department_id String
+  email         String    @unique
+  role_id       Int?
+  job_title_id  String?
+  department_id String?
+  birth_date    DateTime?
 
-  role       Role       @relation(fields: [role_id], references: [id])
-  jobTitle   JobTitle   @relation(fields: [job_title_id], references: [id])
-  department Department @relation(fields: [department_id], references: [id])
+  role       Role?       @relation(fields: [role_id], references: [id])
+  jobTitle   JobTitle?   @relation(fields: [job_title_id], references: [id])
+  department Department? @relation(fields: [department_id], references: [id])
 
   leaves           Leave[]   @relation("UserLeaves")
   createdLeaves    Leave[]   @relation("LeaveCreatedBy")
@@ -50,6 +51,7 @@ model UserInfo {
 
   @@map("userinfo")
 }
+
 
 model Holiday {
   id          Int       @id @default(autoincrement())
