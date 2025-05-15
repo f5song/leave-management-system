@@ -18,7 +18,7 @@ model Account {
   update_time DateTime?
   delete_time DateTime?
 
-  user       UserInfo?  @relation(fields: [user_id], references: [id])
+  user       UserInfo? @relation(fields: [user_id], references: [id])
   approvedBy UserInfo? @relation("AccountApprovedBy", fields: [approved_by], references: [id])
 
   @@map("accounts")
@@ -34,9 +34,10 @@ model UserInfo {
   department_id String?
   birth_date    DateTime?
 
-  role       Role?       @relation(fields: [role_id], references: [id])
-  jobTitle   JobTitle?   @relation(fields: [job_title_id], references: [id])
-  department Department? @relation(fields: [department_id], references: [id])
+  role               Role?        @relation(fields: [role_id], references: [id])
+  jobTitle           JobTitle?    @relation(fields: [job_title_id], references: [id])
+  department         Department?  @relation(fields: [department_id], references: [id])
+  createdPermissions Permission[] @relation("PermissionCreatedBy")
 
   leaves           Leave[]   @relation("UserLeaves")
   createdLeaves    Leave[]   @relation("LeaveCreatedBy")
@@ -51,7 +52,6 @@ model UserInfo {
 
   @@map("userinfo")
 }
-
 
 model Holiday {
   id          Int       @id @default(autoincrement())
@@ -70,14 +70,15 @@ model Holiday {
   @@map("holidays")
 }
 
-
 model Role {
   id         Int    @id @default(autoincrement())
   name       String
   created_by Int?
 
-  user      UserInfo[]
-  createdBy UserInfo?   @relation("RoleCreatedBy", fields: [created_by], references: [id])
+  user        UserInfo[]
+  permissions Permission[] @relation("RolePermissions") // ตั้งชื่อ relation
+
+  createdBy UserInfo? @relation("RoleCreatedBy", fields: [created_by], references: [id])
 
   created_at  DateTime  @default(now())
   update_time DateTime?
@@ -86,14 +87,15 @@ model Role {
   @@map("roles")
 }
 
-
 model JobTitle {
-  id          String     @id @db.VarChar(20)
-  name        String
-  users       UserInfo[]
-  created_at  DateTime   @default(now())
-  update_time DateTime?
-  delete_time DateTime?
+  id            String      @id @db.VarChar(20)
+  name          String
+  department_id String?
+  department    Department? @relation(fields: [department_id], references: [id])
+  users         UserInfo[]
+  created_at    DateTime    @default(now())
+  update_time   DateTime?
+  delete_time   DateTime?
 
   @@map("jobtitles")
 }
@@ -102,6 +104,7 @@ model Department {
   id          String     @id @db.VarChar(20)
   name        String
   users       UserInfo[]
+  jobTitles   JobTitle[]
   created_at  DateTime   @default(now())
   update_time DateTime?
   delete_time DateTime?
@@ -132,7 +135,7 @@ model Leave {
 
   userInfo  UserInfo  @relation("UserLeaves", fields: [user_id], references: [id])
   leaveType LeaveType @relation("LeaveTypeLeaves", fields: [leave_type_id], references: [id])
-  createdBy UserInfo?  @relation("LeaveCreatedBy", fields: [created_by], references: [id])
+  createdBy UserInfo? @relation("LeaveCreatedBy", fields: [created_by], references: [id])
 
   created_at  DateTime  @default(now())
   update_time DateTime?
@@ -141,3 +144,17 @@ model Leave {
   @@map("leaves")
 }
 
+model Permission {
+  id          Int       @id @default(autoincrement())
+  name        String
+  role_id     Int
+  created_by  Int?
+  created_at  DateTime  @default(now())
+  update_time DateTime?
+  delete_time DateTime?
+
+  role      Role      @relation("RolePermissions", fields: [role_id], references: [id]) // ใช้ชื่อ relation เดียวกัน
+  createdBy UserInfo? @relation("PermissionCreatedBy", fields: [created_by], references: [id])
+
+  @@map("permission")
+}

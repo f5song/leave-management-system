@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, Patch } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 
@@ -8,7 +8,6 @@ export class UserController {
 
   @Post()
   async createUser(@Body() userData: CreateUserDto) {
-    // แปลงค่า id ที่เป็น string ให้เป็น number ถ้าจำเป็น
     return this.userService.createUser({
       ...userData,
       role_id: Number(userData.role_id),
@@ -33,6 +32,14 @@ export class UserController {
     @Body() userData: UpdateUserDto,
   ) {
     return this.userService.updateUser(id, userData);
+  }
+
+  @Patch(':id')
+  async partialUpdateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() partialData: Partial<UpdateUserDto>,
+  ) {
+    return this.userService.partialUpdateUser(id, partialData);
   }
 
   @Delete(':id')
