@@ -1,4 +1,4 @@
-import { IsDate, IsDateString, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength, IsEnum, registerDecorator, ValidationOptions, ValidationArguments } from "class-validator";
+import { IsDate, IsDateString, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength, IsEnum, registerDecorator, ValidationOptions, ValidationArguments, IsInt, IsPositive } from "class-validator";
 
 export enum LeaveStatus {
     APPROVED = 'approved',
@@ -19,6 +19,11 @@ export class CreateLeaveDto {
     @IsFutureDate()
     end_date: Date;
 
+    @IsOptional()
+    @IsInt()
+    @IsPositive()
+    total_days?: number;
+
     @IsString()
     @MinLength(10)
     @MaxLength(500)
@@ -35,6 +40,7 @@ export class UpdateLeaveDto {
     @IsOptional()
     @IsDateString()
     @IsDate()
+    @IsFutureDate()
     start_date?: Date;
 
     @IsOptional()
@@ -42,6 +48,11 @@ export class UpdateLeaveDto {
     @IsDate()
     @IsFutureDate()
     end_date?: Date;
+
+    @IsOptional()
+    @IsInt()
+    @IsPositive()
+    total_days?: number;
 
     @IsOptional()
     @IsString()

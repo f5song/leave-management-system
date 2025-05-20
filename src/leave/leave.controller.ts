@@ -12,7 +12,6 @@ import {
   import { LeaveService } from './leave.service';
   import { CreateLeaveDto, UpdateLeaveDto, UpdateLeaveStatusDto } from './dto';
   import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-  import { Request } from 'express';
   
   interface AuthenticatedRequest extends Request {
     user: { id: number };

@@ -28,6 +28,7 @@ model UserInfo {
   id            Int       @id @default(autoincrement())
   first_name    String
   last_name     String
+  nick_name     String?
   email         String    @unique
   role_id       Int?
   job_title_id  String?
@@ -132,6 +133,8 @@ model Leave {
   reason        String
   status        String   @default("pending")
   created_by    Int?
+  total_days    Int?
+
 
   userInfo  UserInfo  @relation("UserLeaves", fields: [user_id], references: [id])
   leaveType LeaveType @relation("LeaveTypeLeaves", fields: [leave_type_id], references: [id])

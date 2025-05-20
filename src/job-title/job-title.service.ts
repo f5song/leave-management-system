@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateJobTitleDto, UpdateJobTitleDto } from './dto';
 
@@ -8,6 +8,24 @@ export class JobTitleService {
 
   async create(createJobTitleDto: CreateJobTitleDto) {
     const { id, name, department_id } = createJobTitleDto;
+
+    // Check if job title with same id already exists
+    const existingById = await this.prisma.jobTitle.findUnique({
+      where: { id },
+      select: { id: true }
+    });
+    if (existingById) {
+      throw new BadRequestException(`Job title with id ${id} already exists`);
+    }
+
+    // Check if job title with same name already exists
+    const existingByName = await this.prisma.jobTitle.findFirst({
+      where: { name },
+      select: { name: true }
+    });
+    if (existingByName) {
+      throw new BadRequestException(`Job title with name ${name} already exists`);
+    }
 
     return this.prisma.jobTitle.create({
       data: {

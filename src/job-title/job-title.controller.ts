@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards } from '@nestjs/common';
 import { JobTitleService } from './job-title.service';
 import { CreateJobTitleDto, UpdateJobTitleDto } from './dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('job-titles')
 export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) {}

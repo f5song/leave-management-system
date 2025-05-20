@@ -1,14 +1,17 @@
-import { IsString, IsDate, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsDate, IsInt, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateHolidayDto {
+  @IsInt()
+  id?: number;
+
   @IsString()
   title: string;
 
-  @IsDate()
-  start_date: Date;
+  @IsDateString()
+  start_date: string;
 
-  @IsDate()
-  end_date: Date;
+  @IsDateString()
+  end_date: string;
 
   @IsInt()
   total_days: number;

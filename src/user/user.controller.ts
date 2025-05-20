@@ -2,8 +2,6 @@ import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, Pars
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
-import { RoleGuard } from './role.guard';
-import { Role } from './role.decorator';
 
 @Controller('users')
 export class UserController {

@@ -127,6 +127,16 @@ export class LeaveService {
         // Validate leave exists and belongs to user
         const leave = await this.prisma.leave.findUnique({
             where: { id },
+            select: {
+                id: true,
+                user_id: true,
+                leave_type_id: true,
+                start_date: true,
+                end_date: true,
+                total_days: true,
+                status: true,
+                reason: true
+            }
         });
 
         if (!leave) {
@@ -137,9 +147,48 @@ export class LeaveService {
             throw new ForbiddenException('You can only update your own leave request');
         }
 
-        // Only validate dates if they're being updated
+        // Validate leave type if provided
+        if (dto.leave_type_id) {
+            await this.validateLeaveTypeExists(dto.leave_type_id);
+            if (typeof dto.leave_type_id !== 'string') {
+                throw new BadRequestException('leave_type_id must be a string');
+            }
+        }
+
+        // Validate dates
         if (dto.start_date || dto.end_date) {
-            await this.validateLeaveDates(dto.start_date || leave.start_date, dto.end_date || leave.end_date);
+            const startDate = dto.start_date || leave.start_date;
+            const endDate = dto.end_date || leave.end_date;
+
+            if (startDate > endDate) {
+                throw new BadRequestException('start_date must be before or equal to end_date');
+            }
+
+            // Validate total_days matches date range
+            const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            if (dto.total_days !== undefined && dto.total_days !== daysDiff) {
+                throw new BadRequestException(`total_days (${dto.total_days}) does not match date range (${daysDiff} days)`);
+            }
+
+            await this.validateLeaveDates(startDate, endDate);
+        }
+
+        // Validate reason if provided
+        if (dto.reason) {
+            if (typeof dto.reason !== 'string') {
+                throw new BadRequestException('reason must be a string');
+            }
+            if (dto.reason.length < 10) {
+                throw new BadRequestException('reason must be at least 10 characters');
+            }
+            if (dto.reason.length > 500) {
+                throw new BadRequestException('reason cannot exceed 500 characters');
+            }
+        }
+
+        // Check if leave is already approved
+        if (leave.status !== 'PENDING') {
+            throw new ForbiddenException('Cannot update leave request that is not in PENDING status');
         }
 
         return this.prisma.leave.update({
@@ -152,6 +201,63 @@ export class LeaveService {
         });
     }
 
+    async partialUpdate(id: number, data: Partial<any>): Promise<any> {
+        // Validate each field, ถ้าผิด throw exception
+
+        if (data.leave_type_id) {
+            if (typeof data.leave_type_id !== 'string') {
+                throw new BadRequestException('leave_type_id must be a string');
+            }
+            await this.validateLeaveTypeExists(data.leave_type_id);
+        }
+
+        if (data.start_date) {
+            if (!(data.start_date instanceof Date)) {
+                throw new BadRequestException('start_date must be a valid date');
+            }
+        }
+
+        if (data.end_date) {
+            if (!(data.end_date instanceof Date)) {
+                throw new BadRequestException('end_date must be a valid date');
+            }
+        }
+
+        if (data.reason) {
+            if (typeof data.reason !== 'string') {
+                throw new BadRequestException('reason must be a string');
+            }
+            if (data.reason.length < 10) {
+                throw new BadRequestException('reason must be at least 10 characters');
+            }
+            if (data.reason.length > 500) {
+                throw new BadRequestException('reason cannot exceed 500 characters');
+            }
+        }
+
+        // Validate dates logic
+        const currentLeave = await this.prisma.leave.findUnique({ where: { id } });
+        const startDate = data.start_date || currentLeave.start_date;
+        const endDate = data.end_date || currentLeave.end_date;
+
+        if (startDate > endDate) {
+            throw new BadRequestException('start_date must be before or equal to end_date');
+        }
+
+        // Validate overlapping dates
+        await this.validateLeaveDates(startDate, endDate);
+
+        // ถ้า validation ผ่านหมด ถึงจะอัปเดตจริง
+        return await this.prisma.leave.update({
+            where: { id },
+            data: {
+                ...data,
+                update_time: new Date(),
+            },
+        });
+    }
+
+
     async updateLeaveStatus(id: number, dto: UpdateLeaveStatusDto, approverId: number) {
         await this.validateLeaveStatus(id);
         await this.validateApprover(approverId);
@@ -159,9 +265,8 @@ export class LeaveService {
         return this.prisma.leave.update({
             where: { id },
             data: {
-                status: dto.status,
+                ...dto,
                 update_time: new Date(),
-                created_by: approverId,
             },
         });
     }
