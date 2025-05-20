@@ -76,7 +76,7 @@ model Role {
   created_by Int?
 
   user        UserInfo[]
-  permissions Permission[] @relation("RolePermissions") // ตั้งชื่อ relation
+  permissions RolePermission[]
 
   createdBy UserInfo? @relation("RoleCreatedBy", fields: [created_by], references: [id])
 
@@ -145,16 +145,28 @@ model Leave {
 }
 
 model Permission {
-  id          Int       @id @default(autoincrement())
-  name        String
-  role_id     Int
-  created_by  Int?
+  id         Int    @id @default(autoincrement())
+  name       String 
+  created_by Int?
+
+  roles RolePermission[] // ตารางเชื่อม
+
+  createdBy UserInfo? @relation("PermissionCreatedBy", fields: [created_by], references: [id])
+
   created_at  DateTime  @default(now())
   update_time DateTime?
   delete_time DateTime?
 
-  role      Role      @relation("RolePermissions", fields: [role_id], references: [id]) // ใช้ชื่อ relation เดียวกัน
-  createdBy UserInfo? @relation("PermissionCreatedBy", fields: [created_by], references: [id])
-
   @@map("permission")
+}
+
+model RolePermission {
+  role_id       Int
+  permission_id Int
+
+  role       Role       @relation(fields: [role_id], references: [id])
+  permission Permission @relation(fields: [permission_id], references: [id])
+
+  @@id([role_id, permission_id])
+  @@map("role_permission")
 }

@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { PrismaModule } from '../../prisma/prisma.module'; // ปรับเส้นทางตามที่คุณจัดเก็บ PrismaService
+import { PrismaModule } from '../../prisma/prisma.module';
+import { RoleGuard } from './role.guard';
 
 @Module({
   imports: [PrismaModule],
-  providers: [UserService],
+  providers: [UserService, RoleGuard],
   controllers: [UserController],
   exports: [UserService],
 })

@@ -1,184 +1,177 @@
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function main() {
-  // Roles
-  const roleAdmin = await prisma.role.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      id: 1,
-      name: 'Admin',
-      created_at: new Date(),
+  // --- Seed Departments ---
+  const itDept = await prisma.department.create({
+    data: {
+      id: 'D001',
+      name: 'IT Department',
     },
   });
 
-  const roleUser = await prisma.role.upsert({
-    where: { id: 2 },
-    update: {},
-    create: {
-      id: 2,
-      name: 'User',
-      created_at: new Date(),
+  const hrDept = await prisma.department.create({
+    data: {
+      id: 'D002',
+      name: 'HR Department',
     },
   });
 
-  // JobTitles
-  const jobDev = await prisma.jobTitle.upsert({
-    where: { id: 'DEV' },
-    update: {},
-    create: {
-      id: 'DEV',
+  // --- Seed Job Titles ---
+  const devJob = await prisma.jobTitle.create({
+    data: {
+      id: 'JT001',
       name: 'Developer',
-      created_at: new Date(),
+      department_id: itDept.id,
     },
   });
 
-  const jobHr = await prisma.jobTitle.upsert({
-    where: { id: 'HR' },
-    update: {},
-    create: {
-      id: 'HR',
-      name: 'HR Manager',
-      created_at: new Date(),
+  const hrJob = await prisma.jobTitle.create({
+    data: {
+      id: 'JT002',
+      name: 'HR Specialist',
+      department_id: hrDept.id,
     },
   });
 
-  // Departments
-  const deptIT = await prisma.department.upsert({
-    where: { id: 'IT' },
-    update: {},
-    create: {
-      id: 'IT',
-      name: 'Information Technology',
-      created_at: new Date(),
+  // --- Seed Roles ---
+  const adminRole = await prisma.role.create({
+    data: {
+      name: 'Admin',
     },
   });
 
-  const deptHR = await prisma.department.upsert({
-    where: { id: 'HR' },
-    update: {},
-    create: {
-      id: 'HR',
-      name: 'Human Resources',
-      created_at: new Date(),
+  const staffRole = await prisma.role.create({
+    data: {
+      name: 'Staff',
     },
   });
 
-  // LeaveTypes
-  const leaveSick = await prisma.leaveType.upsert({
-    where: { id: 'SICK' },
-    update: {},
-    create: {
-      id: 'SICK',
-      name: 'ลาป่วย',
-      created_at: new Date(),
+  // --- Seed Permissions ---
+  const manageLeavePermission = await prisma.permission.create({
+    data: {
+      name: 'manage_leave',
     },
   });
 
-  const leaveVacation = await prisma.leaveType.upsert({
-    where: { id: 'VAC' },
-    update: {},
-    create: {
-      id: 'VAC',
-      name: 'ลากิจ',
-      created_at: new Date(),
+  const viewCalendarPermission = await prisma.permission.create({
+    data: {
+      name: 'view_calendar',
     },
   });
 
-  // UserInfos
-  const user1 = await prisma.userInfo.upsert({
-    where: { email: 'user1@example.com' },
-    update: {},
-    create: {
+  // --- Assign Permissions to Roles ---
+  await prisma.rolePermission.createMany({
+    data: [
+      {
+        role_id: adminRole.id,
+        permission_id: manageLeavePermission.id,
+      },
+      {
+        role_id: adminRole.id,
+        permission_id: viewCalendarPermission.id,
+      },
+      {
+        role_id: staffRole.id,
+        permission_id: viewCalendarPermission.id,
+      },
+    ],
+  });
+
+  // --- Seed Users ---
+  const adminUser = await prisma.userInfo.create({
+    data: {
       first_name: 'สมชาย',
-      last_name: 'ใจดี',
-      email: 'user1@example.com',
-      role_id: roleUser.id,
-      job_title_id: jobDev.id,
-      department_id: deptIT.id,
-      created_at: new Date(),
-    },
-  });
-
-  const user2 = await prisma.userInfo.upsert({
-    where: { email: 'admin@example.com' },
-    update: {},
-    create: {
-      first_name: 'อภิชา',
       last_name: 'ผู้ดูแล',
       email: 'admin@example.com',
-      role_id: roleAdmin.id,
-      job_title_id: jobHr.id,
-      department_id: deptHR.id,
-      created_at: new Date(),
+      role_id: adminRole.id,
+      job_title_id: devJob.id,
+      department_id: itDept.id,
+      birth_date: new Date('1990-01-01'),
     },
   });
 
-  // Accounts
-  await prisma.account.upsert({
-    where: { email: 'user1@example.com' },
-    update: {},
-    create: {
-      google_id: 'google-user1-id',
-      email: 'user1@example.com',
-      user_id: user1.id,
-      created_at: new Date(),
+  const staffUser = await prisma.userInfo.create({
+    data: {
+      first_name: 'สมหญิง',
+      last_name: 'พนักงาน',
+      email: 'staff@example.com',
+      role_id: staffRole.id,
+      job_title_id: hrJob.id,
+      department_id: hrDept.id,
+      birth_date: new Date('1995-05-05'),
     },
   });
 
-  await prisma.account.upsert({
-    where: { email: 'admin@example.com' },
-    update: {},
-    create: {
-      google_id: 'google-admin-id',
-      email: 'admin@example.com',
-      user_id: user2.id,
-      approved_by: user2.id,
-      approved_at: new Date(),
-      created_at: new Date(),
+  // --- Seed Accounts ---
+  await prisma.account.createMany({
+    data: [
+      {
+        google_id: 'google-uid-001',
+        email: 'admin@example.com',
+        user_id: adminUser.id,
+        approved_by: adminUser.id,
+        approved_at: new Date(),
+      },
+      {
+        google_id: 'google-uid-002',
+        email: 'staff@example.com',
+        user_id: staffUser.id,
+        approved_by: adminUser.id,
+        approved_at: new Date(),
+      },
+    ],
+  });
+
+  // --- Seed Leave Types ---
+  const sickLeave = await prisma.leaveType.create({
+    data: {
+      id: 'L001',
+      name: 'ลาป่วย',
     },
   });
 
-  // Holidays
-  await prisma.holiday.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      id: 1,
-      title: 'วันหยุดปีใหม่',
+  const vacationLeave = await prisma.leaveType.create({
+    data: {
+      id: 'L002',
+      name: 'ลาพักร้อน',
+    },
+  });
+
+  // --- Seed Holidays ---
+  await prisma.holiday.create({
+    data: {
+      title: 'วันปีใหม่',
       start_date: new Date('2025-01-01'),
       end_date: new Date('2025-01-01'),
       total_days: 1,
       color: '#FF0000',
-      created_by: user2.id,
-      created_at: new Date(),
+      created_by: adminUser.id,
     },
   });
 
-  // Leaves
-  await prisma.leave.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      id: 1,
-      user_id: user1.id,
-      leave_type_id: leaveSick.id,
-      start_date: new Date('2025-05-10'),
-      end_date: new Date('2025-05-12'),
-      reason: 'ป่วยเป็นไข้หวัด',
-      status: 'approved',
-      created_by: user2.id,
-      created_at: new Date(),
+  // --- Seed Leave Requests ---
+  await prisma.leave.create({
+    data: {
+      user_id: staffUser.id,
+      leave_type_id: vacationLeave.id,
+      start_date: new Date('2025-05-20'),
+      end_date: new Date('2025-05-22'),
+      reason: 'ไปเที่ยวทะเล',
+      status: 'pending',
+      created_by: staffUser.id,
     },
   });
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
+  .then(async () => {
+    console.log('✅ Seed completed successfully');
     await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error('❌ Seed failed:', e);
+    await prisma.$disconnect();
+    process.exit(1);
   });

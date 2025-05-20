@@ -1,31 +1,34 @@
-import { IsEmail, IsNotEmpty, IsString, IsNumber, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDate, IsEmail, IsNotEmpty } from 'class-validator';
 
 export class CreateUserDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   first_name: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   last_name: string;
 
-  @IsNotEmpty()
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
-  @IsNotEmpty()
   @IsNumber()
+  @IsNotEmpty()
   role_id: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  job_title_id: string;
+  job_title_id?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  department_id: string;
+  department_id?: string;
+
+  @IsOptional()
+  @IsDate()
+  birth_date?: Date;
 }
-
 
 export class UpdateUserDto {
   @IsOptional()
@@ -41,6 +44,10 @@ export class UpdateUserDto {
   email?: string;
 
   @IsOptional()
+  @IsNumber()
+  role_id?: number;
+
+  @IsOptional()
   @IsString()
   job_title_id?: string;
 
@@ -49,6 +56,6 @@ export class UpdateUserDto {
   department_id?: string;
 
   @IsOptional()
-  @IsNumber()
-  role_id?: number;
+  @IsDate()
+  birth_date?: Date;
 }

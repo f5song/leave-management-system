@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
+import { RoleGuard } from './role.guard';
+import { Role } from './role.decorator';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createUser(@Body() userData: CreateUserDto) {
     return this.userService.createUser({
       ...userData,
@@ -17,16 +21,19 @@ export class UserController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async getUserById(@Param('id', ParseIntPipe) id: number) {
     return this.userService.getUserById(id);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getAllUsers() {
     return this.userService.getAllUsers();
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() userData: UpdateUserDto,
@@ -35,6 +42,7 @@ export class UserController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async partialUpdateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() partialData: Partial<UpdateUserDto>,
@@ -43,6 +51,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.deleteUser(id);
   }

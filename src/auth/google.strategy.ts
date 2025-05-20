@@ -6,8 +6,7 @@ import { AuthService } from './auth.service';
 export class GoogleAuthService {
   private client: OAuth2Client;
 
-  constructor(private authService: AuthService) {
-    // ใส่ Google Client ID ของคุณ
+  constructor(private authService: AuthService) { 
     this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   }
 
@@ -33,8 +32,6 @@ export class GoogleAuthService {
   async validateUser(idToken: string) {
     const googleUser = await this.verifyIdToken(idToken);
 
-    // เช็ค user ในระบบด้วย googleUser.sub หรือ googleUser.email
-    // สร้าง user ใหม่ถ้ายังไม่มีในระบบ (เชื่อมกับ Account table ของคุณ)
     const user = await this.authService.findOrCreateUserFromGoogle(googleUser);
 
     if (!user) {
