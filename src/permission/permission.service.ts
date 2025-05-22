@@ -1,18 +1,27 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Permission } from '../database/entity/permission.entity';
 import { CreatePermissionDto, UpdatePermissionDto } from './dto';
+import { UserInfo } from '../database/entity/user-info.entity';
 
 @Injectable()
 export class PermissionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Permission)
+    private permissionRepository: Repository<Permission>,
+    @InjectRepository(UserInfo)
+    private userInfoRepository: Repository<UserInfo>
+  ) {}
 
   private async validatePermissionId(id: number): Promise<void> {
     if (!Number.isInteger(id) || id <= 0) {
       throw new BadRequestException('Permission ID must be a positive integer');
     }
 
-    const permission = await this.prisma.permission.findUnique({
+    const permission = await this.permissionRepository.findOne({
       where: { id },
+      relations: ['createdBy']
     });
 
     if (!permission || permission.delete_time) {
@@ -25,11 +34,11 @@ export class PermissionService {
       throw new BadRequestException('Permission name is required and cannot be empty');
     }
 
-    const existingPermission = await this.prisma.permission.findFirst({
+    const existingPermission = await this.permissionRepository.findOne({
       where: {
         name: name.trim(),
-        delete_time: null,
-      },
+        delete_time: null
+      }
     });
 
     if (existingPermission) {
@@ -42,8 +51,8 @@ export class PermissionService {
       throw new BadRequestException('Creator ID must be a positive integer');
     }
 
-    const user = await this.prisma.userInfo.findUnique({
-      where: { id: creatorId },
+    const user = await this.userInfoRepository.findOne({
+      where: { id: creatorId }
     });
 
     if (!user || user.delete_time) {
@@ -55,25 +64,28 @@ export class PermissionService {
     await this.validatePermissionName(dto.name);
     await this.validatePermissionCreator(dto.created_by);
 
-    return this.prisma.permission.create({
-      data: {
-        ...dto,
-        created_at: new Date(),
-      },
+    const permission = this.permissionRepository.create({
+      ...dto,
+      created_at: new Date(),
+      update_time: new Date(),
+      delete_time: null
     });
+
+    return await this.permissionRepository.save(permission);
   }
 
   async findAll() {
-    return this.prisma.permission.findMany({
+    return this.permissionRepository.find({
       where: { delete_time: null },
-      orderBy: { name: 'asc' },
+      order: { name: 'ASC' }
     });
   }
 
   async findOne(id: number) {
     await this.validatePermissionId(id);
-    return this.prisma.permission.findFirst({
+    return this.permissionRepository.findOne({
       where: { id, delete_time: null },
+      relations: ['createdBy']
     });
   }
 
@@ -84,46 +96,50 @@ export class PermissionService {
       await this.validatePermissionName(dto.name);
     }
 
-    return this.prisma.permission.update({
-      where: { id },
-      data: { 
-        ...dto,
-        update_time: new Date(),
-      },
+    const permission = await this.permissionRepository.findOne({
+      where: { id }
     });
+
+    if (!permission || permission.delete_time) {
+      throw new NotFoundException(`Permission with ID ${id} not found`);
+    }
+
+    Object.assign(permission, dto);
+    permission.update_time = new Date();
+
+    return await this.permissionRepository.save(permission);
   }
 
   async softDelete(id: number) {
     await this.validatePermissionId(id);
     
-    return this.prisma.permission.update({
-      where: { id },
-      data: { 
-        delete_time: new Date(),
-      },
+    const permission = await this.permissionRepository.findOne({
+      where: { id }
     });
+
+    if (!permission || permission.delete_time) {
+      throw new NotFoundException(`Permission with ID ${id} not found`);
+    }
+
+    permission.delete_time = new Date();
+    return await this.permissionRepository.save(permission);
   }
 
   async getPermissionById(id: number) {
     await this.validatePermissionId(id);
-    return this.prisma.permission.findUnique({
+    return this.permissionRepository.findOne({
       where: { id },
-      include: {
-        createdBy: true,
-      },
+      relations: ['createdBy']
     });
   }
 
   async getPermissionsByRole(roleId: number) {
-    return this.prisma.rolePermission.findMany({
-      where: {
-        role_id: roleId,
-        role: { delete_time: null },
-        permission: { delete_time: null },
-      },
-      include: {
-        permission: true,
-      },
-    });
+    return this.permissionRepository.createQueryBuilder('permission')
+      .leftJoinAndSelect('permission.rolePermissions', 'rolePermission')
+      .leftJoinAndSelect('rolePermission.role', 'role')
+      .where('role.id = :roleId', { roleId })
+      .andWhere('role.delete_time IS NULL')
+      .andWhere('permission.delete_time IS NULL')
+      .getMany();
   }
 }

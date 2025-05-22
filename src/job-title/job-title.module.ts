@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JobTitleService } from './job-title.service';
 import { JobTitleController } from './job-title.controller';
-import { JobTitle } from './job-title.entity';
-import { Department } from '../department/department.entity';
+import { JobTitleEntity } from '../database/entity/job-title.entity';
+import { DepartmentEntity } from '../database/entity/department.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([JobTitle, Department])],
+  imports: [TypeOrmModule.forFeature([JobTitleEntity, DepartmentEntity])],
   providers: [JobTitleService],
   controllers: [JobTitleController],
   exports: [JobTitleService],

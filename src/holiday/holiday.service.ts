@@ -1,26 +1,28 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
-import { Holiday } from './holiday.entity';
+import { HolidayEntity } from '../database/entity/holiday.entity';
 import { CreateHolidayDto, UpdateHolidayDto } from './holiday.validation';
 import { HolidayResponseDto } from './holiday-response.dto';
 
 @Injectable()
 export class HolidayService {
   constructor(
-    @InjectRepository(Holiday)
-    private readonly holidayRepository: Repository<Holiday>,
+    @InjectRepository(HolidayEntity)
+    private readonly holidayRepository: Repository<HolidayEntity>,
   ) {}
 
-  private toResponseDto(holiday: Holiday): HolidayResponseDto {
+  private toResponseDto(holiday: HolidayEntity): HolidayResponseDto {
     return {
       id: holiday.id,
+      title: holiday.title,
       start_date: holiday.start_date,
       end_date: holiday.end_date,
-      description: holiday.description,
       total_days: holiday.total_days,
+      color: holiday.color,
       created_at: holiday.created_at,
-      updated_at: holiday.updated_at,
+      update_time: holiday.update_time,
+      delete_time: holiday.delete_time,
     };
   }
 

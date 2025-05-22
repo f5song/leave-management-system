@@ -4,8 +4,8 @@ import { OAuth2Client } from 'google-auth-library';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
-import { AccountEntity } from '../account/account.entity';
-import { Auth } from './auth.entity';
+import { AccountEntity } from '../database/entity/account.entity';
+import { Auth } from '../database/entity/auth.entity';
 
 
 @Injectable()

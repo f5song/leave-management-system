@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, JoinColumn } from 'typeorm';
-import { User } from './user.entity';
+import { UserInfoEntity } from './user-info.entity';
 
 @Entity('auth')
-export class Auth {
+export class AuthEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,9 +18,9 @@ export class Auth {
   @Column({ type: 'simple-array', default: ['user'] })
   roles: string[];
 
-  @OneToOne(() => User, user => user.account)
+  @OneToOne(() => UserInfoEntity, user => user.accounts)
   @JoinColumn()
-  user: User;
+  user: UserInfoEntity;
 
   @CreateDateColumn()
   created_at: Date;

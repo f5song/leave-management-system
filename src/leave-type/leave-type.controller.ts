@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { LeaveTypeService } from './leave-type.service';
-import { LeaveType } from './leave-type.entity';
+import { LeaveTypeEntity } from '../database/entity/leave-type.entity';
 import { CreateLeaveTypeDto, UpdateLeaveTypeDto } from './leave-type.validation';
 import { LeaveTypeResponseDto } from './leave-type-response.dto';
 
@@ -28,7 +28,7 @@ export class LeaveTypeController {
 
   @Get(':id')
   @Roles('admin')
-  async findOne(@Param('id') id: number): Promise<LeaveTypeResponseDto> {
+  async findOne(@Param('id') id: number): Promise<LeaveTypeEntity> {
     return this.leaveTypeService.findOne(id);
   }
 
@@ -43,7 +43,7 @@ export class LeaveTypeController {
 
   @Patch(':id')
   @Roles('admin')
-  async partialUpdate(@Param('id') id: string, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<LeaveType> {
+  async partialUpdate(@Param('id') id: string, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
     return this.leaveTypeService.partialUpdate(parseInt(id), data);
   }
 

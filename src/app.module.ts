@@ -13,36 +13,39 @@ import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from './database/database.module';
+import { AccountEntity } from './database/entity/account.entity';
+import { LeaveTypeEntity } from './database/entity/leave-type.entity';
+import { LeaveEntity } from './database/entity/leave.entity';
+import { HolidayEntity } from './database/entity/holiday.entity';
+import { RoleEntity } from './database/entity/role.entity';
+import { PermissionEntity } from './database/entity/permission.entity';
+import { UserInfoEntity } from './database/entity/user-info.entity';
+import { DepartmentEntity } from './database/entity/department.entity';
+import { JobTitleEntity } from './database/entity/job-title.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT) || 3306,
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'leave_management',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-      logging: true,
-      timezone: '+07:00'
-    }),
-    DepartmentModule, 
-    JobTitleModule, 
-    UserModule, 
-    AccountModule, 
-    LeaveTypeModule, 
-    LeaveModule, 
-    HolidayModule, 
-    RoleModule, 
-    PermissionModule, 
-    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-    })
+      envFilePath: '.env',
+    }),
+    DepartmentModule,
+    JobTitleModule,
+    UserModule,
+    AccountModule,
+    LeaveTypeModule,
+    LeaveModule,
+    HolidayModule,
+    RoleModule,
+    PermissionModule,
+    AuthModule,
+    DatabaseModule,
+    TypeOrmModule.forFeature([
+      AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,4 +1,4 @@
-import { JobTitle } from './job-title.entity';
+import { JobTitleEntity } from '../database/entity/job-title.entity';
 
 export class JobTitleResponseDto {
   id: string;
@@ -6,7 +6,7 @@ export class JobTitleResponseDto {
   department_id: string;
   department_name: string | null;
 
-  constructor(jobTitle: JobTitle) {
+  constructor(jobTitle: JobTitleEntity) {
     this.id = jobTitle.id;
     this.name = jobTitle.name;
     this.department_id = jobTitle.department_id;

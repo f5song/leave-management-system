@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
-import { Department } from './department.entity';
+import { DepartmentEntity } from '../database/entity/department.entity';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './department.validation';
 import { DepartmentResponseDto } from './department-response.dto';
 
 @Injectable()
 export class DepartmentService {
   constructor(
-    @InjectRepository(Department)
-    private departmentRepository: Repository<Department>
+    @InjectRepository(DepartmentEntity)
+    private departmentRepository: Repository<DepartmentEntity>
   ) {}
 
   async validateDepartmentId(id: number) {
@@ -67,9 +67,8 @@ export class DepartmentService {
 
     const department = this.departmentRepository.create({
       name,
-      description,
       created_at: new Date(),
-      updated_at: new Date(),
+      update_time: new Date(),
     });
 
     await this.departmentRepository.save(department);
@@ -83,8 +82,13 @@ export class DepartmentService {
     });
     return departments.map(dept => this.toResponseDto(dept));
   }
-  toResponseDto(dept: Department): any {
-    throw new Error('Method not implemented.');
+  toResponseDto(dept: DepartmentEntity): any {
+    return {
+      id: dept.id,
+      name: dept.name,
+      created_at: dept.created_at,
+      update_time: dept.update_time,
+    };
   }
 
   async findOne(id: number): Promise<DepartmentResponseDto> {
@@ -113,8 +117,7 @@ export class DepartmentService {
     }
 
     department.name = name;
-    department.description = description;
-    department.updatedAt = new Date();
+    department.update_time = new Date();
 
     await this.departmentRepository.save(department);
     return this.toResponseDto(department);

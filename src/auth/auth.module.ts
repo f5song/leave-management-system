@@ -7,8 +7,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { AccountEntity } from '../account/account.entity';
-import { Auth } from './auth.entity';
+import { AccountEntity } from '../database/entity/account.entity';
+import { Auth } from '../database/entity/auth.entity';
 import { GoogleAuthService } from './google.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 

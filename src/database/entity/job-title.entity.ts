@@ -7,10 +7,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Department } from '../department/department.entity';
+import { DepartmentEntity } from './department.entity';
 
 @Entity('job_titles')
-export class JobTitle {
+export class JobTitleEntity {
   @PrimaryColumn()
   id: string;
 
@@ -20,9 +20,9 @@ export class JobTitle {
   @Column({ name: 'department_id' })
   department_id: string;
 
-  @ManyToOne(() => Department, (department) => department.jobTitles)
+  @ManyToOne(() => DepartmentEntity, (department) => department.jobTitles)
   @JoinColumn({ name: 'department_id' })
-  department: Department;
+  department: DepartmentEntity;
 
   @Column({ type: 'timestamp', nullable: true })
   delete_time: Date | null;
@@ -32,4 +32,5 @@ export class JobTitle {
 
   @UpdateDateColumn({ name: 'update_time', nullable: true })
   update_time: Date | null;
+  users: any;
 }

@@ -10,9 +10,9 @@ import {
     Req,
   } from '@nestjs/common';
   import { LeaveService } from './leave.service';
-  import { CreateLeaveDto, UpdateLeaveDto, UpdateLeaveStatusDto } from './dto';
+  import { CreateLeaveDto, UpdateLeaveDto, UpdateLeaveStatusDto } from './leave.validation';
   import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-  
+  import { LeaveEntity } from '../database/entity/leave.entity';
   interface AuthenticatedRequest extends Request {
     user: { id: number };
   }

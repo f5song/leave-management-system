@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LeaveType } from './leave-type.entity';
+import { LeaveTypeEntity } from '../database/entity/leave-type.entity';
 import { CreateLeaveTypeDto, UpdateLeaveTypeDto } from './leave-type.validation';
 import { LeaveTypeResponseDto } from './leave-type-response.dto';
 
 @Injectable()
 export class LeaveTypeService {
   constructor(
-    @InjectRepository(LeaveType)
-    private leaveTypeRepository: Repository<LeaveType>,
+    @InjectRepository(LeaveTypeEntity)
+    private leaveTypeRepository: Repository<LeaveTypeEntity>,
   ) { }
 
   async create(createLeaveTypeDto: CreateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
@@ -38,9 +38,9 @@ export class LeaveTypeService {
     return leaveTypes.map(leaveType => this.toResponseDto(leaveType));
   }
 
-  async findOne(id: number): Promise<LeaveType> {
+  async findOne(id: number): Promise<LeaveTypeEntity> {
     const leaveType = await this.leaveTypeRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id: String(id), delete_time: null },
     });
 
     if (!leaveType) {
@@ -56,7 +56,7 @@ export class LeaveTypeService {
       throw new NotFoundException(`Leave type with ID ${id} not found`);
     }
     Object.assign(leaveType, updateLeaveTypeDto);
-    leaveType.updated_at = new Date();
+    leaveType.update_time = new Date();
     await this.leaveTypeRepository.save(leaveType);
     return this.toResponseDto(leaveType);
   }
@@ -69,7 +69,7 @@ export class LeaveTypeService {
 
   async restore(id: number): Promise<LeaveTypeResponseDto> {
     const leaveType = await this.leaveTypeRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id: String(id), delete_time: null },
     });
 
     if (!leaveType) {
@@ -83,7 +83,7 @@ export class LeaveTypeService {
 
   private async validateLeaveTypeExists(id: number): Promise<void> {
     const leaveType = await this.leaveTypeRepository.findOne({
-      where: { id },
+      where: { id: String(id) },
       withDeleted: true,
     });
 
@@ -103,20 +103,19 @@ export class LeaveTypeService {
   async partialUpdate(id: number, data: Partial<{ name: string; description: string; is_active: boolean }>): Promise<LeaveTypeResponseDto> {
     const leaveType = await this.findOne(id);
     Object.assign(leaveType, data);
-    leaveType.updated_at = new Date();
+    leaveType.update_time = new Date();
     const updatedLeaveType = await this.leaveTypeRepository.save(leaveType);
     return this.toResponseDto(updatedLeaveType);
   }
 
-  private toResponseDto(leaveType: LeaveType): LeaveTypeResponseDto {
+  private toResponseDto(leaveType: LeaveTypeEntity): LeaveTypeResponseDto {
     return {
       id: leaveType.id,
       name: leaveType.name,
-      description: leaveType.description,
       created_at: leaveType.created_at,
-      updated_at: leaveType.updated_at,
       update_time: leaveType.update_time,
       delete_time: leaveType.delete_time
+  
     };
   }
 }
