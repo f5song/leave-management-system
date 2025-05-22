@@ -8,6 +8,8 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { UserInfoEntity } from './user-info.entity';
 import { RoleEntity } from './role.entity';
@@ -29,7 +31,12 @@ export class PermissionEntity {
   createdBy: UserInfoEntity;
 
 
-  @OneToMany(() => RoleEntity, (rp) => rp.permissions)
+  @ManyToMany(() => RoleEntity, (rp) => rp.permissions)
+  @JoinTable({
+    name: 'permission_role',
+    joinColumn: { name: 'permission_id' },
+    inverseJoinColumn: { name: 'role_id' },
+  })
   roles: RoleEntity[];
 
   @CreateDateColumn()

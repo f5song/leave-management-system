@@ -1,18 +1,31 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { UserInfo, JobTitle, Department } from '@prisma/client';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserInfoEntity } from '../database/entity/user-info.entity';
+import { JobTitleEntity } from '../database/entity/job-title.entity';
+import { DepartmentEntity } from '../database/entity/department.entity';
+import { RoleEntity } from '../database/entity/role.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(UserInfoEntity)
+    private userInfoRepository: Repository<UserInfoEntity>,
+    @InjectRepository(JobTitleEntity)
+    private jobTitleRepository: Repository<JobTitleEntity>,
+    @InjectRepository(DepartmentEntity)
+    private departmentRepository: Repository<DepartmentEntity>,
+    @InjectRepository(RoleEntity)
+    private roleRepository: Repository<RoleEntity>
+  ) {}
 
   private async validateUserId(id: number): Promise<void> {
     if (!Number.isInteger(id) || id <= 0) {
       throw new BadRequestException('User ID must be a positive integer');
     }
 
-    const user = await this.prisma.userInfo.findUnique({
+    const user = await this.userInfoRepository.findOne({
       where: { id },
     });
 
@@ -30,7 +43,7 @@ export class UserService {
       throw new BadRequestException('Invalid email format');
     }
 
-    const existingUser = await this.prisma.userInfo.findUnique({
+    const existingUser = await this.userInfoRepository.findOne({
       where: { email },
     });
 
@@ -44,8 +57,8 @@ export class UserService {
       throw new BadRequestException('Role ID must be a positive integer');
     }
 
-    const role = await this.prisma.role.findUnique({
-      where: { id: roleId },
+    const role = await this.roleRepository.findOne({
+      where: { id: Number(roleId) },
     });
 
     if (!role || role.delete_time) {
@@ -54,12 +67,12 @@ export class UserService {
   }
 
   private async validateJobTitle(jobTitleId: string): Promise<void> {
-    if (!jobTitleId || typeof jobTitleId !== 'string' || jobTitleId.length > 20) {
+    if (!jobTitleId || typeof jobTitleId !== 'string' || jobTitleId.trim().length === 0) {
       throw new BadRequestException('Job title ID must be a string with maximum length of 20 characters');
     }
 
-    const jobTitle = await this.prisma.jobTitle.findUnique({
-      where: { id: jobTitleId },
+    const jobTitle = await this.jobTitleRepository.findOne({
+      where: { id: jobTitleId.trim() },
     });
 
     if (!jobTitle || jobTitle.delete_time) {
@@ -68,12 +81,12 @@ export class UserService {
   }
 
   private async validateDepartment(departmentId: string): Promise<void> {
-    if (!departmentId || typeof departmentId !== 'string' || departmentId.length > 20) {
-      throw new BadRequestException('Department ID must be a string with maximum length of 20 characters');
+    if (!departmentId || typeof departmentId !== 'number' || departmentId <= 0) {
+      throw new BadRequestException('Department ID must be a positive number');
     }
 
-    const department = await this.prisma.department.findUnique({
-      where: { id: departmentId },
+    const department = await this.departmentRepository.findOne({
+      where: { id: Number(departmentId) },
     });
 
     if (!department || department.delete_time) {
@@ -106,7 +119,7 @@ export class UserService {
     }
   }
 
-  async createUser(data: CreateUserDto): Promise<UserInfo> {
+  async createUser(data: CreateUserDto): Promise<UserInfoEntity> {
     await this.validateEmail(data.email);
     await this.validateRole(data.role_id);
     await this.validateJobTitle(data.job_title_id);
@@ -114,37 +127,39 @@ export class UserService {
     await this.validateNames(data.first_name, data.last_name);
     await this.validateBirthDate(data.birth_date);
 
-    return await this.prisma.userInfo.create({
-      data: {
-        email: data.email,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        birth_date: data.birth_date,
-        role_id: data.role_id,
-        job_title_id: data.job_title_id,
-        department_id: data.department_id,
-      },
+    const user = this.userInfoRepository.create({
+      email: data.email,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      birth_date: data.birth_date,
+      role_id: data.role_id,
+      job_title_id: data.job_title_id,
+      department_id: data.department_id,
+      created_at: new Date(),
     });
+    return this.userInfoRepository.save(user);
   }
 
-  async getUserById(id: number): Promise<UserInfo> {
+  async getUserById(id: number): Promise<UserInfoEntity> {
     await this.validateUserId(id);
     
-    return await this.prisma.userInfo.findUnique({
+    return await this.userInfoRepository.findOne({
       where: { id },
+      relations: ['role', 'jobTitle', 'department']
     });
   }
 
-  async getAllUsers(): Promise<UserInfo[]> {
-    return await this.prisma.userInfo.findMany({
+  async getAllUsers(): Promise<UserInfoEntity[]> {
+    return await this.userInfoRepository.find({
       where: { delete_time: null },
+      relations: ['role', 'jobTitle', 'department']
     });
   }
 
-  async updateUser(userId: number, data: UpdateUserDto): Promise<UserInfo> {
+  async updateUser(userId: number, data: UpdateUserDto): Promise<UserInfoEntity> {
     await this.validateUserId(userId);
     
-    const updateData: Partial<UserInfo> = {};
+    const updateData: Partial<UserInfoEntity> = {};
     
     if (data.email) await this.validateEmail(data.email);
     if (data.role_id) await this.validateRole(data.role_id);
@@ -166,34 +181,55 @@ export class UserService {
     if (data.job_title_id) updateData.job_title_id = data.job_title_id;
     if (data.department_id) updateData.department_id = data.department_id;
 
-    return await this.prisma.userInfo.update({
+    const user = await this.userInfoRepository.findOne({
       where: { id: userId },
-      data: updateData,
     });
+    
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    Object.assign(user, {
+      ...updateData,
+      update_time: new Date(),
+    });
+    
+    return this.userInfoRepository.save(user);
   }
 
-  async partialUpdateUser(id: number, partialData: Partial<UserInfo>): Promise<UserInfo> {
+  async partialUpdateUser(id: number, partialData: Partial<UserInfoEntity>): Promise<UserInfoEntity> {
     await this.validateUserId(id);
     
     const existingUser = await this.getUserById(id);
     
-    return await this.prisma.userInfo.update({
+    const user = await this.userInfoRepository.findOne({
       where: { id },
-      data: {
-        ...partialData,
-        id: existingUser.id,
-      },
     });
+    
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    Object.assign(user, {
+      ...partialData,
+      update_time: new Date(),
+    });
+    
+    return this.userInfoRepository.save(user);
   }
 
-  async deleteUser(id: number): Promise<UserInfo> {
+  async deleteUser(id: number): Promise<UserInfoEntity> {
     await this.validateUserId(id);
     
-    return await this.prisma.userInfo.update({
+    const user = await this.userInfoRepository.findOne({
       where: { id },
-      data: {
-        delete_time: new Date(),
-      },
     });
+    
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    user.delete_time = new Date();
+    return this.userInfoRepository.save(user);
   }
 }

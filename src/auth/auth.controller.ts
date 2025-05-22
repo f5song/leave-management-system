@@ -5,7 +5,7 @@ import { GoogleAuthService } from './google.strategy';
 import { LoginDto } from './auth.validation';
 import { AuthResponseDto } from './auth-response.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { User } from './user.entity';
+import { UserInfoEntity } from '../database/entity/user-info.entity';
 
 @Controller('auth')
 @UsePipes(new ValidationPipe())
@@ -23,7 +23,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req): Promise<User> {
+  getProfile(@Request() req): Promise<UserInfoEntity> {
     return req.user;
   }
 }

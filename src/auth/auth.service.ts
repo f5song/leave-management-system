@@ -3,25 +3,25 @@ import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { UserInfoEntity } from '../database/entity/user-info.entity';
 import { AccountEntity } from '../database/entity/account.entity';
-import { Auth } from '../database/entity/auth.entity';
+import { AuthEntity } from '../database/entity/auth.entity';
 
 
 @Injectable()
 export class AuthService {
-  login(user: User): import("./auth-response.dto").AuthResponseDto | PromiseLike<import("./auth-response.dto").AuthResponseDto> {
+  login(user: UserInfoEntity): import("./auth-response.dto").AuthResponseDto | PromiseLike<import("./auth-response.dto").AuthResponseDto> {
     throw new Error('Method not implemented.');
   }
   private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(UserInfoEntity)
+    private userRepository: Repository<UserInfoEntity>,
     @InjectRepository(AccountEntity)
     private accountRepository: Repository<AccountEntity>,
-    @InjectRepository(Auth)
-    private authRepository: Repository<Auth>,
+    @InjectRepository(AuthEntity)
+    private authRepository: Repository<AuthEntity>,
     private jwtService: JwtService
   ) { }
 

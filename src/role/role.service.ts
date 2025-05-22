@@ -1,17 +1,25 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateRoleDto, UpdateRoleDto } from './dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { RoleEntity } from '../database/entity/role.entity';
+import { UserInfoEntity } from '../database/entity/user-info.entity';
+import { CreateRoleDto, UpdateRoleDto } from './role.validation';
 
 @Injectable()
 export class RoleService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(RoleEntity)
+    private roleRepository: Repository<RoleEntity>,
+    @InjectRepository(UserInfoEntity)
+    private userInfoRepository: Repository<UserInfoEntity>
+  ) {}
 
   private async validateRoleId(id: number): Promise<void> {
     if (!Number.isInteger(id) || id <= 0) {
       throw new BadRequestException('Role ID must be a positive integer');
     }
 
-    const role = await this.prisma.role.findUnique({
+    const role = await this.roleRepository.findOne({
       where: { id },
     });
 
@@ -25,7 +33,7 @@ export class RoleService {
       throw new BadRequestException('Role name is required and cannot be empty');
     }
 
-    const existingRole = await this.prisma.role.findFirst({
+    const existingRole = await this.roleRepository.findOne({
       where: {
         name: name.trim(),
         delete_time: null,
@@ -42,7 +50,7 @@ export class RoleService {
       throw new BadRequestException('Creator ID must be a positive integer');
     }
 
-    const user = await this.prisma.userInfo.findUnique({
+    const user = await this.userInfoRepository.findOne({
       where: { id: creatorId },
     });
 
@@ -52,20 +60,17 @@ export class RoleService {
   }
 
   async findAll() {
-    return this.prisma.role.findMany({
+    return this.roleRepository.find({
       where: { delete_time: null },
-      orderBy: { name: 'asc' },
+      order: { name: 'ASC' },
     });
   }
 
   async findOne(id: number) {
     await this.validateRoleId(id);
-    return this.prisma.role.findFirst({
+    return this.roleRepository.findOne({
       where: { id, delete_time: null },
-      include: {
-        createdBy: true,
-        user: true,
-      },
+      relations: ['createdBy', 'user'],
     });
   }
 
@@ -73,12 +78,11 @@ export class RoleService {
     await this.validateRoleName(data.name);
     await this.validateRoleCreator(data.created_by);
 
-    return this.prisma.role.create({
-      data: {
-        ...data,
-        created_at: new Date(),
-      },
+    const role = this.roleRepository.create({
+      ...data,
+      created_at: new Date(),
     });
+    return this.roleRepository.save(role);
   }
 
   async update(id: number, data: UpdateRoleDto) {
@@ -88,23 +92,34 @@ export class RoleService {
       await this.validateRoleName(data.name);
     }
 
-    return this.prisma.role.update({
+    const role = await this.roleRepository.findOne({
       where: { id },
-      data: {
-        ...data,
-        update_time: new Date(),
-      },
     });
+    
+    if (!role) {
+      throw new NotFoundException(`Role with ID ${id} not found`);
+    }
+
+    Object.assign(role, {
+      ...data,
+      update_time: new Date(),
+    });
+    
+    return this.roleRepository.save(role);
   }
 
   async softDelete(id: number) {
     await this.validateRoleId(id);
     
-    return this.prisma.role.update({
+    const role = await this.roleRepository.findOne({
       where: { id },
-      data: {
-        delete_time: new Date(),
-      },
     });
+    
+    if (!role) {
+      throw new NotFoundException(`Role with ID ${id} not found`);
+    }
+
+    role.delete_time = new Date();
+    return this.roleRepository.save(role);
   }
 }

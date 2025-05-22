@@ -9,10 +9,10 @@ import { CreateJobTitleDto, UpdateJobTitleDto } from './job-title.validation';
 @Injectable()
 export class JobTitleService {
   constructor(
-    @InjectRepository(JobTitle)
-    private readonly jobTitleRepository: Repository<JobTitle>,
-    @InjectRepository(Department)
-    private readonly departmentRepository: Repository<Department>
+    @InjectRepository(JobTitleEntity)
+    private readonly jobTitleRepository: Repository<JobTitleEntity>,
+    @InjectRepository(DepartmentEntity)
+    private readonly departmentRepository: Repository<DepartmentEntity>
   ) {}
 
   async create(createJobTitleDto: CreateJobTitleDto) {

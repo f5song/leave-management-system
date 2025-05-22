@@ -49,7 +49,7 @@ export class AccountService {
       email: account.email,
       approved_by: account.approved_by,
       created_at: account.created_at,
-      updated_at: account.updated_at,
+      updated_at: account.update_time,
     };
   }
 

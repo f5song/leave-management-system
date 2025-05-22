@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn, DeleteDateColumn, ManyToMany, JoinTable } from 'typeorm';
 import { UserInfoEntity } from './user-info.entity';
 import { PermissionEntity } from './permission.entity';
 
@@ -16,7 +16,12 @@ export class RoleEntity {
   @OneToMany(() => UserInfoEntity, (user) => user.role)
   user: UserInfoEntity[];
 
-  @OneToMany(() => PermissionEntity, (rp) => rp.roles)
+  @ManyToMany(() => PermissionEntity, (rp) => rp.roles)
+  @JoinTable({
+    name: 'permission_role',
+    joinColumn: { name: 'role_id' },
+    inverseJoinColumn: { name: 'permission_id' },
+  })
   permissions: PermissionEntity[];
 
   @ManyToOne(() => UserInfoEntity, (user) => user.createdRoles)
