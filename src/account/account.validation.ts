@@ -14,39 +14,19 @@ import { Type } from 'class-transformer';
 export class CreateAccountDto {
   @IsNotEmpty()
   @IsNumber()
-  @IsPositive()
-  @IsInt()
   user_id: number;
 
   @IsNotEmpty()
   @IsString()
-  @IsUUID()
   google_id: string;
 
   @IsNotEmpty()
-  @IsEmail()
+  @IsString()
   email: string;
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
-  @IsInt()
   approved_by?: number;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  approved_at?: Date;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  update_time?: Date;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  delete_time?: Date;
 }
 
 

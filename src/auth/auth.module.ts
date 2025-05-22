@@ -5,7 +5,10 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
-import { UserModule } from '../user/user.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './user.entity';
+import { AccountEntity } from '../account/account.entity';
+import { Auth } from './auth.entity';
 import { GoogleAuthService } from './google.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -13,13 +16,13 @@ import { JwtAuthGuard } from './jwt-auth.guard';
   imports: [
     ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    UserModule,
+    TypeOrmModule.forFeature([User, AccountEntity, Auth]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1d' },
+        signOptions: { expiresIn: '24h' },
       }),
     }),
   ],

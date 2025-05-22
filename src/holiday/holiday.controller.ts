@@ -1,38 +1,39 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, UsePipes, ValidationPipe, HttpCode, HttpStatus } from '@nestjs/common';
 import { HolidayService } from './holiday.service';
-import { CreateHolidayDto, UpdateHolidayDto } from './dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateHolidayDto, UpdateHolidayDto } from './holiday.validation';
+import { HolidayResponseDto } from './holiday-response.dto';
 
-@UseGuards(JwtAuthGuard)
 @Controller('holidays')
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class HolidayController {
   constructor(private readonly holidayService: HolidayService) {}
 
   @Get()
-  findAll() {
+  async findAll(): Promise<HolidayResponseDto[]> {
     return this.holidayService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<HolidayResponseDto> {
     return this.holidayService.findOne(id);
   }
 
   @Post()
-  create(@Body() createHolidayDto: CreateHolidayDto) {
+  async create(@Body() createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
     return this.holidayService.create(createHolidayDto);
   }
 
-  @Patch(':id')
-  update(
+  @Put(':id')
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateHolidayDto: UpdateHolidayDto,
-  ) {
+  ): Promise<HolidayResponseDto> {
     return this.holidayService.update(id, updateHolidayDto);
   }
 
   @Delete(':id')
-  softDelete(@Param('id', ParseIntPipe) id: number) {
-    return this.holidayService.softDelete(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async softDelete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.holidayService.softDelete(id);
   }
 }

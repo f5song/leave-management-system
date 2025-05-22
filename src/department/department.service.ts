@@ -1,20 +1,25 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Department } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
+import { Department } from './department.entity';
+import { CreateDepartmentDto, UpdateDepartmentDto } from './department.validation';
+import { DepartmentResponseDto } from './department-response.dto';
 
 @Injectable()
 export class DepartmentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Department)
+    private departmentRepository: Repository<Department>
+  ) {}
 
-  async validateDepartmentId(id: string) {
-    if (!uuidv4().match(id)) {
+  async validateDepartmentId(id: number) {
+    if (!Number.isInteger(id) || id <= 0) {
       throw new BadRequestException('Invalid department ID format');
     }
   }
 
   async validateUniqueName(name: string) {
-    const existingDepartment = await this.prisma.department.findFirst({
+    const existingDepartment = await this.departmentRepository.findOne({
       where: { name, delete_time: null },
     });
     if (existingDepartment) {
@@ -28,128 +33,136 @@ export class DepartmentService {
     }
   }
 
-  async validateNoReferences(id: string): Promise<void> {
+  async validateNoReferences(id: number): Promise<void> {
     // ตรวจสอบว่ามี user ที่อ้างอิงถึงแผนกนี้หรือไม่
-    const hasUsers = await this.prisma.userInfo.findFirst({
-      where: {
-        department_id: id,
-        delete_time: null,
-      },
-    });
+    const hasUsers = await this.departmentRepository
+      .createQueryBuilder('department')
+      .leftJoinAndSelect('department.users', 'users')
+      .where('users.department_id = :id', { id })
+      .andWhere('users.delete_time IS NULL')
+      .getOne();
 
     if (hasUsers) {
       throw new BadRequestException('Cannot delete department that has users');
     }
 
     // ตรวจสอบว่ามี job title ที่อ้างอิงถึงแผนกนี้หรือไม่
-    const hasJobTitles = await this.prisma.jobTitle.findFirst({
-      where: {
-        department_id: id,
-        delete_time: null,
-      },
-    });
+    const hasJobTitles = await this.departmentRepository
+      .createQueryBuilder('department')
+      .leftJoinAndSelect('department.jobTitles', 'jobTitles')
+      .where('jobTitles.department_id = :id', { id })
+      .andWhere('jobTitles.delete_time IS NULL')
+      .getOne();
 
     if (hasJobTitles) {
       throw new BadRequestException('Cannot delete department that has job titles');
     }
   }
 
-  async findAll(): Promise<Department[]> {
-    return this.prisma.department.findMany({
-      where: { delete_time: null },
+  async create(createDepartmentDto: CreateDepartmentDto): Promise<DepartmentResponseDto> {
+    const { name, description } = createDepartmentDto;
+
+    await this.validateNameLength(name);
+    await this.validateUniqueName(name);
+
+    const department = this.departmentRepository.create({
+      name,
+      description,
+      created_at: new Date(),
+      updated_at: new Date(),
     });
+
+    await this.departmentRepository.save(department);
+    return this.toResponseDto(department);
   }
 
-  async findOne(id: string): Promise<Department> {
-    this.validateDepartmentId(id);
-    const department = await this.prisma.department.findFirst({
+  async findAll(): Promise<DepartmentResponseDto[]> {
+    const departments = await this.departmentRepository.find({
+      where: { delete_time: null },
+      order: { name: 'ASC' },
+    });
+    return departments.map(dept => this.toResponseDto(dept));
+  }
+  toResponseDto(dept: Department): any {
+    throw new Error('Method not implemented.');
+  }
+
+  async findOne(id: number): Promise<DepartmentResponseDto> {
+    const department = await this.departmentRepository.findOne({
+      where: { id, delete_time: null },
+    });
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
+    return this.toResponseDto(department);
+  }
+
+  async update(id: number, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
+    const { name, description } = updateDepartmentDto;
+
+    await this.validateDepartmentId(id);
+    await this.validateNameLength(name);
+    await this.validateUniqueName(name);
+
+    const department = await this.departmentRepository.findOne({
       where: { id, delete_time: null },
     });
 
     if (!department) {
-      throw new NotFoundException(`Department with id ${id} not found`);
+      throw new NotFoundException(`Department #${id} not found`);
     }
 
-    return department;
+    department.name = name;
+    department.description = description;
+    department.updatedAt = new Date();
+
+    await this.departmentRepository.save(department);
+    return this.toResponseDto(department);
   }
 
-  async create(data: { id: string; name: string }): Promise<Department> {
-    await this.validateDepartmentId(data.id);
-    await this.validateNameLength(data.name);
-    await this.validateUniqueName(data.name);
-    return this.prisma.department.create({ data });
-  }
-
-  async update(id: string, data: { name: string }): Promise<Department> {
-    await this.validateDepartmentId(id);
-    const department = await this.findOne(id);
-    
-    if (data.name && data.name !== department.name) {
-      await this.validateNameLength(data.name);
-      await this.validateUniqueName(data.name);
-    }
-
-    return this.prisma.department.update({
-      where: { id },
-      data: {
-        ...data,
-        update_time: new Date(),
-      },
-    });
-  }
-
-  async partialUpdate(id: string, data: Partial<{ name: string }>): Promise<Department> {
+  async remove(id: number): Promise<void> {
     await this.validateDepartmentId(id);
     await this.validateNoReferences(id);
-    const department = await this.findOne(id);
-    
-    if (data.name && data.name !== department.name) {
-      await this.validateNameLength(data.name);
-      await this.validateUniqueName(data.name);
-    }
 
-    return this.prisma.department.update({
-      where: { id },
-      data: {
-        ...data,
-        update_time: new Date(),
-      },
-    });
-  }
-
-  async softDelete(id: string): Promise<Department> {
-    await this.validateDepartmentId(id);
-    const department = await this.findOne(id);
-    await this.validateNoReferences(id);
-
-    return this.prisma.department.update({
-      where: { id },
-      data: {
-        delete_time: new Date(),
-        update_time: new Date(),
-      },
-    });
-  }
-
-  async restore(id: string): Promise<Department> {
-    await this.validateDepartmentId(id);
-    const department = await this.prisma.department.findFirst({
-      where: {
-        id,
-        delete_time: { not: null },
-      },
+    const department = await this.departmentRepository.findOne({
+      where: { id, delete_time: null },
     });
 
     if (!department) {
-      throw new NotFoundException(`Department with id ${id} not found or not deleted`);
+      throw new NotFoundException(`Department #${id} not found`);
     }
 
-    return this.prisma.department.update({
-      where: { id },
-      data: {
-        delete_time: null,
-        update_time: new Date(),
-      },
+    department.delete_time = new Date();
+    await this.departmentRepository.save(department);
+    return;
+  }
+
+  async restoreDepartment(id: number) {
+    await this.validateDepartmentId(id);
+
+    const department = await this.departmentRepository.findOne({
+      where: { id, delete_time: Not(IsNull()) },
     });
+
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
+
+    department.delete_time = null;
+    return this.departmentRepository.save(department);
+  }
+
+  async permanentlyDeleteDepartment(id: number) {
+    await this.validateDepartmentId(id);
+
+    const department = await this.departmentRepository.findOne({
+      where: { id },
+    });
+
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
+
+    return this.departmentRepository.delete(id);
   }
 }

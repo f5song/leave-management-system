@@ -1,16 +1,33 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
-import { PrismaService } from '../../prisma/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
+import { AccountEntity } from '../account/account.entity';
+import { Auth } from './auth.entity';
+
 
 @Injectable()
 export class AuthService {
+  login(user: User): import("./auth-response.dto").AuthResponseDto | PromiseLike<import("./auth-response.dto").AuthResponseDto> {
+    throw new Error('Method not implemented.');
+  }
   private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
   constructor(
-    private prisma: PrismaService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(AccountEntity)
+    private accountRepository: Repository<AccountEntity>,
+    @InjectRepository(Auth)
+    private authRepository: Repository<Auth>,
     private jwtService: JwtService
   ) { }
+
+  validateToken(authToken: any) {
+    throw new Error('Method not implemented.');
+  }
 
   generateJwtToken(payload: { email: string; sub: string | number }) {
     return this.jwtService.sign(payload);
@@ -39,35 +56,26 @@ export class AuthService {
     const googleUser = await this.verifyGoogleToken(idToken);
 
     // เช็คว่ามี account ที่ตรงกับ google_id หรือยัง
-    let account = await this.prisma.account.findUnique({
-      where: {
-        google_id: googleUser.googleId,
-      },
-      include: {
-        user: true,
-      },
+    let account = await this.accountRepository.findOne({
+      where: { google_id: googleUser.googleId },
+      relations: ['user']
     });
 
     if (!account) {
       const [firstName = 'ชื่อ', lastName = 'นามสกุล'] = googleUser.name?.split(' ') || [];
 
-      const user = await this.prisma.userInfo.create({
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          email: googleUser.email,
-        },
+      // สร้าง user ก่อน
+      const user = await this.userRepository.save({
+        first_name: firstName,
+        last_name: lastName,
+        email: googleUser.email
       });
 
-      account = await this.prisma.account.create({
-        data: {
-          email: googleUser.email,
-          google_id: googleUser.googleId,
-          user: { connect: { id: user.id } },
-        },
-        include: {
-          user: true,
-        },
+      // สร้าง account พร้อมเชื่อมโยงกับ user
+      account = await this.accountRepository.save({
+        email: googleUser.email,
+        google_id: googleUser.googleId,
+        user
       });
     }
 
@@ -82,40 +90,36 @@ export class AuthService {
       account,
     };
   }
+
   async validateAccount(accountId: number) {
-    return this.prisma.account.findUnique({
+    return this.accountRepository.findOne({
       where: { id: accountId },
-      include: { user: true }
+      relations: ['user']
     });
   }
 
   async findOrCreateUserFromGoogle(googleUser: { email: string; sub: string; name: string; picture: string }) {
-    // สมมติเช็คในฐานข้อมูล Account ด้วย google_id (sub)
-    let account = await this.prisma.account.findUnique({
+    // ตรวจสอบว่ามี account ที่ตรงกับ google_id หรือยัง
+    let account = await this.accountRepository.findOne({
       where: { google_id: googleUser.sub },
-      include: { user: true },
+      relations: ['user']
     });
 
     if (!account) {
       const [firstName = 'ชื่อ', lastName = 'นามสกุล'] = googleUser.name?.split(' ') || [];
 
-      const newUser = await this.prisma.userInfo.create({
-        data: {
-          email: googleUser.email,
-          first_name: firstName,
-          last_name: lastName,
-        },
+      // สร้าง user
+      const user = await this.userRepository.save({
+        first_name: firstName,
+        last_name: lastName,
+        email: googleUser.email
       });
 
-
-      // สร้าง Account เชื่อมกับ UserInfo
-      account = await this.prisma.account.create({
-        data: {
-          google_id: googleUser.sub,
-          email: googleUser.email,
-          user_id: newUser.id,
-        },
-        include: { user: true },
+      // สร้าง account พร้อมเชื่อมโยงกับ user
+      account = await this.accountRepository.save({
+        email: googleUser.email,
+        google_id: googleUser.sub,
+        user
       });
     }
 

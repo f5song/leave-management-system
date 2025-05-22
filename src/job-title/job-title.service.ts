@@ -1,61 +1,61 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateJobTitleDto, UpdateJobTitleDto } from './dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Not } from 'typeorm';
+import { JobTitle } from './job-title.entity';
+import { Department } from '../department/department.entity';
+
 
 @Injectable()
 export class JobTitleService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(JobTitle)
+    private readonly jobTitleRepository: Repository<JobTitle>,
+    @InjectRepository(Department)
+    private readonly departmentRepository: Repository<Department>
+  ) {}
 
   async create(createJobTitleDto: CreateJobTitleDto) {
     const { id, name, department_id } = createJobTitleDto;
 
     // Check if job title with same id already exists
-    const existingById = await this.prisma.jobTitle.findUnique({
+    const existingById = await this.jobTitleRepository.findOne({
       where: { id },
-      select: { id: true }
+      select: ['id']
     });
     if (existingById) {
       throw new BadRequestException(`Job title with id ${id} already exists`);
     }
 
     // Check if job title with same name already exists
-    const existingByName = await this.prisma.jobTitle.findFirst({
+    const existingByName = await this.jobTitleRepository.findOne({
       where: { name },
-      select: { name: true }
+      select: ['name']
     });
     if (existingByName) {
       throw new BadRequestException(`Job title with name ${name} already exists`);
     }
 
-    return this.prisma.jobTitle.create({
-      data: {
-        id,
-        name,
-        department_id, 
-      },
+    return this.jobTitleRepository.save({
+      id,
+      name,
+      department_id
     });
   }
 
   async findAll() {
-    return this.prisma.jobTitle.findMany({
-      where: {
-        delete_time: null,
-      },
-      include: {
-        department: true, 
-      },
+    return this.jobTitleRepository.find({
+      where: { delete_time: null },
+      relations: ['department']
     });
   }
 
   async findOne(id: string) {
-    const jobTitle = await this.prisma.jobTitle.findUnique({
-      where: { id },
-      include: {
-        department: true, 
-      },
+    const jobTitle = await this.jobTitleRepository.findOne({
+      where: { id, delete_time: null },
+      relations: ['department']
     });
 
-    if (!jobTitle || jobTitle.delete_time) {
+    if (!jobTitle) {
       throw new NotFoundException(`JobTitle with id ${id} not found`);
     }
 
@@ -68,22 +68,20 @@ export class JobTitleService {
     await this.validateUniqueName(updateJobTitleDto.name, updateJobTitleDto.department_id, id);
     await this.validateNoReferences(id);
 
-    return this.prisma.jobTitle.update({
-      where: { id },
-      data: {
-        ...updateJobTitleDto,
-        update_time: new Date(),
-      },
+    return this.jobTitleRepository.save({
+      ...updateJobTitleDto,
+      id,
+      update_time: new Date()
     });
   }
 
   async validateJobTitleId(id: string): Promise<void> {
-    const jobTitle = await this.prisma.jobTitle.findUnique({
-      where: { id },
-      include: { department: true },
+    const jobTitle = await this.jobTitleRepository.findOne({
+      where: { id, delete_time: null },
+      relations: ['department']
     });
 
-    if (!jobTitle || jobTitle.delete_time) {
+    if (!jobTitle) {
       throw new NotFoundException(`JobTitle with id ${id} not found`);
     }
   }
@@ -91,11 +89,11 @@ export class JobTitleService {
   async validateDepartmentExists(departmentId: string): Promise<void> {
     if (!departmentId) return;
 
-    const department = await this.prisma.department.findUnique({
-      where: { id: departmentId },
+    const department = await this.departmentRepository.findOne({
+      where: { id: Number(departmentId), delete_time: null }
     });
 
-    if (!department || department.delete_time) {
+    if (!department) {
       throw new NotFoundException(`Department with id ${departmentId} not found`);
     }
   }
@@ -103,12 +101,12 @@ export class JobTitleService {
   async validateUniqueName(name: string, departmentId: string, currentId?: string): Promise<void> {
     if (!name || !departmentId) return;
 
-    const jobTitle = await this.prisma.jobTitle.findFirst({
+    const jobTitle = await this.jobTitleRepository.findOne({
       where: {
         name,
-        department_id: departmentId,
+        department_id: departmentId as string,
         delete_time: null,
-        ...(currentId ? { id: { not: currentId } } : {}),
+        id: currentId ? Not(currentId) : undefined,
       },
     });
 
@@ -118,11 +116,11 @@ export class JobTitleService {
   }
 
   async validateNoReferences(id: string): Promise<void> {
-    const hasReferences = await this.prisma.$queryRaw<{
-      count: number;
-    }>`
-      SELECT COUNT(*) as count FROM "User" WHERE "job_title_id" = ${id};
-    `;
+    const hasReferences = await this.jobTitleRepository.createQueryBuilder('jobTitle')
+      .leftJoinAndSelect('jobTitle.users', 'users')
+      .where('jobTitle.id = :id', { id })
+      .andWhere('users.delete_time IS NULL')
+      .getCount();
 
     if (hasReferences[0].count > 0) {
       throw new Error('Cannot update or delete job title as it has users associated with it');
@@ -133,11 +131,8 @@ export class JobTitleService {
     await this.validateJobTitleId(id);
     await this.validateNoReferences(id);
 
-    await this.prisma.jobTitle.update({
-      where: { id },
-      data: {
-        delete_time: new Date(),
-      },
+    await this.jobTitleRepository.update(id, {
+      delete_time: new Date()
     });
   }
 }

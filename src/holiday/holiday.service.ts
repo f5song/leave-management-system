@@ -1,204 +1,119 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Holiday } from '@prisma/client';
-import { CreateHolidayDto, UpdateHolidayDto } from './dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
+import { Holiday } from './holiday.entity';
+import { CreateHolidayDto, UpdateHolidayDto } from './holiday.validation';
+import { HolidayResponseDto } from './holiday-response.dto';
 
 @Injectable()
 export class HolidayService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Holiday)
+    private readonly holidayRepository: Repository<Holiday>,
+  ) {}
 
-  async findAll(): Promise<Holiday[]> {
-    return this.prisma.holiday.findMany({
-      where: { delete_time: null },
-      orderBy: { start_date: 'asc' },
-    });
+  private toResponseDto(holiday: Holiday): HolidayResponseDto {
+    return {
+      id: holiday.id,
+      start_date: holiday.start_date,
+      end_date: holiday.end_date,
+      description: holiday.description,
+      total_days: holiday.total_days,
+      created_at: holiday.created_at,
+      updated_at: holiday.updated_at,
+    };
   }
 
-  async findOne(id: number): Promise<Holiday> {
-    const holiday = await this.prisma.holiday.findFirst({
+  async findAll(): Promise<HolidayResponseDto[]> {
+    const holidays = await this.holidayRepository.find({
+      where: { delete_time: null },
+      order: { start_date: 'ASC' },
+    });
+    return holidays.map(h => this.toResponseDto(h));
+  }
+
+  async findOne(id: number): Promise<HolidayResponseDto> {
+    const holiday = await this.holidayRepository.findOne({
       where: { id, delete_time: null },
     });
-
-    if (!holiday) {
-      throw new NotFoundException(`Holiday with id ${id} not found`);
-    }
-
-    return holiday;
+    if (!holiday) throw new NotFoundException(`Holiday with id ${id} not found`);
+    return this.toResponseDto(holiday);
   }
 
-  async create(createHolidayDto: CreateHolidayDto): Promise<Holiday> {
-    // Validate dates
-    if (!createHolidayDto.start_date) {
+  async create(createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
+    await this.validateDateRange(createHolidayDto);
+    await this.validateNoOverlap(createHolidayDto);
+
+    const holiday = this.holidayRepository.create({
+      ...createHolidayDto,
+      start_date: new Date(createHolidayDto.start_date),
+      end_date: createHolidayDto.end_date ? new Date(createHolidayDto.end_date) : null,
+    });
+    await this.holidayRepository.save(holiday);
+    return this.toResponseDto(holiday);
+  }
+
+  async update(id: number, updateHolidayDto: UpdateHolidayDto): Promise<HolidayResponseDto> {
+    const holidayEntity = await this.holidayRepository.findOne({ where: { id, delete_time: null } });
+    if (!holidayEntity) throw new NotFoundException(`Holiday with id ${id} not found`);
+
+    const updatedData = {
+      ...holidayEntity,
+      ...updateHolidayDto,
+      start_date: updateHolidayDto.start_date ? new Date(updateHolidayDto.start_date) : holidayEntity.start_date,
+      end_date: updateHolidayDto.end_date ? new Date(updateHolidayDto.end_date) : holidayEntity.end_date,
+    };
+
+    await this.validateDateRange(updatedData);
+    await this.validateNoOverlap(updatedData, id);
+
+    const updatedHoliday = await this.holidayRepository.save(updatedData);
+    return this.toResponseDto(updatedHoliday);
+  }
+
+  async softDelete(id: number): Promise<void> {
+    const holiday = await this.holidayRepository.findOne({ where: { id, delete_time: null } });
+    if (!holiday) throw new NotFoundException(`Holiday with id ${id} not found`);
+
+    await this.holidayRepository.update(id, { delete_time: new Date() });
+  }
+
+  private async validateDateRange(data: CreateHolidayDto | UpdateHolidayDto | any): Promise<void> {
+    if (!data.start_date) {
       throw new BadRequestException('start_date is required');
     }
+    const startDate = new Date(data.start_date);
+    const endDate = data.end_date ? new Date(data.end_date) : null;
 
-    // Convert date strings to Date objects
-    const startDate = new Date(createHolidayDto.start_date);
-    if (isNaN(startDate.getTime())) {
-      throw new BadRequestException('start_date must be a valid date');
-    }
+    if (isNaN(startDate.getTime())) throw new BadRequestException('start_date must be a valid date');
+    if (endDate && isNaN(endDate.getTime())) throw new BadRequestException('end_date must be a valid date');
+    if (endDate && startDate > endDate) throw new BadRequestException('start_date must be before or equal to end_date');
 
-    const endDate = createHolidayDto.end_date ? new Date(createHolidayDto.end_date) : null;
-    if (endDate && isNaN(endDate.getTime())) {
-      throw new BadRequestException('end_date must be a valid date');
-    }
-
-    if (endDate && startDate > endDate) {
-      throw new BadRequestException('start_date must be before or equal to end_date');
-    }
-
-    // Validate total_days matches date range
     if (endDate) {
       const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      if (createHolidayDto.total_days !== daysDiff) {
-        throw new BadRequestException(`total_days (${createHolidayDto.total_days}) does not match date range (${daysDiff} days)`);
-      }
-    }
-
-    // Validate title
-    if (!createHolidayDto.title || typeof createHolidayDto.title !== 'string') {
-      throw new BadRequestException('title must be a string');
-    }
-    if (createHolidayDto.title.length < 2) {
-      throw new BadRequestException('title must be at least 2 characters');
-    }
-    if (createHolidayDto.title.length > 100) {
-      throw new BadRequestException('title cannot exceed 100 characters');
-    }
-
-    // Validate total_days
-    if (createHolidayDto.total_days <= 0) {
-      throw new BadRequestException('total_days must be greater than 0');
-    }
-
-    // Validate color
-    if (!createHolidayDto.color || typeof createHolidayDto.color !== 'string') {
-      throw new BadRequestException('color must be a string');
-    }
-
-    // Check for overlapping holidays
-    const overlappingHolidays = await this.prisma.holiday.findMany({
-      where: {
-        AND: [
-          { delete_time: null },
-          {
-            OR: [
-              {
-                start_date: {
-                  lte: createHolidayDto.end_date || createHolidayDto.start_date
-                },
-                end_date: {
-                  gte: createHolidayDto.start_date
-                }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    if (overlappingHolidays.length > 0) {
-      throw new BadRequestException('Holiday overlaps with existing holiday');
-    }
-
-    // Check if holiday with same id already exists
-    if (createHolidayDto.id) {
-      const existingHoliday = await this.prisma.holiday.findUnique({
-        where: { id: createHolidayDto.id },
-        select: { id: true }
-      });
-      if (existingHoliday) {
-        throw new BadRequestException(`Holiday with id ${createHolidayDto.id} already exists`);
-      }
-    }
-
-    return this.prisma.holiday.create({ data: createHolidayDto });
-  }
-
-  async update(id: number, updateHolidayDto: UpdateHolidayDto): Promise<Holiday> {
-    await this.findOne(id);
-
-    return this.prisma.holiday.update({
-      where: { id },
-      data: {
-        ...updateHolidayDto,
-        update_time: new Date(),
-      },
-    });
-  }
-
-  async partialUpdate(id: number, data: Partial<UpdateHolidayDto>): Promise<Holiday> {
-    await this.validateHolidayId(id);
-    await this.validateDateRange(data);
-    await this.validateNoOverlap(data, id);
-
-    return this.prisma.holiday.update({
-      where: { id },
-      data: {
-        ...data,
-        update_time: new Date(),
-      },
-    });
-  }
-
-  async validateHolidayId(id: number): Promise<void> {
-    const holiday = await this.prisma.holiday.findFirst({
-      where: { id, delete_time: null },
-    });
-    if (!holiday) {
-      throw new NotFoundException(`Holiday with id ${id} not found`);
-    }
-  }
-
-  async validateDateRange(data: Partial<UpdateHolidayDto>): Promise<void> {
-    if (data.start_date && data.end_date) {
-      if (data.start_date > data.end_date) {
-        throw new Error('Start date cannot be after end date');
+      if (data.total_days !== undefined && data.total_days !== daysDiff) {
+        throw new BadRequestException(`total_days (${data.total_days}) does not match date range (${daysDiff} days)`);
       }
     }
   }
 
-  async validateNoOverlap(data: Partial<UpdateHolidayDto>, holidayId?: number): Promise<void> {
-    if (!data.start_date || !data.end_date) return;
+  private async validateNoOverlap(data: CreateHolidayDto | UpdateHolidayDto | any, holidayId?: number): Promise<void> {
+    const startDate = new Date(data.start_date);
+    const endDate = data.end_date ? new Date(data.end_date) : startDate;
 
-    const holidays = await this.prisma.holiday.findMany({
-      where: {
-        delete_time: null,
-        AND: [
-          {
-            OR: [
-              {
-                start_date: {
-                  lte: data.end_date,
-                  gte: data.start_date,
-                },
-              },
-              {
-                end_date: {
-                  lte: data.end_date,
-                  gte: data.start_date,
-                },
-              },
-            ],
-          },
-        ],
-        ...(holidayId ? { id: { not: holidayId } } : {}),
-      },
-    });
+    const whereClause: any = {
+      delete_time: null,
+      start_date: LessThanOrEqual(endDate),
+      end_date: MoreThanOrEqual(startDate),
+    };
 
-    if (holidays.length > 0) {
-      throw new Error('Holiday dates overlap with existing holiday');
+    if (holidayId) {
+      whereClause.id = Not(holidayId);
     }
-  }
 
-  async softDelete(id: number): Promise<Holiday> {
-    await this.findOne(id);
-
-    return this.prisma.holiday.update({
-      where: { id },
-      data: {
-        delete_time: new Date(),
-      },
-    });
+    const overlapping = await this.holidayRepository.find({ where: whereClause });
+    if (overlapping.length > 0) {
+      throw new BadRequestException('Holiday dates overlap with existing holiday');
+    }
   }
 }

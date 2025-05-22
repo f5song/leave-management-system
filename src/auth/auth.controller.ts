@@ -1,8 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Controller, Post, Get, Request, UseGuards, Body } from '@nestjs/common';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GoogleAuthService } from './google.strategy';
+import { LoginDto } from './auth.validation';
+import { AuthResponseDto } from './auth-response.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { User } from './user.entity';
 
 @Controller('auth')
+@UsePipes(new ValidationPipe())
 export class AuthController {
   constructor(
     private authService: AuthService,
@@ -10,13 +16,14 @@ export class AuthController {
   ) {}
 
   @Post('google-login')
-  async googleLogin(@Body('idToken') idToken: string) {
-    const user = await this.googleAuthService.validateUser(idToken);
+  async googleLogin(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
+    const user = await this.googleAuthService.validateUser(loginDto.idToken);
+    return this.authService.login(user);
+  }
 
-    // สร้าง JWT token สำหรับ user นี้
-    const payload = { email: user.email, sub: user.id };
-    const access_token = this.authService.generateJwtToken(payload);
-
-    return { access_token, user };
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req): Promise<User> {
+    return req.user;
   }
 }

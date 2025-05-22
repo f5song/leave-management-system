@@ -1,35 +1,54 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, UsePipes, ValidationPipe, NotFoundException, ParseIntPipe } from '@nestjs/common';
 import { DepartmentService } from './department.service';
-import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
+import { CreateDepartmentDto, UpdateDepartmentDto } from './department.validation';
+import { DepartmentResponseDto } from './department-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('departments')
-@UseGuards(JwtAuthGuard)
+@UsePipes(new ValidationPipe({ transform: true }))
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() createDepartmentDto: CreateDepartmentDto): Promise<DepartmentResponseDto> {
+    return this.departmentService.create(createDepartmentDto);
+  }
+
   @Get()
-  async getAll() {
+  @UseGuards(JwtAuthGuard)
+  async findAll(): Promise<DepartmentResponseDto[]> {
     return this.departmentService.findAll();
   }
 
   @Get(':id')
-  async getOne(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<DepartmentResponseDto> {
     return this.departmentService.findOne(id);
   }
 
-  @Post()
-  async create(@Body() createDepartmentDto: CreateDepartmentDto) {
-    return this.departmentService.create(createDepartmentDto);
-  }
-
-  @Patch(':id')
-  async partialUpdate(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
-    return this.departmentService.partialUpdate(id, updateDepartmentDto);
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDepartmentDto: UpdateDepartmentDto
+  ): Promise<DepartmentResponseDto> {
+    return this.departmentService.update(id, updateDepartmentDto);
   }
 
   @Delete(':id')
-  async softDelete(@Param('id') id: string) {
-    return this.departmentService.softDelete(id);
+  @UseGuards(JwtAuthGuard)
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.departmentService.remove(id);
+  }
+
+  @Delete(':id/restore')
+  async restoreDepartment(@Param('id') id: number) {
+    return this.departmentService.restoreDepartment(id);
+  }
+
+  @Delete(':id/permanent')
+  async permanentlyDeleteDepartment(@Param('id') id: number) {
+    return this.departmentService.permanentlyDeleteDepartment(id);
   }
 }

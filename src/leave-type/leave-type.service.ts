@@ -1,101 +1,122 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { LeaveType } from '@prisma/client';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { LeaveType } from './leave-type.entity';
+import { CreateLeaveTypeDto, UpdateLeaveTypeDto } from './leave-type.validation';
+import { LeaveTypeResponseDto } from './leave-type-response.dto';
 
 @Injectable()
 export class LeaveTypeService {
-    constructor(private prisma: PrismaService) { }
+  constructor(
+    @InjectRepository(LeaveType)
+    private leaveTypeRepository: Repository<LeaveType>,
+  ) { }
 
-    private async validateLeaveTypeId(id: string): Promise<void> {
-        if (!id || typeof id !== 'string' || id.length > 20) {
-            throw new BadRequestException('Leave type ID must be a string with maximum length of 20 characters');
-        }
+  async create(createLeaveTypeDto: CreateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
+    const existing = await this.leaveTypeRepository.findOne({
+      where: { name: createLeaveTypeDto.name },
+      withDeleted: true,
+    });
 
-        const existingType = await this.prisma.leaveType.findUnique({
-            where: { id },
-        });
-
-        if (existingType && !existingType.delete_time) {
-            throw new BadRequestException(`Leave type with ID ${id} already exists`);
-        }
+    if (existing) {
+      if (!existing.delete_time) {
+        throw new BadRequestException(`Leave type with name '${createLeaveTypeDto.name}' already exists`);
+      }
+      throw new BadRequestException(`Leave type with name '${createLeaveTypeDto.name}' exists but was deleted`);
     }
 
-    private async validateLeaveTypeName(name: string): Promise<void> {
-        if (!name || typeof name !== 'string' || name.trim().length === 0) {
-            throw new BadRequestException('Leave type name is required and cannot be empty');
-        }
+    const leaveType = this.leaveTypeRepository.create(createLeaveTypeDto);
+    await this.leaveTypeRepository.save(leaveType);
+    return this.toResponseDto(leaveType);
+  }
 
-        const existingType = await this.prisma.leaveType.findFirst({
-            where: {
-                name: name.trim(),
-                delete_time: null,
-            },
-        });
+  async findAll(): Promise<LeaveTypeResponseDto[]> {
+    const leaveTypes = await this.leaveTypeRepository.find({
+      where: { delete_time: null },
+      order: { name: 'ASC' },
+    });
+    return leaveTypes.map(leaveType => this.toResponseDto(leaveType));
+  }
 
-        if (existingType) {
-            throw new BadRequestException(`Leave type with name ${name} already exists`);
-        }
+  async findOne(id: number): Promise<LeaveType> {
+    const leaveType = await this.leaveTypeRepository.findOne({
+      where: { id, delete_time: null },
+    });
+
+    if (!leaveType) {
+      throw new NotFoundException(`Leave type with ID ${id} not found`);
     }
 
-    private async validateLeaveTypeExists(id: string): Promise<void> {
-        const leaveType = await this.prisma.leaveType.findUnique({
-            where: { id },
-        });
+    return leaveType;
+  }
 
-        if (!leaveType || leaveType.delete_time) {
-            throw new NotFoundException(`Leave type with ID ${id} not found`);
-        }
+  async update(id: number, updateLeaveTypeDto: UpdateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
+    const leaveType = await this.findOne(id);
+    if (!leaveType) {
+      throw new NotFoundException(`Leave type with ID ${id} not found`);
+    }
+    Object.assign(leaveType, updateLeaveTypeDto);
+    leaveType.updated_at = new Date();
+    await this.leaveTypeRepository.save(leaveType);
+    return this.toResponseDto(leaveType);
+  }
+
+  async delete(id: number): Promise<void> {
+    const leaveType = await this.findOne(id);
+    leaveType.delete_time = new Date();
+    await this.leaveTypeRepository.save(leaveType);
+  }
+
+  async restore(id: number): Promise<LeaveTypeResponseDto> {
+    const leaveType = await this.leaveTypeRepository.findOne({
+      where: { id, delete_time: null },
+    });
+
+    if (!leaveType) {
+      throw new NotFoundException(`Deleted leave type with ID ${id} not found`);
     }
 
-    async findAll(): Promise<LeaveType[]> {
-        return this.prisma.leaveType.findMany({
-            where: { delete_time: null },
-            orderBy: { name: 'asc' },
-        });
-    }
+    leaveType.delete_time = null;
+    await this.leaveTypeRepository.save(leaveType);
+    return this.toResponseDto(leaveType);
+  }
 
-    async findOne(id: string): Promise<LeaveType | null> {
-        await this.validateLeaveTypeExists(id);
-        return this.prisma.leaveType.findFirst({
-            where: { id, delete_time: null },
-        });
-    }
+  private async validateLeaveTypeExists(id: number): Promise<void> {
+    const leaveType = await this.leaveTypeRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
 
-    async create(data: { id: string; name: string }): Promise<LeaveType> {
-        await this.validateLeaveTypeId(data.id);
-        await this.validateLeaveTypeName(data.name);
-
-        return this.prisma.leaveType.create({
-            data,
-        });
+    if (!leaveType) {
+      throw new NotFoundException(`Leave type with ID ${id} not found`);
     }
+  }
 
-    async update(id: string, data: { name?: string }): Promise<LeaveType> {
-        return this.prisma.leaveType.update({
-            where: { id },
-            data: {
-                ...data,
-                update_time: new Date(),
-            },
-        });
-    }
+  async softDelete(id: number): Promise<void> {
+    await this.validateLeaveTypeExists(id);
 
-    async softDelete(id: string): Promise<LeaveType> {
-        return this.prisma.leaveType.update({
-            where: { id },
-            data: {
-                delete_time: new Date(),
-            },
-        });
-    }
-    async partialUpdate(id: string, data: Partial<{ name: string }>): Promise<LeaveType> {
-        return this.prisma.leaveType.update({
-            where: { id },
-            data: {
-                ...data,
-                update_time: new Date(),
-            },
-        });
-    }
+    await this.leaveTypeRepository.update(id, {
+      delete_time: new Date()
+    });
+  }
 
+  async partialUpdate(id: number, data: Partial<{ name: string; description: string; is_active: boolean }>): Promise<LeaveTypeResponseDto> {
+    const leaveType = await this.findOne(id);
+    Object.assign(leaveType, data);
+    leaveType.updated_at = new Date();
+    const updatedLeaveType = await this.leaveTypeRepository.save(leaveType);
+    return this.toResponseDto(updatedLeaveType);
+  }
+
+  private toResponseDto(leaveType: LeaveType): LeaveTypeResponseDto {
+    return {
+      id: leaveType.id,
+      name: leaveType.name,
+      description: leaveType.description,
+      created_at: leaveType.created_at,
+      updated_at: leaveType.updated_at,
+      update_time: leaveType.update_time,
+      delete_time: leaveType.delete_time
+    };
+  }
 }
