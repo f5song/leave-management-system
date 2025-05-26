@@ -10,6 +10,9 @@ import { PermissionEntity } from './entity/permission.entity';
 import { UserInfoEntity } from './entity/user-info.entity';
 import { DepartmentEntity } from './entity/department.entity';
 import { JobTitleEntity } from './entity/job-title.entity';
+import { ItemEntity } from './entity/item.entity';
+import { FacilityRequestEntity } from './entity/facility-request.entity';
+import { ItemRequestEntity } from './entity/item-request.entity';
 
 @Module({
   imports: [
@@ -24,7 +27,7 @@ import { JobTitleEntity } from './entity/job-title.entity';
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DATABASE,
         // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        entities: [AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity],
+        entities: [AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity, ItemEntity, FacilityRequestEntity, ItemRequestEntity],
         synchronize: true, 
         logging: true
       }),

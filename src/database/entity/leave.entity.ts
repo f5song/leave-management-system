@@ -17,7 +17,7 @@ export class LeaveEntity {
   id: string;
 
   @Column({name: 'user_id'})
-  userId: number;
+  userId: string;
 
   @Column({name: 'leave_type_id'})
   leaveTypeId: string;

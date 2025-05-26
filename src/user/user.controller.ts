@@ -12,15 +12,15 @@ export class UserController {
   async createUser(@Body() userData: CreateUserDto) {
     return this.userService.createUser({
       ...userData,
-      roleId: String(userData.roleId),
-      jobTitleId: String(userData.jobTitleId),
-      departmentId: String(userData.departmentId),
+      roleId: userData.roleId,
+      jobTitleId: userData.jobTitleId,
+      departmentId: userData.departmentId,
     });
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async getUserById(@Param('id', ParseIntPipe) id: number) {
+  async getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
   }
 
@@ -33,7 +33,7 @@ export class UserController {
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   async updateUser(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() userData: UpdateUserDto,
   ) {
     return this.userService.updateUser(id, userData);
@@ -42,7 +42,7 @@ export class UserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async partialUpdateUser(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() partialData: Partial<UpdateUserDto>,
   ) {
     return this.userService.partialUpdateUser(id, partialData);
@@ -50,7 +50,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteUser(@Param('id', ParseIntPipe) id: number) {
+  async deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
 }

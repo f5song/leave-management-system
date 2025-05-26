@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common'
 import { JobTitleService } from './job-title.service';
 import { CreateJobTitleDto, UpdateJobTitleDto } from './job-title.validation';
 import { JobTitleResponseDto } from './job-title-response.dto';
+import { JobTitleId } from 'src/constants/jobtitle.enum';
 
 @Controller('job-titles')
 export class JobTitleController {
@@ -14,7 +15,7 @@ export class JobTitleController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<JobTitleResponseDto> {
+  async findOne(@Param('id') id: JobTitleId): Promise<JobTitleResponseDto> {
     const jobTitle = await this.jobTitleService.findOne(id);
     return new JobTitleResponseDto(jobTitle);
   }
@@ -27,7 +28,7 @@ export class JobTitleController {
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id') id: JobTitleId,
     @Body() updateJobTitleDto: UpdateJobTitleDto,
   ): Promise<JobTitleResponseDto> {
     const jobTitle = await this.jobTitleService.update(id, updateJobTitleDto);
@@ -35,7 +36,7 @@ export class JobTitleController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id') id: JobTitleId): Promise<void> {
     await this.jobTitleService.remove(id);
   }
 }

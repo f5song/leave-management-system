@@ -1,14 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
-import { AccountEntity } from './account.entity';
-import { UserInfoEntity } from './user-info.entity';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { DepartmentId } from '../../constants/department.enum';
 
 @Entity('departments')
 export class DepartmentEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn({ type: 'enum', enum: DepartmentId })
+  id: DepartmentId;
 
   @Column({ unique: true })
   name: string;
+
+  @Column()
+  color: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -18,7 +20,5 @@ export class DepartmentEntity {
 
   @DeleteDateColumn({ name: 'delete_time' })
   deleteTime: Date | null;
-  
-  // @OneToMany(() => UserInfoEntity, user => user.department)
-  // users: UserInfoEntity[];
+
 }

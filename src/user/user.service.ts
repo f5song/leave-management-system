@@ -6,6 +6,8 @@ import { JobTitleEntity } from '../database/entity/job-title.entity';
 import { DepartmentEntity } from '../database/entity/department.entity';
 import { RoleEntity } from '../database/entity/role.entity';
 import { CreateUserDto, UpdateUserDto } from './user.validation';
+import { JobTitleId } from 'src/constants/jobtitle.enum';
+import { DepartmentId } from 'src/constants/department.enum';
 
 @Injectable()
 export class UserService {
@@ -60,11 +62,7 @@ export class UserService {
     }
   }
 
-  private async validateJobTitle(jobTitleId: string): Promise<void> {
-    if (!jobTitleId || typeof jobTitleId !== 'string' || jobTitleId.length > 20) {
-      throw new BadRequestException('Job title ID must be a string with maximum length of 20 characters');
-    }
-
+  private async validateJobTitle(jobTitleId: JobTitleId): Promise<void> {
     const jobTitle = await this.jobTitleRepository.findOne({
       where: { id: jobTitleId },
     });
@@ -74,11 +72,7 @@ export class UserService {
     }
   }
 
-  private async validateDepartment(departmentId: string): Promise<void> {
-    if (!departmentId || typeof departmentId !== 'string' || departmentId.length > 20) {
-      throw new BadRequestException('Department ID must be a string with maximum length of 20 characters');
-    }
-
+  private async validateDepartment(departmentId: DepartmentId): Promise<void> {
     const department = await this.departmentRepository.findOne({
       where: { id: departmentId },
     });
@@ -121,7 +115,20 @@ export class UserService {
     await this.validateNames(data.firstName, data.lastName);
     await this.validateBirthDate(data.birthDate);
 
+
+    let nextNumber = 1;
+    const last_user = await this.userInfoRepository.findOne({
+      order: {
+        createdAt: 'DESC'
+      }
+    });
+    if (last_user) {
+      nextNumber = parseInt(last_user.employeeCode.split('-')[1]) + 1;
+    }
+    const paddedNumber = nextNumber.toString().padStart(3, '0');
+
     const user = this.userInfoRepository.create({
+      employeeCode: `fh-${paddedNumber}`,
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,

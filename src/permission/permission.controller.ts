@@ -18,16 +18,16 @@ export class PermissionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.permissionService.findOne(Number(id));
+    return this.permissionService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdatePermissionDto) {
-    return this.permissionService.update(Number(id), dto);
+    return this.permissionService.update(id, dto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.permissionService.softDelete(Number(id));
+    return this.permissionService.softDelete(id);
   }
 }

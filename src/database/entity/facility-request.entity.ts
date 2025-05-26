@@ -2,10 +2,11 @@ import {
     Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
   } from 'typeorm';
   import { UserInfoEntity } from './user-info.entity';
+import { FacilityStatus } from '../../constants/facility-status.enum';
   
   @Entity('facility_requests')
   export class FacilityRequestEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: string;
   
     @Column()
@@ -17,8 +18,12 @@ import {
     @Column({ name: 'requester_id' })
     requesterId: string;
   
-    @Column({ default: 'pending' })
-    status: 'pending' | 'approved' | 'rejected';
+    @Column({
+      type: 'enum',
+      enum: FacilityStatus,
+      default: FacilityStatus.PENDING,
+    })
+    status: FacilityStatus;
   
     @Column({ name: 'approved_by', nullable: true })
     approvedById?: string;

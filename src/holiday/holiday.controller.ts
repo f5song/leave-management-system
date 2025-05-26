@@ -14,7 +14,7 @@ export class HolidayController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<HolidayResponseDto> {
+  async findOne(@Param('id') id: string): Promise<HolidayResponseDto> {
     return this.holidayService.findOne(id);
   }
 
@@ -25,7 +25,7 @@ export class HolidayController {
 
   @Put(':id')
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() updateHolidayDto: UpdateHolidayDto,
   ): Promise<HolidayResponseDto> {
     return this.holidayService.update(id, updateHolidayDto);
@@ -33,7 +33,7 @@ export class HolidayController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async softDelete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async softDelete(@Param('id') id: string): Promise<void> {
     await this.holidayService.softDelete(id);
   }
 }

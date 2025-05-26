@@ -11,15 +11,19 @@ import {
 } from 'typeorm';
 import { DepartmentEntity } from './department.entity';
 import { UserInfoEntity } from './user-info.entity';
+import { JobTitleId } from '../../constants/jobtitle.enum';
 
 @Entity('job_titles')
 export class JobTitleEntity {
-  
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+
+  @PrimaryColumn({ type: 'enum', enum: JobTitleId })
+  id: JobTitleId;
 
   @Column({ unique: true })
   name: string;
+
+  @Column()
+  color: string;
 
   @Column({ name: 'department_id' })
   departmentId: string;
@@ -28,7 +32,7 @@ export class JobTitleEntity {
   @JoinColumn({ name: 'department_id' })
   department: DepartmentEntity;
 
-  @Column({ type: 'timestamp', nullable: true , name: 'delete_time'})
+  @Column({ type: 'timestamp', nullable: true, name: 'delete_time' })
   deleteTime: Date | null;
 
   @CreateDateColumn({ name: 'create_time' })

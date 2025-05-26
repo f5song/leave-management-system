@@ -4,6 +4,8 @@ import { Repository, Not } from 'typeorm';
 import { JobTitleEntity } from '../database/entity/job-title.entity';
 import { DepartmentEntity } from '../database/entity/department.entity';
 import { CreateJobTitleDto, UpdateJobTitleDto } from './job-title.validation';
+import { JobTitleId } from 'src/constants/jobtitle.enum';
+import { DepartmentId } from 'src/constants/department.enum';
 
 
 @Injectable()
@@ -50,7 +52,7 @@ export class JobTitleService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: JobTitleId) {
     const jobTitle = await this.jobTitleRepository.findOne({
       where: { id, deleteTime: null },
       relations: ['department']
@@ -63,7 +65,7 @@ export class JobTitleService {
     return jobTitle;
   }
 
-  async update(id: string, updateJobTitleDto: UpdateJobTitleDto) {
+  async update(id: JobTitleId, updateJobTitleDto: UpdateJobTitleDto) {
     await this.validateJobTitleId(id);
     await this.validateDepartmentExists(updateJobTitleDto.departmentId);
     await this.validateUniqueName(updateJobTitleDto.name, updateJobTitleDto.departmentId, id);
@@ -76,7 +78,7 @@ export class JobTitleService {
     });
   }
 
-  async validateJobTitleId(id: string): Promise<void> {
+  async validateJobTitleId(id: JobTitleId): Promise<void> {
     const jobTitle = await this.jobTitleRepository.findOne({
       where: { id, deleteTime: null },
       relations: ['department']
@@ -87,7 +89,7 @@ export class JobTitleService {
     }
   }
 
-  async validateDepartmentExists(departmentId: string): Promise<void> {
+  async validateDepartmentExists(departmentId: DepartmentId): Promise<void> {
     if (!departmentId) return;
 
     const department = await this.departmentRepository.findOne({
@@ -99,24 +101,24 @@ export class JobTitleService {
     }
   }
 
-  async validateUniqueName(name: string, departmentId: string, currentId?: string): Promise<void> {
+  async validateUniqueName(name: string, departmentId: DepartmentId, currentId?: JobTitleId): Promise<void> {
     if (!name || !departmentId) return;
-
+  
     const jobTitle = await this.jobTitleRepository.findOne({
       where: {
         name,
-        departmentId: departmentId as string,
+        departmentId,
         deleteTime: null,
-        id: currentId ? Not(currentId) : undefined,
+        ...(currentId && { id: Not(currentId as JobTitleId) }),
       },
     });
-
+  
     if (jobTitle) {
       throw new Error('Job title name must be unique within the department');
     }
   }
 
-  async validateNoReferences(id: string): Promise<void> {
+  async validateNoReferences(id: JobTitleId): Promise<void> {
     const hasReferences = await this.jobTitleRepository.createQueryBuilder('jobTitle')
       .leftJoinAndSelect('jobTitle.users', 'users')
       .where('jobTitle.id = :id', { id })
@@ -128,7 +130,7 @@ export class JobTitleService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: JobTitleId): Promise<void> {
     await this.validateJobTitleId(id);
     await this.validateNoReferences(id);
 

@@ -3,6 +3,7 @@ import { DepartmentService } from './department.service';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './department.validation';
 import { DepartmentResponseDto } from './department-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { DepartmentId } from 'src/constants/department.enum';
 
 @Controller('departments')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -23,14 +24,14 @@ export class DepartmentController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async findOne(@Param('id') id: string): Promise<DepartmentResponseDto> {
+  async findOne(@Param('id') id: DepartmentId): Promise<DepartmentResponseDto> {
     return this.departmentService.findOne(id);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   async update(
-    @Param('id') id: string,
+    @Param('id') id: DepartmentId,
     @Body() updateDepartmentDto: UpdateDepartmentDto
   ): Promise<DepartmentResponseDto> {
     return this.departmentService.update(id, updateDepartmentDto);
@@ -38,17 +39,17 @@ export class DepartmentController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id') id: DepartmentId): Promise<void> {
     return this.departmentService.remove(id);
   }
 
   @Delete(':id/restore')
-  async restoreDepartment(@Param('id') id: string) {
+  async restoreDepartment(@Param('id') id: DepartmentId) {
     return this.departmentService.restoreDepartment(id);
   }
 
   @Delete(':id/permanent')
-  async permanentlyDeleteDepartment(@Param('id') id: string) {
+  async permanentlyDeleteDepartment(@Param('id') id: DepartmentId) {
     return this.departmentService.permanentlyDeleteDepartment(id);
   }
 }

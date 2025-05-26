@@ -14,6 +14,9 @@ export class UserInfoEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ name: 'employee_code', unique: true })
+  employeeCode: string;
+
   @Column({ name: 'first_name' })
   firstName: string;
 
@@ -38,6 +41,9 @@ export class UserInfoEntity {
 
   @Column({ name: 'birth_date' })
   birthDate: Date;
+
+  @Column()
+  salary: number;
 
   @ManyToOne(() => RoleEntity, (role) => role.user)
   @JoinColumn({ name: 'role_id' })
@@ -81,19 +87,19 @@ export class UserInfoEntity {
   @DeleteDateColumn({ name: 'delete_time', nullable: true })
   deleteTime?: Date;
 
-    // ✅ ความสัมพันธ์กับการขอเบิกของ
-    @OneToMany(() => ItemRequestEntity, request => request.requester)
-    itemRequests: ItemRequestEntity[];
-  
-    // ✅ ความสัมพันธ์กับการอนุมัติการเบิกของ
-    @OneToMany(() => ItemRequestEntity, request => request.approver)
-    itemApprovals: ItemRequestEntity[];
-  
-    // ✅ ความสัมพันธ์กับการร้องขอ facilities
-    @OneToMany(() => FacilityRequestEntity, facility => facility.requester)
-    facilityRequests: FacilityRequestEntity[];
-  
-    // ✅ ความสัมพันธ์กับการอนุมัติ facilities
-    @OneToMany(() => FacilityRequestEntity, facility => facility.approver)
-    facilityApprovals: FacilityRequestEntity[];
+  // ✅ ความสัมพันธ์กับการขอเบิกของ
+  @OneToMany(() => ItemRequestEntity, request => request.requester)
+  itemRequests: ItemRequestEntity[];
+
+  // ✅ ความสัมพันธ์กับการอนุมัติการเบิกของ
+  @OneToMany(() => ItemRequestEntity, request => request.approver)
+  itemApprovals: ItemRequestEntity[];
+
+  // ✅ ความสัมพันธ์กับการร้องขอ facilities
+  @OneToMany(() => FacilityRequestEntity, facility => facility.requester)
+  facilityRequests: FacilityRequestEntity[];
+
+  // ✅ ความสัมพันธ์กับการอนุมัติ facilities
+  @OneToMany(() => FacilityRequestEntity, facility => facility.approver)
+  facilityApprovals: FacilityRequestEntity[];
 }

@@ -23,7 +23,7 @@ export class PermissionEntity {
   name: string;
 
   @Column({ nullable: true , name: 'created_by'})
-  createdById: number;
+  createdById: string;
 
 
   @ManyToOne(() => UserInfoEntity, (user) => user.createdPermissions)

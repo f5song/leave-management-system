@@ -88,7 +88,7 @@ import {
         relations: ['roles', 'roles.permissions'],
       });
   
-      if (!approver || ![1, 2].includes(approver.roleId)) {
+      if (!approver || approver.roleId !== "Admin") {
         throw new ForbiddenException('You do not have permission to approve leave requests');
       }
     }
@@ -128,8 +128,8 @@ import {
         where: { id: currentUserId },
       });
   
-      if (!currentUser || ![1, 2].includes(currentUser.roleId)) {
-        throw new ForbiddenException('Only admin or HR can view all leave requests');
+      if (!currentUser || currentUser.roleId !== "Admin") {
+        throw new ForbiddenException('Only admin can view all leave requests');
       }
   
       return this.leaveRepository.find({

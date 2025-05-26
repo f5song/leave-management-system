@@ -1,4 +1,6 @@
 import { IsNotEmpty, IsString, IsArray, MinLength, IsEmail, IsNumber, IsOptional, IsDate } from 'class-validator';
+import { DepartmentId } from 'src/constants/department.enum';
+import { JobTitleId } from 'src/constants/jobtitle.enum';
 
 export class RegisterUserDto {
   @IsNotEmpty()
@@ -44,11 +46,11 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  jobTitleId?: string;
+  jobTitleId?: JobTitleId;
 
   @IsOptional()
   @IsString()
-  departmentId?: string;
+  departmentId?: DepartmentId;
 
   @IsOptional()
   @IsDate()
@@ -74,11 +76,11 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  jobTitleId?: string;
+  jobTitleId?: JobTitleId;
 
   @IsOptional()
   @IsString()
-  departmentId?: string;
+  departmentId?: DepartmentId;
 
   @IsOptional()
   @IsDate()

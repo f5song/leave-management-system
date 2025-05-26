@@ -1,9 +1,11 @@
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { DepartmentId } from 'src/constants/department.enum';
+import { JobTitleId } from 'src/constants/jobtitle.enum';
 
 export class CreateJobTitleDto {
   @IsString()
   @IsNotEmpty()
-  id: string;
+  id: JobTitleId;
 
   @IsString()
   @IsNotEmpty()
@@ -11,7 +13,7 @@ export class CreateJobTitleDto {
 
   @IsString()
   @IsNotEmpty()
-  departmentId: string;
+  departmentId: DepartmentId;
 }
 
 export class UpdateJobTitleDto {
@@ -21,5 +23,5 @@ export class UpdateJobTitleDto {
 
   @IsString()
   @IsOptional()
-  departmentId?: string;
+  departmentId?: DepartmentId;
 }

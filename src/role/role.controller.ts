@@ -33,6 +33,6 @@ export class RoleController {
 
   @Delete(':id')
   delete(@Param('id') id: string) {
-    return this.roleService.softDelete(+id);
+    return this.roleService.softDelete(id);
   }
 }

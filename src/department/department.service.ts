@@ -4,6 +4,7 @@ import { Repository, Not, IsNull } from 'typeorm';
 import { DepartmentEntity } from '../database/entity/department.entity';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './department.validation';
 import { DepartmentResponseDto } from './department-response.dto';
+import { DepartmentId } from 'src/constants/department.enum';
 
 @Injectable()
 export class DepartmentService {
@@ -91,7 +92,7 @@ export class DepartmentService {
     };
   }
 
-  async findOne(id: number): Promise<DepartmentResponseDto> {
+  async findOne(id: DepartmentId): Promise<DepartmentResponseDto> {
     const department = await this.departmentRepository.findOne({
       where: { id, deleteTime: null },
     });
@@ -101,7 +102,7 @@ export class DepartmentService {
     return this.toResponseDto(department);
   }
 
-  async update(id: number, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
+  async update(id: DepartmentId, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
     const { name, description } = updateDepartmentDto;
 
     await this.validateDepartmentId(id);
@@ -123,7 +124,7 @@ export class DepartmentService {
     return this.toResponseDto(department);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: DepartmentId): Promise<void> {
     await this.validateDepartmentId(id);
     await this.validateNoReferences(id);
 
@@ -140,7 +141,7 @@ export class DepartmentService {
     return;
   }
 
-  async restoreDepartment(id: number) {
+  async restoreDepartment(id: DepartmentId) {
     await this.validateDepartmentId(id);
 
     const department = await this.departmentRepository.findOne({
@@ -155,7 +156,7 @@ export class DepartmentService {
     return this.departmentRepository.save(department);
   }
 
-  async permanentlyDeleteDepartment(id: number) {
+  async permanentlyDeleteDepartment(id: DepartmentId) {
     await this.validateDepartmentId(id);
 
     const department = await this.departmentRepository.findOne({
