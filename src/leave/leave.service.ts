@@ -13,7 +13,6 @@ import {
     UpdateLeaveDto,
     UpdateLeaveStatusDto,
   } from './leave.validation';
-import { Leave } from '@prisma/client';
   
   
   @Injectable()
@@ -26,16 +25,16 @@ import { Leave } from '@prisma/client';
       private userRepository: Repository<UserInfoEntity>
     ) {}
   
-    private async validateLeaveDates(startDate: Date, endDate: Date, excludeLeaveId?: number): Promise<void> {
+    private async validateLeaveDates(startDate: Date, endDate: Date, excludeLeaveId?: string): Promise<void> {
       if (startDate > endDate) {
         throw new BadRequestException('Start date must be before or equal to end date');
       }
   
       const overlaps = await this.leaveRepository.find({
         where: {
-          start_date: LessThanOrEqual(endDate),
-          end_date: LessThanOrEqual(startDate),
-          delete_time: null,
+          startDate: LessThanOrEqual(endDate),
+          endDate: LessThanOrEqual(startDate),
+          deleteTime: null,
           ...(excludeLeaveId ? { id: Not(excludeLeaveId) } : {}),
         },
       });
@@ -47,32 +46,32 @@ import { Leave } from '@prisma/client';
   
     private async validateLeaveTypeExists(leaveTypeId: string): Promise<void> {
       const leaveType = await this.leaveRepository.findOne({
-        where: { id: Number(leaveTypeId) },
+        where: { id: leaveTypeId },
         relations: ['leaveType'],
       });
   
-      if (!leaveType?.leaveType || leaveType.delete_time) {
+      if (!leaveType?.leaveType || leaveType.deleteTime) {
         throw new NotFoundException(`Leave type with id ${leaveTypeId} not found`);
       }
     }
   
-    private async validateUserExists(userId: number): Promise<void> {
+    private async validateUserExists(userId: string): Promise<void> {
       const user = await this.userRepository.findOne({
         where: { id: userId },
         relations: ['roles', 'roles.permissions'],
       });
   
-      if (!user || user.delete_time) {
+      if (!user || user.deleteTime) {
         throw new NotFoundException(`User with id ${userId} not found`);
       }
     }
   
-    private async validateLeaveStatus(leaveId: number): Promise<LeaveEntity> {
+    private async validateLeaveStatus(leaveId: string): Promise<LeaveEntity> {
       const leave = await this.leaveRepository.findOne({
-        where: { id: Number(leaveId) },
+        where: { id: leaveId },
       });
   
-      if (!leave || leave.delete_time) {
+      if (!leave || leave.deleteTime) {
         throw new NotFoundException('Leave request not found');
       }
   
@@ -83,33 +82,33 @@ import { Leave } from '@prisma/client';
       return leave;
     }
   
-    private async validateApprover(approverId: number): Promise<void> {
+    private async validateApprover(approverId: string): Promise<void> {
       const approver = await this.userRepository.findOne({
         where: { id: approverId },
         relations: ['roles', 'roles.permissions'],
       });
   
-      if (!approver || ![1, 2].includes(approver.role_id)) {
+      if (!approver || ![1, 2].includes(approver.roleId)) {
         throw new ForbiddenException('You do not have permission to approve leave requests');
       }
     }
   
-    async createLeave(dto: CreateLeaveDto, userId: number): Promise<LeaveEntity> {
-      const start = new Date(dto.start_date);
-      const end = new Date(dto.end_date);
+    async createLeave(dto: CreateLeaveDto, userId: string): Promise<LeaveEntity> {
+      const start = new Date(dto.startDate);
+      const end = new Date(dto.endDate);
   
       await this.validateLeaveDates(start, end);
-      await this.validateLeaveTypeExists(dto.leave_type_id);
+      await this.validateLeaveTypeExists(dto.leaveTypeId);
       await this.validateUserExists(userId);
   
       const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   
       const leave = this.leaveRepository.create({
-        user_id: userId,
-        leave_type_id: String(dto.leave_type_id),
-        start_date: start,
-        end_date: end,
-        total_days: totalDays,
+        userId: userId,
+        leaveTypeId: String(dto.leaveTypeId),
+        startDate: start,
+        endDate: end,
+        totalDays: totalDays,
         reason: dto.reason,
         status: 'pending',
       });
@@ -117,31 +116,31 @@ import { Leave } from '@prisma/client';
       return await this.leaveRepository.save(leave);
     }
   
-    async getMyLeaves(userId: number): Promise<LeaveEntity[]> {
+    async getMyLeaves(userId: string): Promise<LeaveEntity[]> {
       return this.leaveRepository.find({
-        where: { user: { id: userId }, delete_time: null },
+        where: { userId: userId, deleteTime: null },
         relations: ['user', 'leaveType', 'creator'],
       });
     }
   
-    async getAllLeaves(currentUserId: number): Promise<LeaveEntity[]> {
+    async getAllLeaves(currentUserId: string): Promise<LeaveEntity[]> {
       const currentUser = await this.userRepository.findOne({
         where: { id: currentUserId },
       });
   
-      if (!currentUser || ![1, 2].includes(currentUser.role_id)) {
+      if (!currentUser || ![1, 2].includes(currentUser.roleId)) {
         throw new ForbiddenException('Only admin or HR can view all leave requests');
       }
   
       return this.leaveRepository.find({
-        where: { delete_time: null },
+        where: { deleteTime: null },
         relations: ['user', 'leaveType', 'creator'],
       });
     }
   
-    async updateLeaveDetails(id: number, dto: UpdateLeaveDto, userId: number): Promise<LeaveEntity> {
+    async updateLeaveDetails(id: string, dto: UpdateLeaveDto, userId: string): Promise<LeaveEntity> {
       const existingLeave = await this.leaveRepository.findOne({
-        where: { id: Number(id) },
+        where: { id },
         relations: ['user', 'leaveType']
       });
 
@@ -149,7 +148,7 @@ import { Leave } from '@prisma/client';
         throw new NotFoundException(`Leave with ID ${id} not found`);
       }
 
-      if (existingLeave.user.id !== userId) {
+      if (existingLeave.userId !== userId) {
         throw new ForbiddenException('You can only update your own leave requests');
       }
 
@@ -158,46 +157,46 @@ import { Leave } from '@prisma/client';
       }
 
       // Update only the fields that were provided in the DTO
-      if (dto.start_date) {
-        existingLeave.start_date = new Date(dto.start_date);
+      if (dto.startDate) {
+        existingLeave.startDate = new Date(dto.startDate);
       }
-      if (dto.end_date) {
-        existingLeave.end_date = new Date(dto.end_date);
+      if (dto.endDate) {
+        existingLeave.endDate = new Date(dto.endDate);
       }
-      if (dto.leave_type_id) {
-        existingLeave.leave_type_id = String(dto.leave_type_id);
+      if (dto.leaveTypeId) {
+        existingLeave.leaveTypeId = String(dto.leaveTypeId);
       }
       if (dto.reason) {
         existingLeave.reason = dto.reason;
       }
-      if (dto.total_days !== undefined) {
-        existingLeave.total_days = Number(dto.total_days);
+      if (dto.totalDays !== undefined) {
+        existingLeave.totalDays = Number(dto.totalDays);
       }
-      existingLeave.update_time = new Date();
+      existingLeave.updateTime = new Date();
 
-      await this.validateLeaveDates(existingLeave.start_date, existingLeave.end_date, id);
+      await this.validateLeaveDates(existingLeave.startDate, existingLeave.endDate, id);
 
       return await this.leaveRepository.save(existingLeave);
     }
   
-    async updateLeaveStatus(id: number, dto: UpdateLeaveStatusDto, approverId: number): Promise<LeaveEntity> {
+    async updateLeaveStatus(id: string, dto: UpdateLeaveStatusDto, approverId: string): Promise<LeaveEntity> {
       const leave = await this.validateLeaveStatus(id);
       await this.validateApprover(approverId);
   
       leave.status = dto.status;
-      leave.update_time = new Date();
+      leave.updateTime = new Date();
   
       return await this.leaveRepository.save(leave);
     }
   
-    async deleteLeave(id: number): Promise<LeaveEntity> {
+    async deleteLeave(id: string): Promise<LeaveEntity> {
       const leave = await this.leaveRepository.findOne({ where: { id } });
   
-      if (!leave || leave.delete_time) {
+      if (!leave || leave.deleteTime) {
         throw new NotFoundException('Leave not found or already deleted');
       }
   
-      leave.delete_time = new Date();
+      leave.deleteTime = new Date();
       return await this.leaveRepository.save(leave);
     }
   }

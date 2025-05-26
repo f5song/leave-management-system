@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from './user.service';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto } from './user.validation';
 
 @Controller('users')
 export class UserController {
@@ -12,9 +12,9 @@ export class UserController {
   async createUser(@Body() userData: CreateUserDto) {
     return this.userService.createUser({
       ...userData,
-      role_id: Number(userData.role_id),
-      job_title_id: String(userData.job_title_id),
-      department_id: String(userData.department_id),
+      roleId: String(userData.roleId),
+      jobTitleId: String(userData.jobTitleId),
+      departmentId: String(userData.departmentId),
     });
   }
 

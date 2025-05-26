@@ -9,11 +9,16 @@ export class UpdatePermissionDto {
     @IsOptional()
     @IsNumber()
     @IsPositive()
-    role_id?: number;
+    roleId?: number;
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    createdById?: string;
 
     @IsOptional()
     @IsDate()
-    update_time?: Date;
+    updateTime?: Date;
 }
 
 export class CreatePermissionDto {
@@ -23,9 +28,9 @@ export class CreatePermissionDto {
 
     @IsNumber()
     @IsPositive()
-    role_id: number;
+    roleId: number;
 
-    @IsNumber()
-    @IsPositive()
-    created_by: number;
+    @IsString()
+    @IsNotEmpty()
+    createdById: string;
 }

@@ -24,10 +24,9 @@ import { JobTitleEntity } from './entity/job-title.entity';
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DATABASE,
         // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        entities: [AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity],
+        entities: [AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity],
         synchronize: true, 
-        logging: true,
-        timezone: '+07:00',
+        logging: true
       }),
     }),
   ],

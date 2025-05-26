@@ -12,15 +12,15 @@ export class DepartmentService {
     private departmentRepository: Repository<DepartmentEntity>
   ) {}
 
-  async validateDepartmentId(id: number) {
-    if (!Number.isInteger(id) || id <= 0) {
+  async validateDepartmentId(id: string) {
+    if (!Number.isInteger(id)) {
       throw new BadRequestException('Invalid department ID format');
     }
   }
 
   async validateUniqueName(name: string) {
     const existingDepartment = await this.departmentRepository.findOne({
-      where: { name, delete_time: null },
+      where: { name, deleteTime: null },
     });
     if (existingDepartment) {
       throw new BadRequestException('Department name already exists');
@@ -33,13 +33,13 @@ export class DepartmentService {
     }
   }
 
-  async validateNoReferences(id: number): Promise<void> {
+  async validateNoReferences(id: string): Promise<void> {
     // ตรวจสอบว่ามี user ที่อ้างอิงถึงแผนกนี้หรือไม่
     const hasUsers = await this.departmentRepository
       .createQueryBuilder('department')
       .leftJoinAndSelect('department.users', 'users')
-      .where('users.department_id = :id', { id })
-      .andWhere('users.delete_time IS NULL')
+      .where('users.departmentId = :id', { id })
+      .andWhere('users.deleteTime IS NULL')
       .getOne();
 
     if (hasUsers) {
@@ -50,8 +50,8 @@ export class DepartmentService {
     const hasJobTitles = await this.departmentRepository
       .createQueryBuilder('department')
       .leftJoinAndSelect('department.jobTitles', 'jobTitles')
-      .where('jobTitles.department_id = :id', { id })
-      .andWhere('jobTitles.delete_time IS NULL')
+      .where('jobTitles.departmentId = :id', { id })
+      .andWhere('jobTitles.deleteTime IS NULL')
       .getOne();
 
     if (hasJobTitles) {
@@ -67,8 +67,8 @@ export class DepartmentService {
 
     const department = this.departmentRepository.create({
       name,
-      created_at: new Date(),
-      update_time: new Date(),
+      createdAt: new Date(),
+      updateTime: new Date(),
     });
 
     await this.departmentRepository.save(department);
@@ -77,7 +77,7 @@ export class DepartmentService {
 
   async findAll(): Promise<DepartmentResponseDto[]> {
     const departments = await this.departmentRepository.find({
-      where: { delete_time: null },
+      where: { deleteTime: null },
       order: { name: 'ASC' },
     });
     return departments.map(dept => this.toResponseDto(dept));
@@ -86,14 +86,14 @@ export class DepartmentService {
     return {
       id: dept.id,
       name: dept.name,
-      created_at: dept.created_at,
-      update_time: dept.update_time,
+      createdAt: dept.createdAt,
+      updateTime: dept.updateTime,
     };
   }
 
   async findOne(id: number): Promise<DepartmentResponseDto> {
     const department = await this.departmentRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
     });
     if (!department) {
       throw new NotFoundException(`Department #${id} not found`);
@@ -109,7 +109,7 @@ export class DepartmentService {
     await this.validateUniqueName(name);
 
     const department = await this.departmentRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
     });
 
     if (!department) {
@@ -117,7 +117,7 @@ export class DepartmentService {
     }
 
     department.name = name;
-    department.update_time = new Date();
+    department.updateTime = new Date();
 
     await this.departmentRepository.save(department);
     return this.toResponseDto(department);
@@ -128,14 +128,14 @@ export class DepartmentService {
     await this.validateNoReferences(id);
 
     const department = await this.departmentRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
     });
 
     if (!department) {
       throw new NotFoundException(`Department #${id} not found`);
     }
 
-    department.delete_time = new Date();
+    department.deleteTime = new Date();
     await this.departmentRepository.save(department);
     return;
   }
@@ -144,14 +144,14 @@ export class DepartmentService {
     await this.validateDepartmentId(id);
 
     const department = await this.departmentRepository.findOne({
-      where: { id, delete_time: Not(IsNull()) },
+      where: { id, deleteTime: Not(IsNull()) },
     });
 
     if (!department) {
       throw new NotFoundException(`Department #${id} not found`);
     }
 
-    department.delete_time = null;
+    department.deleteTime = null;
     return this.departmentRepository.save(department);
   }
 

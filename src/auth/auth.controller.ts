@@ -18,7 +18,7 @@ export class AuthController {
   @Post('google-login')
   async googleLogin(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.googleAuthService.validateUser(loginDto.idToken);
-    return this.authService.login(user);
+    return this.authService.loginWithGoogle(loginDto.idToken);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -4,16 +4,17 @@ import { PermissionEntity } from './permission.entity';
 
 @Entity('roles')
 export class RoleEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
 
-  @Column({ nullable: true })
-  created_by: number;
+  @Column({ nullable: true , name: 'created_by'})
+  createdById: number;
 
   @OneToMany(() => UserInfoEntity, (user) => user.role)
+  @JoinColumn({ name: 'role_id' })
   user: UserInfoEntity[];
 
   @ManyToMany(() => PermissionEntity, (rp) => rp.roles)
@@ -28,12 +29,12 @@ export class RoleEntity {
   @JoinColumn({ name: 'created_by' })
   createdBy: UserInfoEntity;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn({ nullable: true })
-  update_time?: Date;
+  @UpdateDateColumn({ name: 'update_time', nullable: true })
+  updateTime?: Date;
 
-  @DeleteDateColumn({ nullable: true })
-  delete_time?: Date;
+  @DeleteDateColumn({ name: 'delete_time', nullable: true })
+  deleteTime?: Date;
 }

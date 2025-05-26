@@ -1,11 +1,11 @@
 export class DepartmentResponseDto {
-  id: number;
+  id: string;
 
   name: string;
 
   description?: string;
 
-  created_at: Date;
+  createdAt: Date;
 
-  updated_at: Date;
+  updatedAt: Date;
 }

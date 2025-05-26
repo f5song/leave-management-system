@@ -16,27 +16,27 @@ export class HolidayService {
     return {
       id: holiday.id,
       title: holiday.title,
-      start_date: holiday.start_date,
-      end_date: holiday.end_date,
-      total_days: holiday.total_days,
+      startDate: holiday.startDate,
+      endDate: holiday.endDate,
+      totalDays: holiday.totalDays,
       color: holiday.color,
-      created_at: holiday.created_at,
-      update_time: holiday.update_time,
-      delete_time: holiday.delete_time,
+      createdAt: holiday.createdAt,
+      updateTime: holiday.updateTime,
+      deleteTime: holiday.deleteTime,
     };
   }
 
   async findAll(): Promise<HolidayResponseDto[]> {
     const holidays = await this.holidayRepository.find({
-      where: { delete_time: null },
-      order: { start_date: 'ASC' },
+      where: { deleteTime: null },
+      order: { startDate: 'ASC' },
     });
     return holidays.map(h => this.toResponseDto(h));
   }
 
-  async findOne(id: number): Promise<HolidayResponseDto> {
+  async findOne(id: string): Promise<HolidayResponseDto> {
     const holiday = await this.holidayRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
     });
     if (!holiday) throw new NotFoundException(`Holiday with id ${id} not found`);
     return this.toResponseDto(holiday);
@@ -48,22 +48,22 @@ export class HolidayService {
 
     const holiday = this.holidayRepository.create({
       ...createHolidayDto,
-      start_date: new Date(createHolidayDto.start_date),
-      end_date: createHolidayDto.end_date ? new Date(createHolidayDto.end_date) : null,
+      startDate: new Date(createHolidayDto.startDate),
+      endDate: createHolidayDto.endDate ? new Date(createHolidayDto.endDate) : null,
     });
     await this.holidayRepository.save(holiday);
     return this.toResponseDto(holiday);
   }
 
-  async update(id: number, updateHolidayDto: UpdateHolidayDto): Promise<HolidayResponseDto> {
-    const holidayEntity = await this.holidayRepository.findOne({ where: { id, delete_time: null } });
+  async update(id: string, updateHolidayDto: UpdateHolidayDto): Promise<HolidayResponseDto> {
+    const holidayEntity = await this.holidayRepository.findOne({ where: { id, deleteTime: null } });
     if (!holidayEntity) throw new NotFoundException(`Holiday with id ${id} not found`);
 
     const updatedData = {
       ...holidayEntity,
       ...updateHolidayDto,
-      start_date: updateHolidayDto.start_date ? new Date(updateHolidayDto.start_date) : holidayEntity.start_date,
-      end_date: updateHolidayDto.end_date ? new Date(updateHolidayDto.end_date) : holidayEntity.end_date,
+      startDate: updateHolidayDto.startDate ? new Date(updateHolidayDto.startDate) : holidayEntity.startDate,
+      endDate: updateHolidayDto.endDate ? new Date(updateHolidayDto.endDate) : holidayEntity.endDate,
     };
 
     await this.validateDateRange(updatedData);
@@ -73,40 +73,40 @@ export class HolidayService {
     return this.toResponseDto(updatedHoliday);
   }
 
-  async softDelete(id: number): Promise<void> {
-    const holiday = await this.holidayRepository.findOne({ where: { id, delete_time: null } });
+  async softDelete(id: string): Promise<void> {
+    const holiday = await this.holidayRepository.findOne({ where: { id, deleteTime: null } });
     if (!holiday) throw new NotFoundException(`Holiday with id ${id} not found`);
 
-    await this.holidayRepository.update(id, { delete_time: new Date() });
+    await this.holidayRepository.update(id, { deleteTime: new Date() });
   }
 
   private async validateDateRange(data: CreateHolidayDto | UpdateHolidayDto | any): Promise<void> {
-    if (!data.start_date) {
-      throw new BadRequestException('start_date is required');
+    if (!data.startDate) {
+      throw new BadRequestException('startDate is required');
     }
-    const startDate = new Date(data.start_date);
-    const endDate = data.end_date ? new Date(data.end_date) : null;
+    const startDate = new Date(data.startDate);
+    const endDate = data.endDate ? new Date(data.endDate) : null;
 
-    if (isNaN(startDate.getTime())) throw new BadRequestException('start_date must be a valid date');
-    if (endDate && isNaN(endDate.getTime())) throw new BadRequestException('end_date must be a valid date');
-    if (endDate && startDate > endDate) throw new BadRequestException('start_date must be before or equal to end_date');
+    if (isNaN(startDate.getTime())) throw new BadRequestException('startDate must be a valid date');
+    if (endDate && isNaN(endDate.getTime())) throw new BadRequestException('endDate must be a valid date');
+    if (endDate && startDate > endDate) throw new BadRequestException('startDate must be before or equal to endDate');
 
     if (endDate) {
       const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      if (data.total_days !== undefined && data.total_days !== daysDiff) {
-        throw new BadRequestException(`total_days (${data.total_days}) does not match date range (${daysDiff} days)`);
+      if (data.totalDays !== undefined && data.totalDays !== daysDiff) {
+        throw new BadRequestException(`totalDays (${data.totalDays}) does not match date range (${daysDiff} days)`);
       }
     }
   }
 
-  private async validateNoOverlap(data: CreateHolidayDto | UpdateHolidayDto | any, holidayId?: number): Promise<void> {
-    const startDate = new Date(data.start_date);
-    const endDate = data.end_date ? new Date(data.end_date) : startDate;
+  private async validateNoOverlap(data: CreateHolidayDto | UpdateHolidayDto | any, holidayId?: string): Promise<void> {
+    const startDate = new Date(data.startDate);
+    const endDate = data.endDate ? new Date(data.endDate) : startDate;
 
     const whereClause: any = {
-      delete_time: null,
-      start_date: LessThanOrEqual(endDate),
-      end_date: MoreThanOrEqual(startDate),
+      deleteTime: null,
+      startDate: LessThanOrEqual(endDate),
+      endDate: MoreThanOrEqual(startDate),
     };
 
     if (holidayId) {

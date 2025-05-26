@@ -2,13 +2,13 @@ import { IsDateString, IsOptional, IsString, Length, IsInt, Min } from 'class-va
 
 export class CreateLeaveDto {
   @IsDateString()
-  start_date: string;
+  startDate: string;
 
   @IsDateString()
-  end_date: string;
+  endDate: string;
 
   @IsString()
-  leave_type_id: string;
+  leaveTypeId: string;
 
   @IsString()
   @Length(10, 500)
@@ -17,21 +17,21 @@ export class CreateLeaveDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  total_days?: number; // อนุญาตให้ส่งหรือคำนวณเองก็ได้
+  totalDays?: number; // อนุญาตให้ส่งหรือคำนวณเองก็ได้
 }
 
 export class UpdateLeaveDto {
   @IsOptional()
   @IsDateString()
-  start_date?: string;
+  startDate?: string;
 
   @IsOptional()
   @IsDateString()
-  end_date?: string;
+  endDate?: string;
 
   @IsOptional()
   @IsString()
-  leave_type_id?: string;
+  leaveTypeId?: string;
 
   @IsOptional()
   @IsString()
@@ -41,7 +41,7 @@ export class UpdateLeaveDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  total_days?: number;
+  totalDays?: number;
 }
 
 export class UpdateLeaveStatusDto {

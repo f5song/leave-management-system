@@ -23,14 +23,14 @@ export class DepartmentController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<DepartmentResponseDto> {
+  async findOne(@Param('id') id: string): Promise<DepartmentResponseDto> {
     return this.departmentService.findOne(id);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() updateDepartmentDto: UpdateDepartmentDto
   ): Promise<DepartmentResponseDto> {
     return this.departmentService.update(id, updateDepartmentDto);
@@ -38,17 +38,17 @@ export class DepartmentController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async remove(@Param('id') id: string): Promise<void> {
     return this.departmentService.remove(id);
   }
 
   @Delete(':id/restore')
-  async restoreDepartment(@Param('id') id: number) {
+  async restoreDepartment(@Param('id') id: string) {
     return this.departmentService.restoreDepartment(id);
   }
 
   @Delete(':id/permanent')
-  async permanentlyDeleteDepartment(@Param('id') id: number) {
+  async permanentlyDeleteDepartment(@Param('id') id: string) {
     return this.departmentService.permanentlyDeleteDepartment(id);
   }
 }

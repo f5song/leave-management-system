@@ -2,11 +2,11 @@ import { IsDateString, IsOptional, IsString, Length, IsInt, Min } from 'class-va
 
 export class CreateHolidayDto {
   @IsDateString()
-  start_date: string;
+  startDate: string;
 
   @IsOptional()
   @IsDateString()
-  end_date?: string;
+  endDate?: string;
 
   @IsOptional()
   @IsString()
@@ -16,17 +16,17 @@ export class CreateHolidayDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  total_days?: number;
+  totalDays?: number;
 }
 
 export class UpdateHolidayDto {
   @IsOptional()
   @IsDateString()
-  start_date?: string;
+  startDate?: string;
 
   @IsOptional()
   @IsDateString()
-  end_date?: string;
+  endDate?: string;
 
   @IsOptional()
   @IsString()
@@ -36,5 +36,5 @@ export class UpdateHolidayDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  total_days?: number;
+  totalDays?: number;
 }

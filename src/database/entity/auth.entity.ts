@@ -3,11 +3,11 @@ import { UserInfoEntity } from './user-info.entity';
 
 @Entity('auth')
 export class AuthEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ unique: true })
-  username: string;
+  @Column({ unique: true , name: 'user_name'})
+  userName: string;
 
   @Column()
   password: string;
@@ -18,16 +18,19 @@ export class AuthEntity {
   @Column({ type: 'simple-array', default: ['user'] })
   roles: string[];
 
-  @OneToOne(() => UserInfoEntity, user => user.accounts)
-  @JoinColumn()
+  @Column({name: 'user_id'})
+  userId: number;
+
+  @OneToOne(() => UserInfoEntity, user => user.id)
+  @JoinColumn({ name: 'user_id' })
   user: UserInfoEntity;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({name: 'created_at'})
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  update_time: Date;
+  @UpdateDateColumn({name: 'update_time'})
+  updateTime: Date;
 
-  @DeleteDateColumn()
-  delete_time: Date | null;
+  @DeleteDateColumn({name: 'delete_time'})
+  deleteTime: Date | null;
 }

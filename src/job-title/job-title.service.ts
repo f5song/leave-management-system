@@ -16,7 +16,7 @@ export class JobTitleService {
   ) {}
 
   async create(createJobTitleDto: CreateJobTitleDto) {
-    const { id, name, department_id } = createJobTitleDto;
+    const { id, name, departmentId } = createJobTitleDto;
 
     // Check if job title with same id already exists
     const existingById = await this.jobTitleRepository.findOne({
@@ -39,20 +39,20 @@ export class JobTitleService {
     return this.jobTitleRepository.save({
       id,
       name,
-      department_id
+      departmentId
     });
   }
 
   async findAll() {
     return this.jobTitleRepository.find({
-      where: { delete_time: null },
+      where: { deleteTime: null },
       relations: ['department']
     });
   }
 
   async findOne(id: string) {
     const jobTitle = await this.jobTitleRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
       relations: ['department']
     });
 
@@ -65,20 +65,20 @@ export class JobTitleService {
 
   async update(id: string, updateJobTitleDto: UpdateJobTitleDto) {
     await this.validateJobTitleId(id);
-    await this.validateDepartmentExists(updateJobTitleDto.department_id);
-    await this.validateUniqueName(updateJobTitleDto.name, updateJobTitleDto.department_id, id);
+    await this.validateDepartmentExists(updateJobTitleDto.departmentId);
+    await this.validateUniqueName(updateJobTitleDto.name, updateJobTitleDto.departmentId, id);
     await this.validateNoReferences(id);
 
     return this.jobTitleRepository.save({
       ...updateJobTitleDto,
       id,
-      update_time: new Date()
+      updateTime: new Date()
     });
   }
 
   async validateJobTitleId(id: string): Promise<void> {
     const jobTitle = await this.jobTitleRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
       relations: ['department']
     });
 
@@ -91,7 +91,7 @@ export class JobTitleService {
     if (!departmentId) return;
 
     const department = await this.departmentRepository.findOne({
-      where: { id: Number(departmentId), delete_time: null }
+      where: { id: departmentId, deleteTime: null }
     });
 
     if (!department) {
@@ -105,8 +105,8 @@ export class JobTitleService {
     const jobTitle = await this.jobTitleRepository.findOne({
       where: {
         name,
-        department_id: departmentId as string,
-        delete_time: null,
+        departmentId: departmentId as string,
+        deleteTime: null,
         id: currentId ? Not(currentId) : undefined,
       },
     });
@@ -120,7 +120,7 @@ export class JobTitleService {
     const hasReferences = await this.jobTitleRepository.createQueryBuilder('jobTitle')
       .leftJoinAndSelect('jobTitle.users', 'users')
       .where('jobTitle.id = :id', { id })
-      .andWhere('users.delete_time IS NULL')
+      .andWhere('users.deleteTime IS NULL')
       .getCount();
 
     if (hasReferences[0].count > 0) {
@@ -133,7 +133,7 @@ export class JobTitleService {
     await this.validateNoReferences(id);
 
     await this.jobTitleRepository.update(id, {
-      delete_time: new Date()
+      deleteTime: new Date()
     });
   }
 }

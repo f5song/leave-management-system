@@ -14,17 +14,14 @@ export class PermissionService {
     private userInfoRepository: Repository<UserInfoEntity>
   ) {}
 
-  private async validatePermissionId(id: number): Promise<void> {
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new BadRequestException('Permission ID must be a positive integer');
-    }
+  private async validatePermissionId(id: string): Promise<void> {
 
     const permission = await this.permissionRepository.findOne({
       where: { id },
       relations: ['createdBy']
     });
 
-    if (!permission || permission.delete_time) {
+    if (!permission || permission.deleteTime) {
       throw new NotFoundException(`Permission with ID ${id} not found`);
     }
   }
@@ -37,7 +34,7 @@ export class PermissionService {
     const existingPermission = await this.permissionRepository.findOne({
       where: {
         name: name.trim(),
-        delete_time: null
+        deleteTime: null
       }
     });
 
@@ -46,29 +43,33 @@ export class PermissionService {
     }
   }
 
-  private async validatePermissionCreator(creatorId: number): Promise<void> {
-    if (!Number.isInteger(creatorId) || creatorId <= 0) {
-      throw new BadRequestException('Creator ID must be a positive integer');
-    }
+  private async validatePermissionCreatedById(creatorId: string): Promise<void> {
 
     const user = await this.userInfoRepository.findOne({
       where: { id: creatorId }
     });
 
-    if (!user || user.delete_time) {
+    if (!user || user.deleteTime) {
       throw new NotFoundException(`User with ID ${creatorId} not found`);
     }
   }
 
   async create(dto: CreatePermissionDto) {
     await this.validatePermissionName(dto.name);
-    await this.validatePermissionCreator(dto.created_by);
+    await this.validatePermissionCreatedById(dto.createdById);
+
+    const user = await this.userInfoRepository.findOne({
+      where: { id: dto.createdById },
+      relations: ['createdPermissions']
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${dto.createdById} not found`);
+    }
 
     const permission = this.permissionRepository.create({
       ...dto,
-      created_at: new Date(),
-      update_time: new Date(),
-      delete_time: null
+      createdBy: user
     });
 
     return await this.permissionRepository.save(permission);
@@ -76,20 +77,20 @@ export class PermissionService {
 
   async findAll() {
     return this.permissionRepository.find({
-      where: { delete_time: null },
+      where: { deleteTime: null },
       order: { name: 'ASC' }
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     await this.validatePermissionId(id);
     return this.permissionRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
       relations: ['createdBy']
     });
   }
 
-  async update(id: number, dto: UpdatePermissionDto) {
+  async update(id: string, dto: UpdatePermissionDto) {
     await this.validatePermissionId(id);
     
     if (dto.name) {
@@ -100,32 +101,32 @@ export class PermissionService {
       where: { id }
     });
 
-    if (!permission || permission.delete_time) {
+    if (!permission || permission.deleteTime) {
       throw new NotFoundException(`Permission with ID ${id} not found`);
     }
 
     Object.assign(permission, dto);
-    permission.update_time = new Date();
+    permission.updateTime = new Date();
 
     return await this.permissionRepository.save(permission);
   }
 
-  async softDelete(id: number) {
+  async softDelete(id: string) {
     await this.validatePermissionId(id);
     
     const permission = await this.permissionRepository.findOne({
       where: { id }
     });
 
-    if (!permission || permission.delete_time) {
+    if (!permission || permission.deleteTime) {
       throw new NotFoundException(`Permission with ID ${id} not found`);
     }
 
-    permission.delete_time = new Date();
+    permission.deleteTime = new Date();
     return await this.permissionRepository.save(permission);
   }
 
-  async getPermissionById(id: number) {
+  async getPermissionById(id: string) {
     await this.validatePermissionId(id);
     return this.permissionRepository.findOne({
       where: { id },
@@ -133,13 +134,13 @@ export class PermissionService {
     });
   }
 
-  async getPermissionsByRole(roleId: number) {
+  async getPermissionsByRole(roleId: string) {
     return this.permissionRepository.createQueryBuilder('permission')
       .leftJoinAndSelect('permission.rolePermissions', 'rolePermission')
       .leftJoinAndSelect('rolePermission.role', 'role')
       .where('role.id = :roleId', { roleId })
-      .andWhere('role.delete_time IS NULL')
-      .andWhere('permission.delete_time IS NULL')
+      .andWhere('role.deleteTime IS NULL')
+      .andWhere('permission.deleteTime IS NULL')
       .getMany();
   }
 }

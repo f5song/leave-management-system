@@ -16,14 +16,14 @@ import { RoleEntity } from './role.entity';
 
 @Entity('permission') 
 export class PermissionEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
 
-  @Column({ nullable: true })
-  created_by: number;
+  @Column({ nullable: true , name: 'created_by'})
+  createdById: number;
 
 
   @ManyToOne(() => UserInfoEntity, (user) => user.createdPermissions)
@@ -39,12 +39,12 @@ export class PermissionEntity {
   })
   roles: RoleEntity[];
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn({ nullable: true })
-  update_time?: Date;
+  @UpdateDateColumn({ name: 'update_time', nullable: true })
+  updateTime?: Date;
 
-  @DeleteDateColumn({ nullable: true })
-  delete_time?: Date;
+  @DeleteDateColumn({ name: 'delete_time', nullable: true })
+  deleteTime?: Date;
 }

@@ -5,7 +5,7 @@ import { UserInfoEntity } from '../database/entity/user-info.entity';
 import { JobTitleEntity } from '../database/entity/job-title.entity';
 import { DepartmentEntity } from '../database/entity/department.entity';
 import { RoleEntity } from '../database/entity/role.entity';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto } from './user.validation';
 
 @Injectable()
 export class UserService {
@@ -20,16 +20,13 @@ export class UserService {
     private roleRepository: Repository<RoleEntity>
   ) {}
 
-  private async validateUserId(id: number): Promise<void> {
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new BadRequestException('User ID must be a positive integer');
-    }
+  private async validateUserId(id: string): Promise<void> {
 
     const user = await this.userInfoRepository.findOne({
       where: { id },
     });
 
-    if (!user || user.delete_time) {
+    if (!user || user.deleteTime) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
@@ -47,49 +44,46 @@ export class UserService {
       where: { email },
     });
 
-    if (existingUser && !existingUser.delete_time) {
+    if (existingUser && !existingUser.deleteTime) {
       throw new BadRequestException('Email already exists');
     }
   }
 
-  private async validateRole(roleId: number): Promise<void> {
-    if (!Number.isInteger(roleId) || roleId <= 0) {
-      throw new BadRequestException('Role ID must be a positive integer');
-    }
+  private async validateRole(roleId: string): Promise<void> {
 
     const role = await this.roleRepository.findOne({
-      where: { id: Number(roleId) },
+      where: { id: roleId },
     });
 
-    if (!role || role.delete_time) {
+    if (!role || role.deleteTime) {
       throw new NotFoundException(`Role with ID ${roleId} not found`);
     }
   }
 
   private async validateJobTitle(jobTitleId: string): Promise<void> {
-    if (!jobTitleId || typeof jobTitleId !== 'string' || jobTitleId.trim().length === 0) {
+    if (!jobTitleId || typeof jobTitleId !== 'string' || jobTitleId.length > 20) {
       throw new BadRequestException('Job title ID must be a string with maximum length of 20 characters');
     }
 
     const jobTitle = await this.jobTitleRepository.findOne({
-      where: { id: jobTitleId.trim() },
+      where: { id: jobTitleId },
     });
 
-    if (!jobTitle || jobTitle.delete_time) {
+    if (!jobTitle || jobTitle.deleteTime) {
       throw new NotFoundException(`Job title with ID ${jobTitleId} not found`);
     }
   }
 
   private async validateDepartment(departmentId: string): Promise<void> {
-    if (!departmentId || typeof departmentId !== 'number' || departmentId <= 0) {
-      throw new BadRequestException('Department ID must be a positive number');
+    if (!departmentId || typeof departmentId !== 'string' || departmentId.length > 20) {
+      throw new BadRequestException('Department ID must be a string with maximum length of 20 characters');
     }
 
     const department = await this.departmentRepository.findOne({
-      where: { id: Number(departmentId) },
+      where: { id: departmentId },
     });
 
-    if (!department || department.delete_time) {
+    if (!department || department.deleteTime) {
       throw new NotFoundException(`Department with ID ${departmentId} not found`);
     }
   }
@@ -121,26 +115,26 @@ export class UserService {
 
   async createUser(data: CreateUserDto): Promise<UserInfoEntity> {
     await this.validateEmail(data.email);
-    await this.validateRole(data.role_id);
-    await this.validateJobTitle(data.job_title_id);
-    await this.validateDepartment(data.department_id);
-    await this.validateNames(data.first_name, data.last_name);
-    await this.validateBirthDate(data.birth_date);
+    await this.validateRole(data.roleId);
+    await this.validateJobTitle(data.jobTitleId);
+    await this.validateDepartment(data.departmentId);
+    await this.validateNames(data.firstName, data.lastName);
+    await this.validateBirthDate(data.birthDate);
 
     const user = this.userInfoRepository.create({
       email: data.email,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      birth_date: data.birth_date,
-      role_id: data.role_id,
-      job_title_id: data.job_title_id,
-      department_id: data.department_id,
-      created_at: new Date(),
+      firstName: data.firstName,
+      lastName: data.lastName,
+      birthDate: data.birthDate,
+      roleId: data.roleId,
+      jobTitleId: data.jobTitleId,
+      departmentId: data.departmentId,
+      createdAt: new Date(),
     });
     return this.userInfoRepository.save(user);
   }
 
-  async getUserById(id: number): Promise<UserInfoEntity> {
+  async getUserById(id: string): Promise<UserInfoEntity> {
     await this.validateUserId(id);
     
     return await this.userInfoRepository.findOne({
@@ -151,35 +145,35 @@ export class UserService {
 
   async getAllUsers(): Promise<UserInfoEntity[]> {
     return await this.userInfoRepository.find({
-      where: { delete_time: null },
+      where: { deleteTime: null },
       relations: ['role', 'jobTitle', 'department']
     });
   }
 
-  async updateUser(userId: number, data: UpdateUserDto): Promise<UserInfoEntity> {
+  async updateUser(userId: string, data: UpdateUserDto): Promise<UserInfoEntity> {
     await this.validateUserId(userId);
     
     const updateData: Partial<UserInfoEntity> = {};
     
     if (data.email) await this.validateEmail(data.email);
-    if (data.role_id) await this.validateRole(data.role_id);
-    if (data.job_title_id) await this.validateJobTitle(data.job_title_id);
-    if (data.department_id) await this.validateDepartment(data.department_id);
-    if (data.first_name || data.last_name) {
+    if (data.roleId) await this.validateRole(data.roleId);
+    if (data.jobTitleId) await this.validateJobTitle(data.jobTitleId);
+    if (data.departmentId) await this.validateDepartment(data.departmentId);
+    if (data.firstName || data.lastName) {
       await this.validateNames(
-        data.first_name || (await this.getUserById(userId)).first_name,
-        data.last_name || (await this.getUserById(userId)).last_name
+        data.firstName || (await this.getUserById(userId)).firstName,
+        data.lastName || (await this.getUserById(userId)).lastName
       );
     }
-    if (data.birth_date) await this.validateBirthDate(data.birth_date);
+    if (data.birthDate) await this.validateBirthDate(data.birthDate);
 
     if (data.email) updateData.email = data.email;
-    if (data.first_name) updateData.first_name = data.first_name;
-    if (data.last_name) updateData.last_name = data.last_name;
-    if (data.birth_date) updateData.birth_date = data.birth_date;
-    if (data.role_id) updateData.role_id = data.role_id;
-    if (data.job_title_id) updateData.job_title_id = data.job_title_id;
-    if (data.department_id) updateData.department_id = data.department_id;
+    if (data.firstName) updateData.firstName = data.firstName;
+    if (data.lastName) updateData.lastName = data.lastName;
+    if (data.birthDate) updateData.birthDate = data.birthDate;
+    if (data.roleId) updateData.roleId = data.roleId;
+    if (data.jobTitleId) updateData.jobTitleId = data.jobTitleId;
+    if (data.departmentId) updateData.departmentId = data.departmentId;
 
     const user = await this.userInfoRepository.findOne({
       where: { id: userId },
@@ -191,13 +185,13 @@ export class UserService {
 
     Object.assign(user, {
       ...updateData,
-      update_time: new Date(),
+      updateTime: new Date(),
     });
     
     return this.userInfoRepository.save(user);
   }
 
-  async partialUpdateUser(id: number, partialData: Partial<UserInfoEntity>): Promise<UserInfoEntity> {
+  async partialUpdateUser(id: string, partialData: Partial<UserInfoEntity>): Promise<UserInfoEntity> {
     await this.validateUserId(id);
     
     const existingUser = await this.getUserById(id);
@@ -212,13 +206,13 @@ export class UserService {
 
     Object.assign(user, {
       ...partialData,
-      update_time: new Date(),
+      updateTime: new Date(),
     });
     
     return this.userInfoRepository.save(user);
   }
 
-  async deleteUser(id: number): Promise<UserInfoEntity> {
+  async deleteUser(id: string): Promise<UserInfoEntity> {
     await this.validateUserId(id);
     
     const user = await this.userInfoRepository.findOne({
@@ -229,7 +223,7 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    user.delete_time = new Date();
+    user.deleteTime = new Date();
     return this.userInfoRepository.save(user);
   }
 }

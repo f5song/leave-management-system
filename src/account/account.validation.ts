@@ -13,20 +13,20 @@ import { Type } from 'class-transformer';
 
 export class CreateAccountDto {
   @IsNotEmpty()
-  @IsNumber()
-  user_id: number;
+  @IsString()
+  userId: string;
 
   @IsNotEmpty()
   @IsString()
-  google_id: string;
+  googleId: string;
 
   @IsNotEmpty()
   @IsString()
   email: string;
 
   @IsOptional()
-  @IsNumber()
-  approved_by?: number;
+  @IsString()
+  approvedById?: string;
 }
 
 
@@ -34,28 +34,28 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsString()
   @IsUUID()
-  google_id?: string;
+  googleId?: string;
 
   @IsOptional()
   @IsEmail()
   email?: string;
 
   @IsOptional()
-  @IsNumber()
-  approved_by?: number;
+  @IsString()
+  approvedById?: string;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  approved_at?: Date;
+  approvedAt?: Date;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  update_time?: Date;
+  updatedAt?: Date;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  delete_time?: Date;
+  deletedAt?: Date;
 }

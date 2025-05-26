@@ -13,20 +13,20 @@ import { UserInfoEntity } from './user-info.entity';
 
 @Entity('leaves')
 export class LeaveEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
-  user_id: number;
+  @Column({name: 'user_id'})
+  userId: number;
 
-  @Column()
-  leave_type_id: string;
+  @Column({name: 'leave_type_id'})
+  leaveTypeId: string;
 
-  @Column()
-  start_date: Date;
+  @Column({name: 'start_date'})
+  startDate: Date;
 
-  @Column()
-  end_date: Date;
+  @Column({name: 'end_date'})
+  endDate: Date;
 
   @Column()
   reason: string;
@@ -34,17 +34,14 @@ export class LeaveEntity {
   @Column({ default: 'pending' })
   status: string;
 
-  @Column({ nullable: true })
-  created_by: number;
-
-  @Column({ nullable: true })
-  total_days: number;
+  @Column({ nullable: true , name: 'total_days'})
+  totalDays: number;
 
   @ManyToOne(() => UserInfoEntity, (user) => user.leaves)
   @JoinColumn({ name: 'user_id' })
   userInfo: UserInfoEntity;
 
-  @ManyToOne(() => LeaveTypeEntity, (type) => type.leaves)
+  @ManyToOne(() => LeaveTypeEntity, (type) => type.id)
   @JoinColumn({ name: 'leave_type_id' })
   leaveType: LeaveTypeEntity;
 
@@ -52,14 +49,12 @@ export class LeaveEntity {
   @JoinColumn({ name: 'created_by' })
   createdBy: UserInfoEntity;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({name: 'created_at'})
+  createdAt: Date;
 
-  @UpdateDateColumn({ nullable: true })
-  update_time?: Date;
+  @UpdateDateColumn({ nullable: true , name: 'update_time'})
+  updateTime?: Date;
 
-  @DeleteDateColumn({ nullable: true })
-  delete_time?: Date;
-    user: any;
-    existingLeave: { id: string; };
+  @DeleteDateColumn({ nullable: true , name: 'delete_time'})
+  deleteTime?: Date;
 }

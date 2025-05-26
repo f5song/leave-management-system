@@ -14,16 +14,12 @@ export class RoleService {
     private userInfoRepository: Repository<UserInfoEntity>
   ) {}
 
-  private async validateRoleId(id: number): Promise<void> {
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new BadRequestException('Role ID must be a positive integer');
-    }
-
+  private async validateRoleId(id: string): Promise<void> {
     const role = await this.roleRepository.findOne({
       where: { id },
     });
 
-    if (!role || role.delete_time) {
+    if (!role || role.deleteTime) {
       throw new NotFoundException(`Role with ID ${id} not found`);
     }
   }
@@ -36,7 +32,7 @@ export class RoleService {
     const existingRole = await this.roleRepository.findOne({
       where: {
         name: name.trim(),
-        delete_time: null,
+        deleteTime: null,
       },
     });
 
@@ -45,47 +41,54 @@ export class RoleService {
     }
   }
 
-  private async validateRoleCreator(creatorId: number): Promise<void> {
-    if (!Number.isInteger(creatorId) || creatorId <= 0) {
-      throw new BadRequestException('Creator ID must be a positive integer');
-    }
-
+  private async validateRoleCreator(creatorId: string): Promise<void> {
     const user = await this.userInfoRepository.findOne({
       where: { id: creatorId },
     });
 
-    if (!user || user.delete_time) {
+    if (!user || user.deleteTime) {
       throw new NotFoundException(`User with ID ${creatorId} not found`);
     }
   }
 
   async findAll() {
     return this.roleRepository.find({
-      where: { delete_time: null },
+      where: { deleteTime: null },
       order: { name: 'ASC' },
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     await this.validateRoleId(id);
     return this.roleRepository.findOne({
-      where: { id, delete_time: null },
+      where: { id, deleteTime: null },
       relations: ['createdBy', 'user'],
     });
   }
 
   async create(data: CreateRoleDto) {
     await this.validateRoleName(data.name);
-    await this.validateRoleCreator(data.created_by);
+    await this.validateRoleCreator(data.createdBy);
+
+    const user = await this.userInfoRepository.findOne({
+      where: { id: data.createdBy },
+      relations: ['createdRoles']
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${data.createdBy} not found`);
+    }
 
     const role = this.roleRepository.create({
-      ...data,
-      created_at: new Date(),
+      name: data.name,
+      createdBy: user,
+      createdAt: new Date()
     });
+
     return this.roleRepository.save(role);
   }
 
-  async update(id: number, data: UpdateRoleDto) {
+  async update(id: string, data: UpdateRoleDto) {
     await this.validateRoleId(id);
     
     if (data.name) {
@@ -102,13 +105,13 @@ export class RoleService {
 
     Object.assign(role, {
       ...data,
-      update_time: new Date(),
+      updateTime: new Date(),
     });
     
     return this.roleRepository.save(role);
   }
 
-  async softDelete(id: number) {
+  async softDelete(id: string) {
     await this.validateRoleId(id);
     
     const role = await this.roleRepository.findOne({
@@ -119,7 +122,7 @@ export class RoleService {
       throw new NotFoundException(`Role with ID ${id} not found`);
     }
 
-    role.delete_time = new Date();
+    role.deleteTime = new Date();
     return this.roleRepository.save(role);
   }
 }

@@ -11,7 +11,7 @@ export class CreateJobTitleDto {
 
   @IsString()
   @IsNotEmpty()
-  department_id: string;
+  departmentId: string;
 }
 
 export class UpdateJobTitleDto {
@@ -21,5 +21,5 @@ export class UpdateJobTitleDto {
 
   @IsString()
   @IsOptional()
-  department_id?: string;
+  departmentId?: string;
 }

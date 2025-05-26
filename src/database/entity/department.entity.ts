@@ -4,24 +4,21 @@ import { UserInfoEntity } from './user-info.entity';
 
 @Entity('departments')
 export class DepartmentEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   name: string;
 
-  @OneToMany(() => UserInfoEntity, user => user.department)
-  users: UserInfoEntity[];
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @Column()
-  jobTitles: any;
+  @UpdateDateColumn({ name: 'update_time' })
+  updateTime: Date;
+
+  @DeleteDateColumn({ name: 'delete_time' })
+  deleteTime: Date | null;
   
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  update_time: Date;
-
-  @DeleteDateColumn()
-  delete_time: Date | null;
+  // @OneToMany(() => UserInfoEntity, user => user.department)
+  // users: UserInfoEntity[];
 }

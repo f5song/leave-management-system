@@ -10,9 +10,6 @@ import { AuthEntity } from '../database/entity/auth.entity';
 
 @Injectable()
 export class AuthService {
-  login(user: UserInfoEntity): import("./auth-response.dto").AuthResponseDto | PromiseLike<import("./auth-response.dto").AuthResponseDto> {
-    throw new Error('Method not implemented.');
-  }
   private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
   constructor(
@@ -57,7 +54,7 @@ export class AuthService {
 
     // เช็คว่ามี account ที่ตรงกับ google_id หรือยัง
     let account = await this.accountRepository.findOne({
-      where: { google_id: googleUser.googleId },
+      where: { googleId: googleUser.googleId },
       relations: ['user']
     });
 
@@ -91,7 +88,7 @@ export class AuthService {
     };
   }
 
-  async validateAccount(accountId: number) {
+  async validateAccount(accountId: string) {
     return this.accountRepository.findOne({
       where: { id: accountId },
       relations: ['user']
@@ -101,7 +98,7 @@ export class AuthService {
   async findOrCreateUserFromGoogle(googleUser: { email: string; sub: string; name: string; picture: string }) {
     // ตรวจสอบว่ามี account ที่ตรงกับ google_id หรือยัง
     let account = await this.accountRepository.findOne({
-      where: { google_id: googleUser.sub },
+      where: { googleId: googleUser.sub },
       relations: ['user']
     });
 

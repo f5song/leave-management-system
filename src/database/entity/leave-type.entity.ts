@@ -1,23 +1,24 @@
 import { LeaveEntity } from './leave.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, PrimaryColumn, OneToMany } from 'typeorm';
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, PrimaryColumn, OneToMany, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('leavetypes')
 export class LeaveTypeEntity {
-  @PrimaryColumn({ type: 'varchar', length: 20 })
+
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   name: string;
-
+  
   @OneToMany(() => LeaveEntity, (leave) => leave.leaveType)
   leaves: LeaveEntity[];
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn({ nullable: true })
-  update_time?: Date;
+  @UpdateDateColumn({ name: 'update_time', nullable: true })
+  updateTime?: Date;
 
-  @DeleteDateColumn({ nullable: true })
-  delete_time?: Date;
+  @DeleteDateColumn({ name: 'delete_time', nullable: true })
+  deleteTime?: Date;
 }

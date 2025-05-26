@@ -14,7 +14,7 @@ import {
   import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
   import { LeaveEntity } from '../database/entity/leave.entity';
   interface AuthenticatedRequest extends Request {
-    user: { id: number };
+    user: { id: string };
   }
   
   @UseGuards(JwtAuthGuard)
@@ -43,7 +43,7 @@ import {
       @Body() dto: UpdateLeaveDto,
       @Req() req: AuthenticatedRequest,
     ) {
-      return this.leaveService.updateLeaveDetails(+id, dto, req.user.id);
+      return this.leaveService.updateLeaveDetails(id, dto, req.user.id);
     }
 
     @Patch(':id/status')
@@ -52,11 +52,11 @@ import {
       @Body() dto: UpdateLeaveStatusDto,
       @Req() req: AuthenticatedRequest,
     ) {
-      return this.leaveService.updateLeaveStatus(+id, dto, req.user.id);
+      return this.leaveService.updateLeaveStatus(id, dto, req.user.id);
     }
   
     @Delete(':id')
     delete(@Param('id') id: string) {
-      return this.leaveService.deleteLeave(+id);
+      return this.leaveService.deleteLeave(id);
     }
   }

@@ -1,12 +1,12 @@
 export class HolidayResponseDto {
-  id: number;
+  id: string;
   title: string;
-  start_date: Date;
-  end_date?: Date;
+  startDate: Date;
+  endDate?: Date;
   description?: string;
-  total_days?: number;
-  created_at: Date;
-  update_time: Date;
-  delete_time: Date;
+  totalDays?: number;
+  createdAt: Date;
+  updateTime: Date;
+  deleteTime: Date;
   color: string;
 }

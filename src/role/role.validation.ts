@@ -5,8 +5,8 @@ export class CreateRoleDto {
   name: string;
 
   @IsOptional()
-  @IsInt()
-  created_by?: number;
+  @IsString()
+  createdBy?: string;
 }
 
 export class UpdateRoleDto {
@@ -15,6 +15,6 @@ export class UpdateRoleDto {
   name?: string;
 
   @IsOptional()
-  @IsInt()
-  created_by?: number;
+  @IsString()
+  createdBy?: string;
 }

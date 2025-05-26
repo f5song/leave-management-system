@@ -5,35 +5,35 @@ import { UserInfoEntity } from './user-info.entity';
 
 @Entity('holidays')
 export class HolidayEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;
 
-  @Column({ type: 'datetime' })
-  start_date: Date;
+  @Column({ type: 'datetime', name: 'start_date' })
+  startDate: Date;
 
-  @Column({ type: 'datetime' })
-  end_date: Date;
+  @Column({ type: 'datetime', name: 'end_date' })
+  endDate: Date;
 
-  @Column()
-  total_days: number;
+  @Column({ name: 'total_days' })
+  totalDays: number;
 
   @Column()
   color: string;
 
-  @Column({ nullable: true })
-  created_by?: number;
+  @Column({ name: 'created_by' })
+  createdById?: string;
 
-  @CreateDateColumn({ type: 'datetime' })
-  created_at: Date;
+  @CreateDateColumn({ type: 'datetime' , name: 'created_at'})
+  createdAt: Date;
 
-  @Column({ type: 'datetime', nullable: true })
-  update_time?: Date;
+  @Column({ type: 'datetime', nullable: true , name: 'update_time'})
+  updateTime?: Date;
 
-  @Column({ type: 'datetime', nullable: true })
-  delete_time?: Date;
+  @Column({ type: 'datetime', nullable: true , name: 'delete_time'})
+  deleteTime?: Date;
 
   @ManyToOne(() => UserInfoEntity, user => user.createdHolidays)
   @JoinColumn({ name: 'created_by' })

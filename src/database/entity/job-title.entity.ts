@@ -6,31 +6,37 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { DepartmentEntity } from './department.entity';
+import { UserInfoEntity } from './user-info.entity';
 
 @Entity('job_titles')
 export class JobTitleEntity {
-  @PrimaryColumn()
+  
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ unique: true })
   name: string;
 
   @Column({ name: 'department_id' })
-  department_id: string;
+  departmentId: string;
 
-  @ManyToOne(() => DepartmentEntity, (department) => department.jobTitles)
+  @ManyToOne(() => DepartmentEntity, (department) => department.id)
   @JoinColumn({ name: 'department_id' })
   department: DepartmentEntity;
 
-  @Column({ type: 'timestamp', nullable: true })
-  delete_time: Date | null;
+  @Column({ type: 'timestamp', nullable: true , name: 'delete_time'})
+  deleteTime: Date | null;
 
   @CreateDateColumn({ name: 'create_time' })
-  create_time: Date;
+  createTime: Date;
 
   @UpdateDateColumn({ name: 'update_time', nullable: true })
-  update_time: Date | null;
-  users: any;
+  updateTime: Date | null;
+
+  @OneToMany(() => UserInfoEntity, (user) => user.jobTitle)
+  users: UserInfoEntity[];
 }

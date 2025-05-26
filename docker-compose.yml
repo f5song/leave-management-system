@@ -1,0 +1,26 @@
+version: '3'
+services:
+  funch_db:
+    image: mysql:latest
+    container_name: funch_mysql
+    platform: linux/amd64
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./funch_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: funch_db
+
+  funch_phpadmin:
+    depends_on:
+      - funch_db
+    image: phpmyadmin/phpmyadmin
+    container_name: funch_phpmyadmin
+    restart: always
+    ports:
+      - '8001:80'
+    environment:
+      PMA_HOST: funch_db
+
+

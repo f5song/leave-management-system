@@ -28,7 +28,7 @@ export class AccountController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async getAccountById(@Param('id', ParseIntPipe) id: number): Promise<AccountResponseDto> {
+  async getAccountById(@Param('id') id: string): Promise<AccountResponseDto> {
     return this.accountService.getAccountById(id);
   }
 
@@ -41,7 +41,7 @@ export class AccountController {
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   async updateAccount(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Body() accountData: UpdateAccountDto
   ): Promise<AccountResponseDto> {
     return this.accountService.updateAccount(id, accountData);
@@ -49,7 +49,7 @@ export class AccountController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteAccount(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+  async deleteAccount(@Param('id', ParseIntPipe) id: string): Promise<{ message: string }> {
     await this.accountService.deleteAccount(id);
     return { message: 'Account deleted successfully' };
   }

@@ -12,15 +12,15 @@ export class AccountService {
     private accountRepository: Repository<AccountEntity>,
   ) { }
 
-  async validateUserId(userId: number): Promise<void> {
-    const user = await this.accountRepository.findOne({ where: { user_id: userId } });
+  async validateUserId(userId: string): Promise<void> {
+    const user = await this.accountRepository.findOne({ where: { userId: userId } });
     if (!user) {
       throw new BadRequestException(`User with ID ${userId} not found`);
     }
   }
 
   async validateGoogleId(googleId: string): Promise<void> {
-    const existing = await this.accountRepository.findOne({ where: { google_id: googleId } });
+    const existing = await this.accountRepository.findOne({ where: { googleId: googleId } });
     if (existing) {
       throw new BadRequestException(`Google ID ${googleId} already exists`);
     }
@@ -33,41 +33,40 @@ export class AccountService {
     }
   }
 
-  async validateApprover(approvedBy: number): Promise<void> {
-    if (!approvedBy) return;
-    const user = await this.accountRepository.findOne({ where: { user_id: approvedBy } });
+  async validateApprover(approvedById?: string): Promise<void> {
+    if (!approvedById) return;
+    const user = await this.accountRepository.findOne({ where: { userId: approvedById } });
     if (!user) {
-      throw new BadRequestException(`Approver with ID ${approvedBy} not found`);
+      throw new BadRequestException(`Approver with ID ${approvedById} not found`);
     }
   }
 
   toResponseDto(account: AccountEntity): AccountResponseDto {
     return {
       id: account.id,
-      user_id: account.user_id,
-      google_id: account.google_id,
+      userId: account.userId,
+      googleId: account.googleId,
       email: account.email,
-      approved_by: account.approved_by,
-      created_at: account.created_at,
-      updated_at: account.update_time,
+      approvedById: account.approvedById,
+      createdAt: account.createdAt,
+      updateTime: account.updateTime,
     };
   }
 
   async createAccount(data: CreateAccountDto): Promise<AccountResponseDto> {
-    await this.validateUserId(data.user_id);
-    await this.validateGoogleId(data.google_id);
+    await this.validateUserId(data.userId);
+    await this.validateGoogleId(data.googleId);
     await this.validateEmail(data.email);
-    await this.validateApprover(data.approved_by);
+    await this.validateApprover(data.approvedById);
 
     const account = await this.accountRepository.save(data);
     return this.toResponseDto(account);
   }
 
-  async getAccountById(id: number | string): Promise<AccountResponseDto> {
-    const numericId = typeof id === 'string' ? Number(id) : id;
-    const account = await this.accountRepository.findOne({ where: { id: numericId } });
+  async getAccountById(id: string): Promise<AccountResponseDto> {
+    const account = await this.accountRepository.findOne({ where: { id } });
     if (!account) {
-      throw new NotFoundException(`Account with ID ${numericId} not found`);
+      throw new NotFoundException(`Account with ID ${id} not found`);
     }
     return this.toResponseDto(account);
   }
@@ -77,45 +76,43 @@ export class AccountService {
     return accounts.map(acc => this.toResponseDto(acc));
   }
 
-  async updateAccount(id: number, data: UpdateAccountDto): Promise<AccountResponseDto> {
-    const numericId = typeof id === 'string' ? Number(id) : id;
-    const existing = await this.accountRepository.findOne({ where: { id: numericId } });
+  async updateAccount(id: string, data: UpdateAccountDto): Promise<AccountResponseDto> {
+    const existing = await this.accountRepository.findOne({ where: { id } });
     if (!existing) {
-      throw new NotFoundException(`Account with ID ${numericId} not found`);
+      throw new NotFoundException(`Account with ID ${id} not found`);
     }
 
-    if (data.google_id && data.google_id !== existing.google_id) {
-      await this.validateGoogleId(data.google_id);
+    if (data.googleId && data.googleId !== existing.googleId) {
+      await this.validateGoogleId(data.googleId);
     }
 
     if (data.email && data.email !== existing.email) {
       await this.validateEmail(data.email);
     }
 
-    if (data.approved_by) {
-      await this.validateApprover(data.approved_by);
+    if (data.approvedById) {
+      await this.validateApprover(data.approvedById);
     }
 
     const updated = await this.accountRepository.save({ ...existing, ...data });
     return this.toResponseDto(updated);
   }
 
-  async deleteAccount(id: number): Promise<void> {
-    const numericId = typeof id === 'string' ? Number(id) : id;
-    const existing = await this.accountRepository.findOne({ where: { id: numericId } });
+  async deleteAccount(id: string): Promise<void> {
+    const existing = await this.accountRepository.findOne({ where: { id } });
     if (!existing) {
-      throw new NotFoundException(`Account with ID ${numericId} not found`);
+      throw new NotFoundException(`Account with ID ${id} not found`);
     }
 
     // ตรวจสอบว่ามีการใช้งาน account นี้อยู่หรือไม่ก่อนลบ
     const hasReferences = await this.accountRepository.findOne({
-      where: { approved_by: numericId }
+      where: { approvedById: id }
     });
 
     if (hasReferences) {
       throw new BadRequestException('Cannot delete account that is being used');
     }
 
-    await this.accountRepository.delete(numericId);
+    await this.accountRepository.delete(id);
   }
 }

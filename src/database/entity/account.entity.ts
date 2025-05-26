@@ -6,38 +6,38 @@ import { UserInfoEntity } from './user-info.entity';
 
 @Entity('accounts')
 export class AccountEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ nullable: true })
-  user_id?: number;
+  @Column({ nullable: true , name: 'userId'})
+  userId?: string;
 
-  @Column({ unique: true })
-  google_id: string;
+  @Column({ unique: true , name: 'googleId'})
+  googleId: string;
 
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  approved_by?: number;
+  @Column({ nullable: true , name: 'approvedBy'})
+  approvedById?: string;
 
-  @Column({ type: 'datetime', nullable: true })
-  approved_at?: Date;
+  @Column({ type: 'datetime', nullable: true , name: 'approvedAt'})
+  approvedAt?: Date;
 
-  @CreateDateColumn({ type: 'datetime' })
-  created_at: Date;
+  @CreateDateColumn({ type: 'datetime' , name: 'createdAt'})
+  createdAt: Date;
 
-  @Column({ type: 'datetime', nullable: true })
-  update_time?: Date;
+  @Column({ type: 'datetime', nullable: true , name: 'updatedAt'})
+  updateTime?: Date;
 
-  @Column({ type: 'datetime', nullable: true })
-  delete_time?: Date;
+  @Column({ type: 'datetime', nullable: true , name: 'deletedAt'})
+  deleteTime?: Date;
 
-  @ManyToOne(() => UserInfoEntity, user => user.accounts)
-  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => UserInfoEntity, user => user.id)
+  @JoinColumn({ name: 'userId' })
   user?: UserInfoEntity;
 
   @ManyToOne(() => UserInfoEntity, user => user.approvedAccounts)
-  @JoinColumn({ name: 'approved_by' })
+  @JoinColumn({ name: 'approvedBy' })
   approvedBy?: UserInfoEntity;
 }

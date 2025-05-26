@@ -19,7 +19,7 @@ export class LeaveTypeService {
     });
 
     if (existing) {
-      if (!existing.delete_time) {
+      if (!existing.deleteTime) {
         throw new BadRequestException(`Leave type with name '${createLeaveTypeDto.name}' already exists`);
       }
       throw new BadRequestException(`Leave type with name '${createLeaveTypeDto.name}' exists but was deleted`);
@@ -32,7 +32,7 @@ export class LeaveTypeService {
 
   async findAll(): Promise<LeaveTypeResponseDto[]> {
     const leaveTypes = await this.leaveTypeRepository.find({
-      where: { delete_time: null },
+      where: { deleteTime: null },
       order: { name: 'ASC' },
     });
     return leaveTypes.map(leaveType => this.toResponseDto(leaveType));
@@ -40,7 +40,7 @@ export class LeaveTypeService {
 
   async findOne(id: number): Promise<LeaveTypeEntity> {
     const leaveType = await this.leaveTypeRepository.findOne({
-      where: { id: String(id), delete_time: null },
+      where: { id: String(id), deleteTime: null },
     });
 
     if (!leaveType) {
@@ -56,27 +56,27 @@ export class LeaveTypeService {
       throw new NotFoundException(`Leave type with ID ${id} not found`);
     }
     Object.assign(leaveType, updateLeaveTypeDto);
-    leaveType.update_time = new Date();
+    leaveType.updateTime = new Date();
     await this.leaveTypeRepository.save(leaveType);
     return this.toResponseDto(leaveType);
   }
 
   async delete(id: number): Promise<void> {
     const leaveType = await this.findOne(id);
-    leaveType.delete_time = new Date();
+    leaveType.deleteTime = new Date();
     await this.leaveTypeRepository.save(leaveType);
   }
 
   async restore(id: number): Promise<LeaveTypeResponseDto> {
     const leaveType = await this.leaveTypeRepository.findOne({
-      where: { id: String(id), delete_time: null },
+      where: { id: String(id), deleteTime: null },
     });
 
     if (!leaveType) {
       throw new NotFoundException(`Deleted leave type with ID ${id} not found`);
     }
 
-    leaveType.delete_time = null;
+    leaveType.deleteTime = null;
     await this.leaveTypeRepository.save(leaveType);
     return this.toResponseDto(leaveType);
   }
@@ -96,14 +96,14 @@ export class LeaveTypeService {
     await this.validateLeaveTypeExists(id);
 
     await this.leaveTypeRepository.update(id, {
-      delete_time: new Date()
+      deleteTime: new Date()
     });
   }
 
   async partialUpdate(id: number, data: Partial<{ name: string; description: string; is_active: boolean }>): Promise<LeaveTypeResponseDto> {
     const leaveType = await this.findOne(id);
     Object.assign(leaveType, data);
-    leaveType.update_time = new Date();
+    leaveType.updateTime = new Date();
     const updatedLeaveType = await this.leaveTypeRepository.save(leaveType);
     return this.toResponseDto(updatedLeaveType);
   }
@@ -112,9 +112,9 @@ export class LeaveTypeService {
     return {
       id: leaveType.id,
       name: leaveType.name,
-      created_at: leaveType.created_at,
-      update_time: leaveType.update_time,
-      delete_time: leaveType.delete_time
+      createdAt: leaveType.createdAt,
+      updateTime: leaveType.updateTime,
+      deleteTime: leaveType.deleteTime
   
     };
   }
