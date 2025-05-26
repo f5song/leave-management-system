@@ -8,7 +8,8 @@ import { PermissionEntity } from './permission.entity';
 import { HolidayEntity } from './holiday.entity';
 import { ItemRequestEntity } from './item-request.entity';
 import { FacilityRequestEntity } from './facility-request.entity';
-
+import { JobTitleId } from 'src/constants/jobtitle.enum';
+import { DepartmentId } from 'src/constants/department.enum';
 @Entity('userinfo')
 export class UserInfoEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -33,11 +34,15 @@ export class UserInfoEntity {
   @Column({ name: 'role_id' })
   roleId: string;
 
-  @Column({ name: 'job_title_id' })
-  jobTitleId: string;
+  @Column({ name: 'job_title_id', type: 'enum', enum: JobTitleId })
+  jobTitleId: JobTitleId;
 
-  @Column({ name: 'department_id' })
-  departmentId: string;
+  @Column({ name: 'department_id', type: 'enum', enum: DepartmentId })
+  departmentId: DepartmentId;
+
+  @ManyToOne(() => JobTitleEntity, (jobTitle) => jobTitle.users)
+  @JoinColumn({ name: 'job_title_id' })
+  jobTitle: JobTitleEntity;
 
   @Column({ name: 'birth_date' })
   birthDate: Date;
@@ -48,10 +53,6 @@ export class UserInfoEntity {
   @ManyToOne(() => RoleEntity, (role) => role.user)
   @JoinColumn({ name: 'role_id' })
   role: RoleEntity;
-
-  @ManyToOne(() => JobTitleEntity, (jt) => jt.id)
-  @JoinColumn({ name: 'job_title_id' })
-  jobTitle: JobTitleEntity;
 
   @ManyToOne(() => DepartmentEntity, (dept) => dept.id)
   @JoinColumn({ name: 'department_id' })

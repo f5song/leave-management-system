@@ -1,5 +1,7 @@
+import { LeaveType } from "src/constants/leave-type.enum";
+
 export class LeaveTypeResponseDto {
-  id: string;
+  id: LeaveType;
   name: string;
   description?: string;
   createdAt: Date;

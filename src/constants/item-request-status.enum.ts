@@ -1,7 +1,7 @@
 export enum ItemRequestStatus {
-    PENDING = 'pending',
-    APPROVED = 'approved',
-    REJECTED = 'rejected',
-    RETURNED = 'returned',
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+    RETURNED = 'RETURNED',
   }
   

@@ -1,4 +1,5 @@
 import { IsDateString, IsOptional, IsString, Length, IsInt, Min } from 'class-validator';
+import { LeaveType } from 'src/constants/leave-type.enum';
 
 export class CreateLeaveDto {
   @IsDateString()
@@ -8,7 +9,7 @@ export class CreateLeaveDto {
   endDate: string;
 
   @IsString()
-  leaveTypeId: string;
+  leaveTypeId: LeaveType;
 
   @IsString()
   @Length(10, 500)
@@ -31,7 +32,7 @@ export class UpdateLeaveDto {
 
   @IsOptional()
   @IsString()
-  leaveTypeId?: string;
+  leaveTypeId?: LeaveType;
 
   @IsOptional()
   @IsString()

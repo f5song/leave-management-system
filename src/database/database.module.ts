@@ -13,6 +13,7 @@ import { JobTitleEntity } from './entity/job-title.entity';
 import { ItemEntity } from './entity/item.entity';
 import { FacilityRequestEntity } from './entity/facility-request.entity';
 import { ItemRequestEntity } from './entity/item-request.entity';
+import { RolePermissionEntity } from './entity/role-permission.entity';
 
 @Module({
   imports: [
@@ -27,11 +28,11 @@ import { ItemRequestEntity } from './entity/item-request.entity';
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DATABASE,
         // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        entities: [AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity, ItemEntity, FacilityRequestEntity, ItemRequestEntity],
-        synchronize: true, 
+        entities: [AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity, ItemEntity, FacilityRequestEntity, ItemRequestEntity, RolePermissionEntity],
+        synchronize: true,
         logging: true
       }),
     }),
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

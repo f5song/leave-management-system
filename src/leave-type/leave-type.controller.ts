@@ -7,6 +7,7 @@ import { LeaveTypeService } from './leave-type.service';
 import { LeaveTypeEntity } from '../database/entity/leave-type.entity';
 import { CreateLeaveTypeDto, UpdateLeaveTypeDto } from './leave-type.validation';
 import { LeaveTypeResponseDto } from './leave-type-response.dto';
+import { LeaveType } from 'src/constants/leave-type.enum';
 
 @Controller('leave-types')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -28,14 +29,14 @@ export class LeaveTypeController {
 
   @Get(':id')
   @Roles('admin')
-  async findOne(@Param('id') id: number): Promise<LeaveTypeEntity> {
+  async findOne(@Param('id') id: LeaveType): Promise<LeaveTypeEntity> {
     return this.leaveTypeService.findOne(id);
   }
 
   @Put(':id')
   @Roles('admin')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: LeaveType,
     @Body() updateLeaveTypeDto: UpdateLeaveTypeDto
   ): Promise<LeaveTypeResponseDto> {
     return this.leaveTypeService.update(id, updateLeaveTypeDto);
@@ -43,13 +44,13 @@ export class LeaveTypeController {
 
   @Patch(':id')
   @Roles('admin')
-  async partialUpdate(@Param('id') id: string, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
-    return this.leaveTypeService.partialUpdate(parseInt(id), data);
+  async partialUpdate(@Param('id') id: LeaveType, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
+    return this.leaveTypeService.partialUpdate(id, data);
   }
 
   @Delete(':id')
   @Roles('admin')
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@Param('id') id: LeaveType): Promise<void> {
     return this.leaveTypeService.delete(id);
   }
 }

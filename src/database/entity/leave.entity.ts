@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { LeaveTypeEntity } from './leave-type.entity';
 import { UserInfoEntity } from './user-info.entity';
+import { LeaveType } from '../../constants/leave-type.enum';
 
 @Entity('leaves')
 export class LeaveEntity {
@@ -19,8 +20,12 @@ export class LeaveEntity {
   @Column({name: 'user_id'})
   userId: string;
 
-  @Column({name: 'leave_type_id'})
-  leaveTypeId: string;
+  @Column({
+    type: 'enum',
+    enum: LeaveType,
+    name: 'leave_type_id'
+  })
+  leaveTypeId: LeaveType;
 
   @Column({name: 'start_date'})
   startDate: Date;
@@ -31,7 +36,11 @@ export class LeaveEntity {
   @Column()
   reason: string;
 
-  @Column({ default: 'pending' })
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  })
   status: string;
 
   @Column({ nullable: true , name: 'total_days'})

@@ -1,8 +1,8 @@
 export enum LeaveType {
-  ANNUAL = 'annual',
-  SICK = 'sick',
-  MATERNITY = 'maternity',
-  PATERNITY = 'paternity',
-  COMPENSATORY = 'compensatory',
-  UNPAID = 'unpaid'
+  ANNUAL = 'ANNUAL',
+  SICK = 'SICK',
+  MATERNITY = 'MATERNITY',
+  PATERNITY = 'PATERNITY',
+  COMPENSATORY = 'COMPENSATORY',
+  UNPAID = 'UNPAID'
 }

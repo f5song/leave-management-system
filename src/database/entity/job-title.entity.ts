@@ -12,6 +12,7 @@ import {
 import { DepartmentEntity } from './department.entity';
 import { UserInfoEntity } from './user-info.entity';
 import { JobTitleId } from '../../constants/jobtitle.enum';
+import { DepartmentId } from 'src/constants/department.enum';
 
 @Entity('job_titles')
 export class JobTitleEntity {
@@ -25,8 +26,8 @@ export class JobTitleEntity {
   @Column()
   color: string;
 
-  @Column({ name: 'department_id' })
-  departmentId: string;
+  @Column({ type: 'enum', enum: DepartmentId })
+  departmentId: DepartmentId;
 
   @ManyToOne(() => DepartmentEntity, (department) => department.id)
   @JoinColumn({ name: 'department_id' })

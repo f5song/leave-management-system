@@ -26,6 +26,7 @@ import { JobTitleEntity } from './database/entity/job-title.entity';
 import { ItemEntity } from './database/entity/item.entity';
 import { ItemRequestEntity } from './database/entity/item-request.entity';
 import { FacilityRequestEntity } from './database/entity/facility-request.entity';
+import { RolePermissionEntity } from './database/entity/role-permission.entity';
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { FacilityRequestEntity } from './database/entity/facility-request.entity
     AuthModule,
     DatabaseModule,
     TypeOrmModule.forFeature([
-      AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity, ItemEntity, FacilityRequestEntity, ItemRequestEntity
+      AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity, ItemEntity, FacilityRequestEntity, ItemRequestEntity, RolePermissionEntity
     ]),
   ],
   controllers: [AppController],

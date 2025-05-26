@@ -6,13 +6,11 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
-  OneToMany,
   JoinColumn,
-  ManyToMany,
-  JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { UserInfoEntity } from './user-info.entity';
-import { RoleEntity } from './role.entity';
+import { RolePermissionEntity } from './role-permission.entity';
 
 @Entity('permission') 
 export class PermissionEntity {
@@ -30,14 +28,8 @@ export class PermissionEntity {
   @JoinColumn({ name: 'created_by' })
   createdBy: UserInfoEntity;
 
-
-  @ManyToMany(() => RoleEntity, (rp) => rp.permissions)
-  @JoinTable({
-    name: 'permission_role',
-    joinColumn: { name: 'permission_id' },
-    inverseJoinColumn: { name: 'role_id' },
-  })
-  roles: RoleEntity[];
+  @OneToMany(() => RolePermissionEntity, (rp) => rp.permission)
+  rolePermissions: RolePermissionEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

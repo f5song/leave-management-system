@@ -3,6 +3,7 @@ import {
 } from 'typeorm';
 import { ItemEntity } from './item.entity';
 import { UserInfoEntity } from './user-info.entity';
+import { ItemRequestStatus } from 'src/constants/item-request-status.enum';
 
 @Entity('item_requests')
 export class ItemRequestEntity {

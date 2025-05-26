@@ -13,6 +13,7 @@ import {
     UpdateLeaveDto,
     UpdateLeaveStatusDto,
   } from './leave.validation';
+import { LeaveType } from 'src/constants/leave-type.enum';
   
   
   @Injectable()
@@ -105,7 +106,7 @@ import {
   
       const leave = this.leaveRepository.create({
         userId: userId,
-        leaveTypeId: String(dto.leaveTypeId),
+        leaveTypeId: dto.leaveTypeId,
         startDate: start,
         endDate: end,
         totalDays: totalDays,
@@ -164,7 +165,7 @@ import {
         existingLeave.endDate = new Date(dto.endDate);
       }
       if (dto.leaveTypeId) {
-        existingLeave.leaveTypeId = String(dto.leaveTypeId);
+        existingLeave.leaveTypeId = dto.leaveTypeId;
       }
       if (dto.reason) {
         existingLeave.reason = dto.reason;

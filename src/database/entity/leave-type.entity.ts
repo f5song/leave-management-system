@@ -5,14 +5,14 @@ import { LeaveType } from '../../constants/leave-type.enum';
 @Entity('leavetypes')
 export class LeaveTypeEntity {
 
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('enum', { enum: LeaveType, default: LeaveType.ANNUAL })
+  id: LeaveType;
 
-  @Column('enum', { enum: LeaveType, default: LeaveType.ANNUAL })
-  name: LeaveType;
-  
   @Column()
-  color: string;
+  name: string;
+
+  @Column()
+  description?: string;
 
   @OneToMany(() => LeaveEntity, (leave) => leave.leaveType)
   leaves: LeaveEntity[];

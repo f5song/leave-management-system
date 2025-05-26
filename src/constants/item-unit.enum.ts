@@ -1,11 +1,11 @@
 export enum UnitType {
-    PIECE = 'piece',
-    SET = 'set',
-    BOX = 'box',
-    PACK = 'pack',
-    DEVICE = 'device',
-    MONITOR = 'monitor',
-    MOUSE = 'mouse',
-    KEYBOARD = 'keyboard',
+    PIECE = 'PIECE',
+    SET = 'SET',
+    BOX = 'BOX',
+    PACK = 'PACK',
+    DEVICE = 'DEVICE',
+    MONITOR = 'MONITOR',
+    MOUSE = 'MOUSE',
+    KEYBOARD = 'KEYBOARD',
   }
   
