@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, IsPositive, IsOptional, IsDate } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsPositive, IsOptional, IsDate, IsUUID } from 'class-validator';
 
 export class UpdatePermissionDto {
     @IsOptional()
@@ -32,5 +32,6 @@ export class CreatePermissionDto {
 
     @IsString()
     @IsNotEmpty()
+    @IsUUID()
     createdById: string;
 }

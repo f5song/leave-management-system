@@ -12,7 +12,7 @@ export class PermissionService {
     private permissionRepository: Repository<PermissionEntity>,
     @InjectRepository(UserInfoEntity)
     private userInfoRepository: Repository<UserInfoEntity>
-  ) {}
+  ) { }
 
   private async validatePermissionId(id: string): Promise<void> {
 
@@ -55,23 +55,23 @@ export class PermissionService {
   }
 
   async create(dto: CreatePermissionDto) {
+    // Validate permission name and creator ID
     await this.validatePermissionName(dto.name);
     await this.validatePermissionCreatedById(dto.createdById);
 
+    // Fetch the user who's creating this permission
     const user = await this.userInfoRepository.findOne({
       where: { id: dto.createdById },
       relations: ['createdPermissions']
     });
 
-    if (!user) {
-      throw new NotFoundException(`User with ID ${dto.createdById} not found`);
-    }
-
+    // Create new permission with the DTO data and set the creator
     const permission = this.permissionRepository.create({
       ...dto,
-      createdBy: user
+      createdById: user.id
     });
 
+    // Save the new permission to the database
     return await this.permissionRepository.save(permission);
   }
 
@@ -92,7 +92,7 @@ export class PermissionService {
 
   async update(id: string, dto: UpdatePermissionDto) {
     await this.validatePermissionId(id);
-    
+
     if (dto.name) {
       await this.validatePermissionName(dto.name);
     }
@@ -113,7 +113,7 @@ export class PermissionService {
 
   async softDelete(id: string) {
     await this.validatePermissionId(id);
-    
+
     const permission = await this.permissionRepository.findOne({
       where: { id }
     });

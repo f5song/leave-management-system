@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, DeleteDateColumn, BeforeInsert, Repository } from 'typeorm';
 import { AccountEntity } from './account.entity';
 import { RoleEntity } from './role.entity';
 import { JobTitleEntity } from './job-title.entity';
@@ -70,9 +70,6 @@ export class UserInfoEntity {
   @OneToMany(() => RoleEntity, (role) => role.createdBy)
   createdRoles: RoleEntity[];
 
-  // @OneToMany(() => AccountEntity, (account) => account.user)
-  // accounts: AccountEntity[];
-
   @OneToMany(() => AccountEntity, (account) => account.approvedBy)
   approvedAccounts: AccountEntity[];
 
@@ -88,19 +85,38 @@ export class UserInfoEntity {
   @DeleteDateColumn({ name: 'delete_time', nullable: true })
   deleteTime?: Date;
 
-  // ✅ ความสัมพันธ์กับการขอเบิกของ
   @OneToMany(() => ItemRequestEntity, request => request.requester)
   itemRequests: ItemRequestEntity[];
 
-  // ✅ ความสัมพันธ์กับการอนุมัติการเบิกของ
   @OneToMany(() => ItemRequestEntity, request => request.approver)
   itemApprovals: ItemRequestEntity[];
 
-  // ✅ ความสัมพันธ์กับการร้องขอ facilities
   @OneToMany(() => FacilityRequestEntity, facility => facility.requester)
   facilityRequests: FacilityRequestEntity[];
 
-  // ✅ ความสัมพันธ์กับการอนุมัติ facilities
   @OneToMany(() => FacilityRequestEntity, facility => facility.approver)
   facilityApprovals: FacilityRequestEntity[];
+
+  @BeforeInsert()
+  async generateEmployeeCode(userRepository: Repository<UserInfoEntity>) {
+    if (!this.employeeCode) {
+
+      const lastUser = await userRepository
+        .createQueryBuilder('userinfo')
+        .orderBy('userinfo.createdAt', 'DESC')
+        .getOne();
+
+      // let nextNumber = 1;
+      // if (lastUser?.employeeCode) {
+      //   const lastCode = lastUser.employeeCode.replace(prefix, '');
+      //   const parsed = parseInt(lastCode, 10);
+      //   if (!isNaN(parsed)) {
+      //     nextNumber = parsed + 1;
+      //   }
+      // }
+
+      // const code = String(nextNumber).padStart(3, '0');
+      // this.employeeCode = `${prefix}${code}`;
+    }
+  }
 }
