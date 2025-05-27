@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
-import { HolidayEntity } from '../database/entity/holiday.entity';
+import { HolidayEntity } from '../database/entity/holidays.entity';
 import { CreateHolidayDto, UpdateHolidayDto } from './holiday.validation';
 import { HolidayResponseDto } from './holiday-response.dto';
 

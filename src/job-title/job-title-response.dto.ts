@@ -1,4 +1,4 @@
-import { JobTitleEntity } from '../database/entity/job-title.entity';
+import { JobTitleEntity } from '../database/entity/job-titles.entity';
 
 export class JobTitleResponseDto {
   id: string;

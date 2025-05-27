@@ -1,7 +1,7 @@
 import {
     Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
   } from 'typeorm';
-  import { UserInfoEntity } from './user-info.entity';
+  import { UserInfoEntity } from './users.entity';
 import { FacilityStatus } from '../../constants/facility-status.enum';
   
   @Entity('facility_requests')

@@ -3,10 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LeaveService } from './leave.service';
 import { LeaveController } from './leave.controller';
 import { AuthModule } from '../auth/auth.module';
-import { LeaveEntity } from '../database/entity/leave.entity';
-import { UserInfoEntity } from '../database/entity/user-info.entity';
-import { LeaveTypeEntity } from '../database/entity/leave-type.entity';
-import { HolidayEntity } from '../database/entity/holiday.entity';
+import { LeaveEntity } from '../database/entity/leaves.entity';
+import { UserInfoEntity } from '../database/entity/users.entity';
+import { LeaveTypeEntity } from '../database/entity/leave-types.entity';
+import { HolidayEntity } from '../database/entity/holidays.entity';
 
 @Module({
   imports: [

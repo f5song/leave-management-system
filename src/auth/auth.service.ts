@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserInfoEntity } from '../database/entity/user-info.entity';
+import { UserInfoEntity } from '../database/entity/users.entity';
 import { AccountEntity } from '../database/entity/account.entity';
 import { AuthEntity } from '../database/entity/auth.entity';
 

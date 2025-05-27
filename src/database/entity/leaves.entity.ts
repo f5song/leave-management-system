@@ -8,8 +8,8 @@ import {
   DeleteDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { LeaveTypeEntity } from './leave-type.entity';
-import { UserInfoEntity } from './user-info.entity';
+import { LeaveTypeEntity } from './leave-types.entity';
+import { UserInfoEntity } from './users.entity';
 import { LeaveType } from '../../constants/leave-type.enum';
 
 @Entity('leaves')

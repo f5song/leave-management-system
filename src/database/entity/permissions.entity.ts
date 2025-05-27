@@ -11,8 +11,8 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { UserInfoEntity } from './user-info.entity';
-import { RoleEntity } from './role.entity';
+import { UserInfoEntity } from './users.entity';
+import { RoleEntity } from './roles.entity';
 
 @Entity('permission') 
 export class PermissionEntity {

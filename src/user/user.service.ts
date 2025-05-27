@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserInfoEntity } from '../database/entity/user-info.entity';
-import { JobTitleEntity } from '../database/entity/job-title.entity';
-import { DepartmentEntity } from '../database/entity/department.entity';
-import { RoleEntity } from '../database/entity/role.entity';
+import { UserInfoEntity } from '../database/entity/users.entity';
+import { JobTitleEntity } from '../database/entity/job-titles.entity';
+import { DepartmentEntity } from '../database/entity/departments.entity';
+import { RoleEntity } from '../database/entity/roles.entity';
 import { CreateUserDto, UpdateUserDto } from './user.validation';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';

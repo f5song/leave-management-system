@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
-import { JobTitleEntity } from '../database/entity/job-title.entity';
-import { DepartmentEntity } from '../database/entity/department.entity';
+import { JobTitleEntity } from '../database/entity/job-titles.entity';
+import { DepartmentEntity } from '../database/entity/departments.entity';
 import { CreateJobTitleDto, UpdateJobTitleDto } from './job-title.validation';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';

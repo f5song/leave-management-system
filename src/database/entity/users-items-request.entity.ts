@@ -1,8 +1,8 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
 } from 'typeorm';
-import { ItemEntity } from './item.entity';
-import { UserInfoEntity } from './user-info.entity';
+import { ItemEntity } from './users-items.entity';
+import { UserInfoEntity } from './users.entity';
 import { ItemRequestStatus } from 'src/constants/item-request-status.enum';
 
 @Entity('item_requests')

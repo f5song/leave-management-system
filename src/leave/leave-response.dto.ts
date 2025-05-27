@@ -1,4 +1,4 @@
-import { LeaveEntity } from "../database/entity/leave.entity";
+import { LeaveEntity } from "../database/entity/leaves.entity";
 
 export class LeaveResponseDto {
     id: string;

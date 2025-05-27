@@ -15,17 +15,17 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { AccountEntity } from './database/entity/account.entity';
-import { LeaveTypeEntity } from './database/entity/leave-type.entity';
-import { LeaveEntity } from './database/entity/leave.entity';
-import { HolidayEntity } from './database/entity/holiday.entity';
-import { RoleEntity } from './database/entity/role.entity';
-import { PermissionEntity } from './database/entity/permission.entity';
-import { UserInfoEntity } from './database/entity/user-info.entity';
-import { DepartmentEntity } from './database/entity/department.entity';
-import { JobTitleEntity } from './database/entity/job-title.entity';
-import { ItemEntity } from './database/entity/item.entity';
-import { ItemRequestEntity } from './database/entity/item-request.entity';
-import { FacilityRequestEntity } from './database/entity/facility-request.entity';
+import { LeaveTypeEntity } from './database/entity/leave-types.entity';
+import { LeaveEntity } from './database/entity/leaves.entity';
+import { HolidayEntity } from './database/entity/holidays.entity';
+import { RoleEntity } from './database/entity/roles.entity';
+import { PermissionEntity } from './database/entity/permissions.entity';
+import { UserInfoEntity } from './database/entity/users.entity';
+import { DepartmentEntity } from './database/entity/departments.entity';
+import { JobTitleEntity } from './database/entity/job-titles.entity';
+import { ItemEntity } from './database/entity/users-items.entity';
+import { ItemRequestEntity } from './database/entity/users-items-request.entity';
+import { FacilityRequestEntity } from './database/entity/users-facility-requests.entity';
 // import { RolePermissionEntity } from './database/entity/role-permission.entity';
 
 @Module({

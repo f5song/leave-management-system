@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { LeaveTypeService } from './leave-type.service';
-import { LeaveTypeEntity } from '../database/entity/leave-type.entity';
+import { LeaveTypeEntity } from '../database/entity/leave-types.entity';
 import { CreateLeaveTypeDto, UpdateLeaveTypeDto } from './leave-type.validation';
 import { LeaveTypeResponseDto } from './leave-type-response.dto';
 import { LeaveType } from 'src/constants/leave-type.enum';

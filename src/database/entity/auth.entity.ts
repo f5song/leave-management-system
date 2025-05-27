@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, JoinColumn } from 'typeorm';
-import { UserInfoEntity } from './user-info.entity';
+import { UserInfoEntity } from './users.entity';
 
 @Entity('auth')
 export class AuthEntity {

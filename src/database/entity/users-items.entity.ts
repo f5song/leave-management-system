@@ -5,9 +5,9 @@ import {
   JoinColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { ItemRequestEntity } from './item-request.entity';
+import { ItemRequestEntity } from './users-items-request.entity';
 import { ItemCategoryId } from '../../constants/item-category.enum';
-import { UserInfoEntity } from './user-info.entity';
+import { UserInfoEntity } from './users.entity';
 import { ItemStatus } from '../../constants/item-status.enum';
 import { UnitType } from '../../constants/item-unit.enum';
 

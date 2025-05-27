@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
-import { DepartmentEntity } from '../database/entity/department.entity';
+import { DepartmentEntity } from '../database/entity/departments.entity';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './department.validation';
 import { DepartmentResponseDto } from './department-response.dto';
 import { DepartmentId } from 'src/constants/department.enum';

@@ -2,17 +2,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AccountEntity } from './entity/account.entity';
-import { LeaveTypeEntity } from './entity/leave-type.entity';
-import { LeaveEntity } from './entity/leave.entity';
-import { HolidayEntity } from './entity/holiday.entity';
-import { RoleEntity } from './entity/role.entity';
-import { PermissionEntity } from './entity/permission.entity';
-import { UserInfoEntity } from './entity/user-info.entity';
-import { DepartmentEntity } from './entity/department.entity';
-import { JobTitleEntity } from './entity/job-title.entity';
-import { ItemEntity } from './entity/item.entity';
-import { FacilityRequestEntity } from './entity/facility-request.entity';
-import { ItemRequestEntity } from './entity/item-request.entity';
+import { LeaveTypeEntity } from './entity/leave-types.entity';
+import { LeaveEntity } from './entity/leaves.entity';
+import { HolidayEntity } from './entity/holidays.entity';
+import { RoleEntity } from './entity/roles.entity';
+import { PermissionEntity } from './entity/permissions.entity';
+import { UserInfoEntity } from './entity/users.entity';
+import { DepartmentEntity } from './entity/departments.entity';
+import { JobTitleEntity } from './entity/job-titles.entity';
+import { ItemEntity } from './entity/users-items.entity';
+import { FacilityRequestEntity } from './entity/users-facility-requests.entity';
+import { ItemRequestEntity } from './entity/users-items-request.entity';
 
 @Module({
   imports: [

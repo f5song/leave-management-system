@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LeaveTypeEntity } from '../database/entity/leave-type.entity';
+import { LeaveTypeEntity } from '../database/entity/leave-types.entity';
 import { CreateLeaveTypeDto, UpdateLeaveTypeDto } from './leave-type.validation';
 import { LeaveTypeResponseDto } from './leave-type-response.dto';
 import { LeaveType } from 'src/constants/leave-type.enum';

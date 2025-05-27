@@ -1,4 +1,4 @@
-import { LeaveEntity } from './leave.entity';
+import { LeaveEntity } from './leaves.entity';
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, PrimaryColumn, OneToMany, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { LeaveType } from '../../constants/leave-type.enum';
 

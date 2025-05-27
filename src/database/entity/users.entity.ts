@@ -1,16 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, DeleteDateColumn, BeforeInsert, Repository } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, DeleteDateColumn, BeforeInsert, Repository, AfterInsert } from 'typeorm';
 import { AccountEntity } from './account.entity';
-import { RoleEntity } from './role.entity';
-import { JobTitleEntity } from './job-title.entity';
-import { DepartmentEntity } from './department.entity';
-import { LeaveEntity } from './leave.entity';
-import { PermissionEntity } from './permission.entity';
-import { HolidayEntity } from './holiday.entity';
-import { ItemRequestEntity } from './item-request.entity';
-import { FacilityRequestEntity } from './facility-request.entity';
+import { RoleEntity } from './roles.entity';
+import { JobTitleEntity } from './job-titles.entity';
+import { DepartmentEntity } from './departments.entity';
+import { LeaveEntity } from './leaves.entity';
+import { PermissionEntity } from './permissions.entity';
+import { HolidayEntity } from './holidays.entity';
+import { ItemRequestEntity } from './users-items-request.entity';
+import { FacilityRequestEntity } from './users-facility-requests.entity';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';
-@Entity('userinfo')
+@Entity('users')
 export class UserInfoEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -18,18 +18,23 @@ export class UserInfoEntity {
   @Column({ name: 'employee_code', unique: true })
   employeeCode: string;
 
+  @Column({ unique: true, name: 'googleId' })
+  googleId: string;
+
+  @Column({ unique: true })
+  email: string;
+
   @Column({ name: 'first_name' })
   firstName: string;
 
   @Column({ name: 'last_name' })
   lastName: string;
 
-  @Column({ name: 'email' })
-  email: string;
-
   @Column({ name: 'nick_name' })
   nickName?: string;
 
+  @Column({ type: 'datetime', nullable: true, name: 'approvedAt' })
+  approvedAt?: Date;
 
   @Column({ name: 'role_id' })
   roleId: string;
@@ -105,6 +110,20 @@ export class UserInfoEntity {
         .createQueryBuilder('userinfo')
         .orderBy('userinfo.createdAt', 'DESC')
         .getOne();
+      console.log('🔍 Last user:', lastUser);
+
+      let newCode: string;
+
+      if (lastUser?.employeeCode) {
+        const lastNumber = parseInt(lastUser.employeeCode.replace('fh-', ''), 10);
+        const nextNumber = lastNumber + 1;
+
+        newCode = `fh-${nextNumber.toString().padStart(4, '0')}`;
+      } else {
+        newCode = 'fh-0001';
+      }
+
+      this.employeeCode = newCode;
 
       // let nextNumber = 1;
       // if (lastUser?.employeeCode) {
@@ -119,4 +138,9 @@ export class UserInfoEntity {
       // this.employeeCode = `${prefix}${code}`;
     }
   }
+
+  // @AfterInsert()
+  // logAfterInsert() {
+  //   console.log('Created user successfully:', this.email, 'with employee code:', this.employeeCode);
+  // }
 }

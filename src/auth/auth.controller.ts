@@ -5,7 +5,7 @@ import { GoogleAuthService } from './google.strategy';
 import { LoginDto } from './auth.validation';
 import { AuthResponseDto } from './auth-response.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { UserInfoEntity } from '../database/entity/user-info.entity';
+import { UserInfoEntity } from '../database/entity/users.entity';
 
 @Controller('auth')
 @UsePipes(new ValidationPipe())

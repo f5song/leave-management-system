@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HolidayEntity } from '../database/entity/holiday.entity';
+import { HolidayEntity } from '../database/entity/holidays.entity';
 import { HolidayService } from './holiday.service';
 import { HolidayController } from './holiday.controller';
 

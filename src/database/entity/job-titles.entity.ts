@@ -9,8 +9,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { DepartmentEntity } from './department.entity';
-import { UserInfoEntity } from './user-info.entity';
+import { DepartmentEntity } from './departments.entity';
+import { UserInfoEntity } from './users.entity';
 import { JobTitleId } from '../../constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';
 
