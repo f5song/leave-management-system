@@ -1,10 +1,10 @@
 import {
     Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
   } from 'typeorm';
-  import { UserInfoEntity } from './users.entity';
+  import { UserEntity } from './users.entity';
 import { FacilityStatus } from '../../constants/facility-status.enum';
   
-  @Entity('facility_requests')
+  @Entity('users_facility_requests')
   export class FacilityRequestEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -15,8 +15,8 @@ import { FacilityStatus } from '../../constants/facility-status.enum';
     @Column({ nullable: true })
     description?: string;
   
-    @Column({ name: 'requester_id' })
-    requesterId: string;
+    @Column({ name: 'requested_by', type: 'uuid' })
+    requestedById: string;
   
     @Column({
       type: 'enum',
@@ -34,18 +34,18 @@ import { FacilityStatus } from '../../constants/facility-status.enum';
     @CreateDateColumn({ type: 'datetime', name: 'created_at' })
     createdAt: Date;
   
-    @Column({ type: 'datetime', nullable: true, name: 'update_time' })
-    updateTime?: Date;
+    @Column({ type: 'datetime', nullable: true, name: 'updated_at' })
+    updatedAt?: Date;
   
-    @Column({ type: 'datetime', nullable: true, name: 'delete_time' })
-    deleteTime?: Date;
+    @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
+    deletedAt?: Date;
   
-    @ManyToOne(() => UserInfoEntity, user => user.facilityRequests)
-    @JoinColumn({ name: 'requester_id' })
-    requester: UserInfoEntity;
+    @ManyToOne(() => UserEntity, user => user.facilityRequests)
+    @JoinColumn({ name: 'requested_by' })
+    requestedBy: UserEntity;
   
-    @ManyToOne(() => UserInfoEntity, user => user.facilityApprovals)
+    @ManyToOne(() => UserEntity, user => user.facilityApprovals)
     @JoinColumn({ name: 'approved_by' })
-    approver?: UserInfoEntity;
+    approvedBy?:  UserEntity;
   }
   

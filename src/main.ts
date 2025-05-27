@@ -10,8 +10,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
-      whitelist: true, // ตัด field ที่ไม่อยู่ใน DTO ทิ้ง
-      forbidNonWhitelisted: true, // ถ้ามี field ที่ไม่อนุญาต ให้ throw error
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
 

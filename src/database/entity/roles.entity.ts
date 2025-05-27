@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn, DeleteDateColumn, ManyToMany, JoinTable } from 'typeorm';
-import { UserInfoEntity } from './users.entity';
+import { UserEntity } from './users.entity';
 import { PermissionEntity } from './permissions.entity';
 
 @Entity('roles')
@@ -11,11 +11,11 @@ export class RoleEntity {
   name: string;
 
   @Column({ nullable: true , name: 'created_by'})
-  createdById: number;
+  createdById: string;
 
-  @OneToMany(() => UserInfoEntity, (user) => user.role)
+  @OneToMany(() => UserEntity, (user) => user.role)
   @JoinColumn({ name: 'role_id' })
-  user: UserInfoEntity[];
+  user: UserEntity[];
 
   @ManyToMany(() => PermissionEntity, (rp) => rp.roles)
   @JoinTable({
@@ -25,16 +25,16 @@ export class RoleEntity {
   })
   permissions: PermissionEntity[];
 
-  @ManyToOne(() => UserInfoEntity, (user) => user.createdRoles)
+  @ManyToOne(() => UserEntity, (user) => user.createdRoles)
   @JoinColumn({ name: 'created_by' })
-  createdBy: UserInfoEntity;
+  createdBy: UserEntity;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_time', nullable: true })
-  updateTime?: Date;
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
+  updatedAt?: Date;
 
-  @DeleteDateColumn({ name: 'delete_time', nullable: true })
-  deleteTime?: Date;
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date;
 }

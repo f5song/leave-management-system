@@ -1,8 +1,8 @@
 import { LeaveEntity } from './leaves.entity';
-import { Entity, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, PrimaryColumn, OneToMany, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, PrimaryColumn, OneToMany } from 'typeorm';
 import { LeaveType } from '../../constants/leave-type.enum';
 
-@Entity('leavetypes')
+@Entity('leave_types')
 export class LeaveTypeEntity {
 
   @PrimaryColumn('enum', { enum: LeaveType, default: LeaveType.ANNUAL })
@@ -20,9 +20,9 @@ export class LeaveTypeEntity {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_time', nullable: true })
-  updateTime?: Date;
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
+  updatedAt?: Date;
 
-  @DeleteDateColumn({ name: 'delete_time', nullable: true })
-  deleteTime?: Date;
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date;
 }

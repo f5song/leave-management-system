@@ -2,10 +2,10 @@ import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
 } from 'typeorm';
 import { ItemEntity } from './users-items.entity';
-import { UserInfoEntity } from './users.entity';
+import { UserEntity } from './users.entity';
 import { ItemRequestStatus } from 'src/constants/item-request-status.enum';
 
-@Entity('item_requests')
+@Entity('users_item_requests')
 export class ItemRequestEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -13,14 +13,8 @@ export class ItemRequestEntity {
   @Column({ name: 'item_id' })
   itemId: string;
 
-  @Column({ name: 'requester_id' })
-  requesterId: string;
-
   @Column()
   quantity: number;
-
-  // @Column({ type: 'enum', enum: ['pending', 'approved', 'rejected', 'returned'] })
-  // status: 'pending' | 'approved' | 'rejected' | 'returned';
 
   @Column({
     type: 'enum',
@@ -29,8 +23,8 @@ export class ItemRequestEntity {
   })
   status: ItemRequestStatus;
 
-  @Column({ name: 'approved_by', nullable: true })
-  approvedById?: string;
+  // @Column({ type: 'datetime', name: 'action_at', nullable: true })
+  // actionAt?: Date;
 
   @Column({ type: 'datetime', name: 'approved_at', nullable: true })
   approvedAt?: Date;
@@ -41,21 +35,18 @@ export class ItemRequestEntity {
   @CreateDateColumn({ type: 'datetime', name: 'created_at' })
   createdAt: Date;
 
-  @Column({ type: 'datetime', nullable: true, name: 'update_time' })
-  updateTime?: Date;
+  @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
+  deletedAt?: Date;
 
-  @Column({ type: 'datetime', nullable: true, name: 'delete_time' })
-  deleteTime?: Date;
-
-  @ManyToOne(() => ItemEntity, item => item.requests)
+  @ManyToOne(() => ItemEntity, item => item.itemRequests)
   @JoinColumn({ name: 'item_id' })
   item: ItemEntity;
 
-  @ManyToOne(() => UserInfoEntity, user => user.itemRequests)
-  @JoinColumn({ name: 'requester_id' })
-  requester: UserInfoEntity;
+  @ManyToOne(() => UserEntity, user => user.itemRequests)
+  @JoinColumn({ name: 'requested_by' })
+  requestedBy: UserEntity;
 
-  @ManyToOne(() => UserInfoEntity, user => user.itemApprovals)
+  @ManyToOne(() => UserEntity, user => user.itemApprovals)
   @JoinColumn({ name: 'approved_by' })
-  approver?: UserInfoEntity;
+  approvedBy?: UserEntity;
 }

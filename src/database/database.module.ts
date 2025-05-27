@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AccountEntity } from './entity/account.entity';
 import { LeaveTypeEntity } from './entity/leave-types.entity';
 import { LeaveEntity } from './entity/leaves.entity';
 import { HolidayEntity } from './entity/holidays.entity';
 import { RoleEntity } from './entity/roles.entity';
 import { PermissionEntity } from './entity/permissions.entity';
-import { UserInfoEntity } from './entity/users.entity';
+import { UserEntity } from './entity/users.entity';
 import { DepartmentEntity } from './entity/departments.entity';
 import { JobTitleEntity } from './entity/job-titles.entity';
 import { ItemEntity } from './entity/users-items.entity';
@@ -27,7 +26,7 @@ import { ItemRequestEntity } from './entity/users-items-request.entity';
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DATABASE,
         // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        entities: [AccountEntity, LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserInfoEntity, DepartmentEntity, JobTitleEntity, ItemEntity, FacilityRequestEntity, ItemRequestEntity],
+        entities: [LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserEntity, DepartmentEntity, JobTitleEntity, ItemEntity, FacilityRequestEntity, ItemRequestEntity],
         synchronize: true,
         logging: true
       }),

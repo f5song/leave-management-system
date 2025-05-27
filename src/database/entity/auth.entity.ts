@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, JoinColumn } from 'typeorm';
-import { UserInfoEntity } from './users.entity';
+import { UserEntity } from './users.entity';
 
 @Entity('auth')
 export class AuthEntity {
@@ -21,9 +21,9 @@ export class AuthEntity {
   @Column({name: 'user_id'})
   userId: number;
 
-  @OneToOne(() => UserInfoEntity, user => user.id)
+  @OneToOne(() => UserEntity, user => user.id)
   @JoinColumn({ name: 'user_id' })
-  user: UserInfoEntity;
+  user: UserEntity;
 
   @CreateDateColumn({name: 'created_at'})
   createdAt: Date;

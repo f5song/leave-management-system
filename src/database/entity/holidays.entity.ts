@@ -1,7 +1,7 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
 } from 'typeorm';
-import { UserInfoEntity } from './users.entity';
+import { UserEntity } from './users.entity';
 
 @Entity('holidays')
 export class HolidayEntity {
@@ -29,13 +29,13 @@ export class HolidayEntity {
   @CreateDateColumn({ type: 'datetime' , name: 'created_at'})
   createdAt: Date;
 
-  @Column({ type: 'datetime', nullable: true , name: 'update_time'})
-  updateTime?: Date;
+  @Column({ type: 'datetime', nullable: true , name: 'updated_at'})
+  updatedAt?: Date;
 
-  @Column({ type: 'datetime', nullable: true , name: 'delete_time'})
-  deleteTime?: Date;
+  @Column({ type: 'datetime', nullable: true , name: 'deleted_at'})
+  deletedAt?: Date;
 
-  @ManyToOne(() => UserInfoEntity, user => user.createdHolidays)
+  @ManyToOne(() => UserEntity, user => user.createdHolidays)
   @JoinColumn({ name: 'created_by' })
-  createdBy?: UserInfoEntity;
+  createdBy?: UserEntity;
 }

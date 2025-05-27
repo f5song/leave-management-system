@@ -1,17 +1,18 @@
 import {
-  Entity, Column, OneToMany, CreateDateColumn,
+  Entity, Column, CreateDateColumn,
   PrimaryColumn,
   ManyToOne,
   JoinColumn,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  OneToMany
 } from 'typeorm';
-import { ItemRequestEntity } from './users-items-request.entity';
 import { ItemCategoryId } from '../../constants/item-category.enum';
-import { UserInfoEntity } from './users.entity';
+import { UserEntity } from './users.entity';
 import { ItemStatus } from '../../constants/item-status.enum';
 import { UnitType } from '../../constants/item-unit.enum';
+import { ItemRequestEntity } from './users-items-request.entity';
 
-@Entity('items')
+@Entity('users_items')
 export class ItemEntity {
 
   @PrimaryGeneratedColumn('uuid')
@@ -35,19 +36,23 @@ export class ItemEntity {
   @Column({ type: 'enum', enum: ItemStatus, default: ItemStatus.AVAILABLE })
   status: ItemStatus;
 
-  @OneToMany(() => ItemRequestEntity, request => request.item)
-  requests: ItemRequestEntity[];
+  @Column({ name: 'created_by', type: 'uuid' })
+  createdById: string;
 
-  @ManyToOne(() => UserInfoEntity)
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'created_by' })
-  createdBy: UserInfoEntity;
+  createdBy: UserEntity;
 
   @CreateDateColumn({ type: 'datetime', name: 'created_at' })
   createdAt: Date;
 
-  @Column({ type: 'datetime', nullable: true, name: 'update_time' })
-  updateTime?: Date;
+  @Column({ type: 'datetime', nullable: true, name: 'updated_at' })
+  updatedAt?: Date;
 
-  @Column({ type: 'datetime', nullable: true, name: 'delete_time' })
-  deleteTime?: Date;
+  @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
+  deletedAt?: Date;
+
+  @OneToMany(() => ItemRequestEntity, (itemRequest) => itemRequest.item)
+  itemRequests: ItemRequestEntity[];
+
 }

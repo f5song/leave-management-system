@@ -7,12 +7,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { DepartmentEntity } from './departments.entity';
-import { UserInfoEntity } from './users.entity';
 import { JobTitleId } from '../../constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';
+import { UserEntity } from './users.entity';
 
 @Entity('job_titles')
 export class JobTitleEntity {
@@ -33,15 +32,15 @@ export class JobTitleEntity {
   @JoinColumn({ name: 'department_id' })
   department: DepartmentEntity;
 
-  @Column({ type: 'timestamp', nullable: true, name: 'delete_time' })
-  deleteTime: Date | null;
+  @Column({ type: 'timestamp', nullable: true, name: 'deleted_at' })
+  deletedAt: Date | null;
 
-  @CreateDateColumn({ name: 'create_time' })
-  createTime: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_time', nullable: true })
-  updateTime: Date | null;
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
+  updatedAt: Date | null;
 
-  @OneToMany(() => UserInfoEntity, (user) => user.jobTitle)
-  users: UserInfoEntity[];
+  @OneToMany(() => UserEntity, (user) => user.jobTitle)
+  users: UserEntity[];
 }

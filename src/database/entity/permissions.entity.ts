@@ -11,7 +11,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { UserInfoEntity } from './users.entity';
+import { UserEntity } from './users.entity';
 import { RoleEntity } from './roles.entity';
 
 @Entity('permission') 
@@ -26,9 +26,9 @@ export class PermissionEntity {
   createdById: string;
 
 
-  @ManyToOne(() => UserInfoEntity, (user) => user.createdPermissions)
+  @ManyToOne(() => UserEntity, (user) => user.createdPermissions)
   @JoinColumn({ name: 'created_by' })
-  createdBy: UserInfoEntity;
+  createdBy: UserEntity;
 
 
   @ManyToMany(() => RoleEntity, (rp) => rp.permissions)
@@ -42,9 +42,9 @@ export class PermissionEntity {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_time', nullable: true })
-  updateTime?: Date;
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
+  updatedAt?: Date;
 
-  @DeleteDateColumn({ name: 'delete_time', nullable: true })
-  deleteTime?: Date;
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date;
 }

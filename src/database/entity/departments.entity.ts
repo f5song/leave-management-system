@@ -15,10 +15,10 @@ export class DepartmentEntity {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_time' })
-  updateTime: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'delete_time' })
-  deleteTime: Date | null;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date | null;
 
 }

@@ -1,6 +1,6 @@
-import { AccountEntity } from '../database/entity/account.entity';
+import { UserEntity } from '../database/entity/users.entity';
 
 export class AuthResponseDto {
   access_token: string;
-  account: AccountEntity;
+  account: UserEntity;
 }
