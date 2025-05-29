@@ -1,56 +1,51 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from './user.service';
-import { CreateUserDto, UpdateUserDto } from './user.dto';
+import { CreateUserDto, UpdateUserDto, UserResponseDto } from './user.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  async createUser(@Body() userData: CreateUserDto) {
-    return this.userService.createUser({
-      ...userData,
-      roleId: userData.roleId,
-      jobTitleId: userData.jobTitleId,
-      departmentId: userData.departmentId,
-    });
+  // @UseGuards(JwtAuthGuard)
+  async createUser(@Body() userData: CreateUserDto): Promise<UserResponseDto> {
+    const userEntity = await this.userService.createUser(userData);
+    return this.userService.toUserResponseDto(userEntity);
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  async getUserById(@Param('id') id: string) {
-    return this.userService.getUserById(id);
+  // @UseGuards(JwtAuthGuard)
+  async getUserById(@Param('id') id: string): Promise<UserResponseDto> {
+    const userEntity = await this.userService.getUserById(id);
+    return this.userService.toUserResponseDto(userEntity);
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
-  async getAllUsers() {
-    return this.userService.getAllUsers();
+  // @UseGuards(JwtAuthGuard)
+  async getAllUsers(): Promise<UserResponseDto[]> {
+    const userEntities = await this.userService.getAllUsers();
+    return userEntities.map(entity => this.userService.toUserResponseDto(entity));
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  async updateUser(
-    @Param('id') id: string,
-    @Body() userData: UpdateUserDto,
-  ) {
-    return this.userService.updateUser(id, userData);
+  // @UseGuards(JwtAuthGuard)
+  async updateUser(@Param('id') id: string, @Body() updateData: UpdateUserDto): Promise<UserResponseDto> {
+    const updatedUser = await this.userService.updateUser(id, updateData);
+    return this.userService.toUserResponseDto(updatedUser);
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
-  async partialUpdateUser(
-    @Param('id') id: string,
-    @Body() partialData: Partial<UpdateUserDto>,
-  ) {
-    return this.userService.partialUpdateUser(id, partialData);
+  // @UseGuards(JwtAuthGuard)
+  async partialUpdate(@Param('id') id: string, @Body() partialData: Partial<UpdateUserDto>): Promise<UserResponseDto> {
+    const updatedUser = await this.userService.partialUpdateUser(id, partialData);
+    return this.userService.toUserResponseDto(updatedUser);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  async deleteUser(@Param('id') id: string) {
-    return this.userService.deleteUser(id);
+  // @UseGuards(JwtAuthGuard)
+  async deleteUser(@Param('id') id: string): Promise<UserResponseDto> {
+    const deletedUser = await this.userService.deleteUser(id);
+    return this.userService.toUserResponseDto(deletedUser);
   }
 }

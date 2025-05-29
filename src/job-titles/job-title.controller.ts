@@ -1,37 +1,35 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { JobTitleService } from './job-title.service';
 import { CreateJobTitleDto, UpdateJobTitleDto, JobTitleResponseDto } from './job-title.dto';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
+import { JobTitleEntity } from 'src/database/entity/job-titles.entity';
 
 @Controller('job-titles')
+@UseInterceptors(ClassSerializerInterceptor)
 export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) {}
 
   @Get()
-  async findAll(): Promise<JobTitleResponseDto[]> {
-    const jobTitles = await this.jobTitleService.findAll();
-    return jobTitles.map(job => new JobTitleResponseDto(job));
+  async findAll(): Promise<JobTitleEntity[]> {
+    return this.jobTitleService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: JobTitleId): Promise<JobTitleResponseDto> {
-    const jobTitle = await this.jobTitleService.findOne(id);
-    return new JobTitleResponseDto(jobTitle);
+  async findOne(@Param('id') id: JobTitleId): Promise<JobTitleEntity> {
+    return this.jobTitleService.findOne(id);
   }
 
   @Post()
-  async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<JobTitleResponseDto> {
-    const jobTitle = await this.jobTitleService.create(createJobTitleDto);
-    return new JobTitleResponseDto(jobTitle);
+  async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<JobTitleEntity> {
+    return this.jobTitleService.create(createJobTitleDto);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: JobTitleId,
     @Body() updateJobTitleDto: UpdateJobTitleDto,
-  ): Promise<JobTitleResponseDto> {
-    const jobTitle = await this.jobTitleService.update(id, updateJobTitleDto);
-    return new JobTitleResponseDto(jobTitle);
+  ): Promise<JobTitleEntity> {
+    return this.jobTitleService.update(id, updateJobTitleDto);
   }
 
   @Delete(':id')

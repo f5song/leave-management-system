@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { RoleEntity } from '../database/entity/roles.entity';
 import { UserEntity } from '../database/entity/users.entity';
 import { CreateRoleDto, UpdateRoleDto } from './role.dto';
+import { RoleResponseDto } from './role.dto';
 
 @Injectable()
 export class RoleService {
@@ -12,7 +13,23 @@ export class RoleService {
     private roleRepository: Repository<RoleEntity>,
     @InjectRepository(UserEntity)
     private userInfoRepository: Repository<UserEntity>
-  ) {}
+  ) { }
+
+  toRoleResponseDto(
+    entity: RoleEntity
+  ): RoleResponseDto {
+    return {
+      id: entity.id,
+      name: entity.name,
+      createdById: entity.createdById,
+      createdBy: entity.createdBy,
+      user: entity.user,
+      permissions: entity.permissions,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    };
+  }
 
   private async validateRoleId(id: string): Promise<void> {
     const role = await this.roleRepository.findOne({
@@ -51,22 +68,27 @@ export class RoleService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<RoleEntity[]> {
     return this.roleRepository.find({
       where: { deletedAt: null },
       order: { name: 'ASC' },
+      relations: ['createdBy', 'user', 'permissions']
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<RoleEntity> {
     await this.validateRoleId(id);
-    return this.roleRepository.findOne({
+    const role = await this.roleRepository.findOne({
       where: { id, deletedAt: null },
-      relations: ['createdBy', 'user'],
+      relations: ['createdBy', 'user', 'permissions']
     });
+    if (!role) {
+      throw new NotFoundException(`Role with ID ${id} not found`);
+    }
+    return role;
   }
 
-  async create(data: CreateRoleDto) {
+  async create(data: CreateRoleDto): Promise<RoleEntity> {
     await this.validateRoleName(data.name);
     await this.validateRoleCreator(data.createdBy);
 
@@ -79,24 +101,23 @@ export class RoleService {
       throw new NotFoundException(`User with ID ${data.createdBy} not found`);
     }
 
-    const role = this.roleRepository.create({
+    return this.roleRepository.save({
       name: data.name,
+      createdById: data.createdBy,
       createdBy: user,
-      createdAt: new Date()
     });
-
-    return this.roleRepository.save(role);
   }
 
-  async update(id: string, data: UpdateRoleDto) {
+  async update(id: string, data: UpdateRoleDto): Promise<RoleEntity> {
     await this.validateRoleId(id);
     
     if (data.name) {
       await this.validateRoleName(data.name);
     }
-
+    
     const role = await this.roleRepository.findOne({
       where: { id },
+      relations: ['createdBy', 'user', 'permissions']
     });
     
     if (!role || role.deletedAt) {
@@ -111,11 +132,12 @@ export class RoleService {
     return this.roleRepository.save(role);
   }
 
-  async softDelete(id: string) {
+  async remove(id: string): Promise<RoleEntity> {
     await this.validateRoleId(id);
     
     const role = await this.roleRepository.findOne({
       where: { id },
+      relations: ['createdBy', 'user', 'permissions']
     });
     
     if (!role || role.deletedAt) {

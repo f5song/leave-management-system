@@ -35,6 +35,9 @@ export class HolidayEntity {
   @Column({ type: 'datetime', nullable: true , name: 'deleted_at'})
   deletedAt?: Date;
 
+  @Column()
+  description: string;
+
   @ManyToOne(() => UserEntity, user => user.createdHolidays)
   @JoinColumn({ name: 'created_by' })
   createdBy?: UserEntity;

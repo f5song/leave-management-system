@@ -17,8 +17,9 @@ import { DepartmentEntity } from './departments.entity';
 import { LeaveEntity } from './leaves.entity';
 import { PermissionEntity } from './permissions.entity';
 import { HolidayEntity } from './holidays.entity';
-import { ItemRequestEntity } from './users-items-request.entity';
-import { FacilityRequestEntity } from './users-facility-requests.entity';
+import { UsersItemRequestEntity } from './users-items-requests.entity';
+import { UsersFacilityRequestEntity } from './users-facility-requests.entity';
+import { UsersItemsRequestsHistoryEntity } from './users-items-requests-histories.entity';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';
 
@@ -71,8 +72,9 @@ export class UserEntity {
   approvedByUser?: UserEntity;
 
   // ✅ Inverse: user คนนี้เคยอนุมัติใครบ้าง
-  @OneToMany(() => UserEntity, user => user.approvedByUser)
-  approvedUsers: UserEntity[];
+  @Column({ type: 'json', nullable: true })
+  approvedUsers?: string[];
+
 
   @Column({ name: 'approved_at', type: 'timestamp', nullable: true })
   approvedAt?: Date;
@@ -104,17 +106,20 @@ export class UserEntity {
   @OneToMany(() => HolidayEntity, holiday => holiday.createdBy)
   createdHolidays: HolidayEntity[];
 
-  @OneToMany(() => ItemRequestEntity, request => request.requestedBy)
-  itemRequests: ItemRequestEntity[];
+  @OneToMany(() => UsersItemRequestEntity, request => request.requestedBy)
+  itemRequests: UsersItemRequestEntity[];
 
-  @OneToMany(() => ItemRequestEntity, request => request.approvedBy)
-  itemApprovals: ItemRequestEntity[];
+  @OneToMany(() => UsersItemRequestEntity, request => request.approvedBy)
+  itemApprovals: UsersItemRequestEntity[];
 
-  @OneToMany(() => FacilityRequestEntity, request => request.requestedBy)
-  facilityRequests: FacilityRequestEntity[];
+  @OneToMany(() => UsersFacilityRequestEntity, request => request.requestedBy)
+  facilityRequests: UsersFacilityRequestEntity[];
 
-  @OneToMany(() => FacilityRequestEntity, request => request.approvedBy)
-  facilityApprovals: FacilityRequestEntity[];
+  @OneToMany(() => UsersFacilityRequestEntity, request => request.approvedBy)
+  facilityApprovals: UsersFacilityRequestEntity[];
+
+  @OneToMany(() => UsersItemsRequestsHistoryEntity, history => history.actionedBy)
+  actionedRequestsHistory: UsersItemsRequestsHistoryEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

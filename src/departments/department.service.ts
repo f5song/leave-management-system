@@ -7,7 +7,7 @@ import { DepartmentId } from 'src/constants/department.enum';
 
 @Injectable()
 export class DepartmentService {
-  constructor(
+  constructor(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
     @InjectRepository(DepartmentEntity)
     private departmentRepository: Repository<DepartmentEntity>
   ) { }

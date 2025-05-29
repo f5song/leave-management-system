@@ -8,6 +8,7 @@ import { RoleEntity } from '../database/entity/roles.entity';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';
+import { UserResponseDto } from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,31 @@ export class UserService {
     @InjectRepository(RoleEntity)
     private roleRepository: Repository<RoleEntity>
   ) {}
+
+    toUserResponseDto(
+      entity: UserEntity
+    ): UserResponseDto {
+      return {
+        id: entity.id,
+        employeeCode: entity.employeeCode,
+        googleId: entity.googleId,
+        email: entity.email,
+        firstName: entity.firstName,
+        lastName: entity.lastName,
+        nickName: entity.nickName,
+        avatarUrl: entity.avatarUrl,
+        birthDate: entity.birthDate,
+        salary: entity.salary,
+        roleId: entity.roleId,
+        jobTitleId: entity.jobTitleId,
+        departmentId: entity.departmentId,
+        approvedBy: entity.approvedBy,
+        approvedAt: entity.approvedAt,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
+        deletedAt: entity.deletedAt,
+      };
+    }
 
   private async validateUserId(id: string): Promise<void> {
 
@@ -115,7 +141,6 @@ export class UserService {
     await this.validateNames(data.firstName, data.lastName);
     await this.validateBirthDate(data.birthDate);
 
-
     let nextNumber = 1;
     const last_user = await this.userInfoRepository.findOne({
       order: {
@@ -127,7 +152,7 @@ export class UserService {
     }
     const paddedNumber = nextNumber.toString().padStart(3, '0');
 
-    const user = this.userInfoRepository.create({
+    const user = await this.userInfoRepository.save({
       employeeCode: `fh-${paddedNumber}`,
       email: data.email,
       firstName: data.firstName,
@@ -138,23 +163,23 @@ export class UserService {
       departmentId: data.departmentId,
       createdAt: new Date(),
     });
-    return this.userInfoRepository.save(user);
+    return user;
   }
 
   async getUserById(id: string): Promise<UserEntity> {
     await this.validateUserId(id);
     
-    return await this.userInfoRepository.findOne({
-      where: { id },
-      relations: ['role', 'jobTitle', 'department']
+    const user = await this.userInfoRepository.findOne({
+      where: { id }
     });
+    return user;
   }
 
   async getAllUsers(): Promise<UserEntity[]> {
-    return await this.userInfoRepository.find({
-      where: { deletedAt: null },
-      relations: ['role', 'jobTitle', 'department']
+    const users = await this.userInfoRepository.find({
+      where: { deletedAt: null }
     });
+    return users;
   }
 
   async updateUser(userId: string, data: UpdateUserDto): Promise<UserEntity> {
@@ -195,13 +220,11 @@ export class UserService {
       updateTime: new Date(),
     });
     
-    return this.userInfoRepository.save(user);
+    return await this.userInfoRepository.save(user);
   }
 
   async partialUpdateUser(id: string, partialData: Partial<UserEntity>): Promise<UserEntity> {
     await this.validateUserId(id);
-    
-    const existingUser = await this.getUserById(id);
     
     const user = await this.userInfoRepository.findOne({
       where: { id },
@@ -216,7 +239,7 @@ export class UserService {
       updateTime: new Date(),
     });
     
-    return this.userInfoRepository.save(user);
+    return await this.userInfoRepository.save(user);
   }
 
   async deleteUser(id: string): Promise<UserEntity> {
@@ -231,6 +254,6 @@ export class UserService {
     }
 
     user.deletedAt = new Date();
-    return this.userInfoRepository.save(user);
+    return await this.userInfoRepository.save(user);
   }
 }

@@ -1,14 +1,18 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
+  Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany
 } from 'typeorm';
-import { ItemEntity } from './users-items.entity';
+import { UsersItemEntity } from './users-items.entity';
 import { UserEntity } from './users.entity';
 import { ItemRequestStatus } from 'src/constants/item-request-status.enum';
+import { UsersItemsRequestsHistoryEntity } from './users-items-requests-histories.entity';
 
 @Entity('users_item_requests')
-export class ItemRequestEntity {
+export class UsersItemRequestEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @OneToMany(() => UsersItemsRequestsHistoryEntity, history => history.request)
+  history: UsersItemsRequestsHistoryEntity[];
 
   @Column({ name: 'item_id' })
   itemId: string;
@@ -38,9 +42,9 @@ export class ItemRequestEntity {
   @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
   deletedAt?: Date;
 
-  @ManyToOne(() => ItemEntity, item => item.itemRequests)
+  @ManyToOne(() => UsersItemEntity, item => item.itemRequests)
   @JoinColumn({ name: 'item_id' })
-  item: ItemEntity;
+  item: UsersItemEntity;
 
   @ManyToOne(() => UserEntity, user => user.itemRequests)
   @JoinColumn({ name: 'requested_by' })

@@ -6,15 +6,13 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
-  OneToMany,
-  JoinColumn,
   ManyToMany,
-  JoinTable,
+  JoinColumn,
 } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { RoleEntity } from './roles.entity';
 
-@Entity('permission') 
+@Entity('permission')
 export class PermissionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -22,21 +20,14 @@ export class PermissionEntity {
   @Column()
   name: string;
 
-  @Column({ nullable: true , name: 'created_by'})
+  @Column({ nullable: true, name: 'created_by' })
   createdById: string;
-
 
   @ManyToOne(() => UserEntity, (user) => user.createdPermissions)
   @JoinColumn({ name: 'created_by' })
   createdBy: UserEntity;
 
-
-  @ManyToMany(() => RoleEntity, (rp) => rp.permissions)
-  @JoinTable({
-    name: 'permission_role',
-    joinColumn: { name: 'permission_id' },
-    inverseJoinColumn: { name: 'role_id' },
-  })
+  @ManyToMany(() => RoleEntity, (role) => role.permissions)
   roles: RoleEntity[];
 
   @CreateDateColumn({ name: 'created_at' })

@@ -33,19 +33,19 @@ export class LeaveController {
     @Req() req: AuthenticatedRequest,
   ): Promise<LeaveResponseDto> {
     const leave = await this.leaveService.createLeave(dto, req.user.id);
-    return new LeaveResponseDto(leave);
+    return this.leaveService.toLeaveResponseDto(leave);
   }
 
   @Get('me')
   async getMyLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
     const leaves = await this.leaveService.getMyLeaves(req.user.id);
-    return leaves.map(leave => new LeaveResponseDto(leave));
+    return leaves.map(leave => this.leaveService.toLeaveResponseDto(leave));
   }
 
   @Get()
   async getAllLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
     const leaves = await this.leaveService.getAllLeaves(req.user.id);
-    return leaves.map(leave => new LeaveResponseDto(leave));
+    return leaves.map(leave => this.leaveService.toLeaveResponseDto(leave));
   }
 
   @Patch(':id/details')
@@ -55,7 +55,7 @@ export class LeaveController {
     @Req() req: AuthenticatedRequest,
   ): Promise<LeaveResponseDto> {
     const updatedLeave = await this.leaveService.updateLeaveDetails(id, dto, req.user.id);
-    return new LeaveResponseDto(updatedLeave);
+    return this.leaveService.toLeaveResponseDto(updatedLeave);
   }
 
   @Patch(':id/status')
@@ -65,7 +65,7 @@ export class LeaveController {
     @Req() req: AuthenticatedRequest,
   ): Promise<LeaveResponseDto> {
     const updatedLeave = await this.leaveService.updateLeaveStatus(id, dto, req.user.id);
-    return new LeaveResponseDto(updatedLeave);
+    return this.leaveService.toLeaveResponseDto(updatedLeave);
   }
 
   @Delete(':id')

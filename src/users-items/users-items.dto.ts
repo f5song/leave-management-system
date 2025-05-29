@@ -71,3 +71,16 @@ export class ItemRequestDto {
   @IsString()
   reason?: string;
 }
+
+export class UserItemResponseDto {
+  id: string;
+  name: string;
+  categoryId: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
+}

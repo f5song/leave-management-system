@@ -60,23 +60,15 @@ export class UpdateLeaveStatusDto {
 
 export class LeaveResponseDto {
   id: string;
+  userId: string;
+  leaveTypeId: LeaveType;
   startDate: Date;
   endDate: Date;
+  totalDays: number;
   status: string;
   description: string;
-  createdBy: UserEntity;
   createdAt: Date;
   updatedAt: Date;
-
-  constructor(entity: LeaveEntity) {
-    this.id = entity.id;
-    this.startDate = entity.startDate;
-    this.endDate = entity.endDate;
-    this.status = entity.status;
-    this.description = entity.description;
-    this.createdBy = entity.createdBy;
-    this.createdAt = entity.createdAt;
-    this.updatedAt = entity.updatedAt;
-  }
+  deletedAt: Date;
 }
 

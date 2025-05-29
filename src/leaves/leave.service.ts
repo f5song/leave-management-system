@@ -15,6 +15,7 @@ import {
   } from './leave.dto';
 import { LeaveType } from 'src/constants/leave-type.enum';
 import { LeaveStatus } from 'src/constants/leave-status.enum';
+import { LeaveResponseDto } from './leave.dto';
   
   
   @Injectable()
@@ -26,6 +27,24 @@ import { LeaveStatus } from 'src/constants/leave-status.enum';
       @InjectRepository(UserEntity)
       private userRepository: Repository<UserEntity>
     ) {}
+
+    toLeaveResponseDto(
+          entity: LeaveEntity
+        ): LeaveResponseDto {
+        return {
+          id: entity.id,
+          userId: entity.userId,
+          leaveTypeId: entity.leaveTypeId,
+          startDate: entity.startDate,
+          endDate: entity.endDate,
+          totalDays: entity.totalDays,
+          description: entity.description,
+          status: entity.status,
+          createdAt: entity.createdAt,
+          updatedAt: entity.updatedAt,
+          deletedAt: entity.deletedAt,
+        };
+      }
   
     private async validateLeaveDates(startDate: Date, endDate: Date, excludeLeaveId?: string): Promise<void> {
       if (startDate > endDate) {

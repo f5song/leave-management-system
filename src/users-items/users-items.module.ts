@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersItemsService } from './users-items.service';
-import { ItemEntity } from '../database/entity/users-items.entity';
-import { ItemRequestEntity } from '../database/entity/users-items-request.entity';
+import { UsersItemEntity } from '../database/entity/users-items.entity';
+import { UsersItemRequestEntity } from '../database/entity/users-items-requests.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ItemEntity, ItemRequestEntity]),
+    TypeOrmModule.forFeature([UsersItemEntity, UsersItemRequestEntity]),
   ],
   providers: [UsersItemsService],
   exports: [UsersItemsService],

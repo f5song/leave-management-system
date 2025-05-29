@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString, IsNumber, IsPositive, IsOptional, IsDate, IsUUID } from 'class-validator';
+import { RoleEntity } from 'src/database/entity/roles.entity';
 
 export class UpdatePermissionDto {
     @IsOptional()
@@ -34,4 +35,13 @@ export class CreatePermissionDto {
     @IsNotEmpty()
     @IsUUID()
     createdById: string;
+}
+
+export class PermissionResponseDto {
+  id: string;
+  name: string;
+  roles: RoleEntity[];
+  createdAt: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
 }

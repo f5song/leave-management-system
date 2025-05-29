@@ -11,19 +11,19 @@ export class HolidayController {
   @Get()
   async findAll(): Promise<HolidayResponseDto[]> {
     const holidays: HolidayEntity[] = await this.holidayService.findAll();
-    return holidays.map(holiday => new HolidayResponseDto(holiday));
+    return holidays.map(holiday => this.holidayService.toHolidayResponseDto(holiday));
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<HolidayResponseDto> {
     const holiday: HolidayEntity = await this.holidayService.findOne(id);
-    return new HolidayResponseDto(holiday);
+    return this.holidayService.toHolidayResponseDto(holiday);
   }
 
   @Post()
   async create(@Body() createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
     const holiday: HolidayEntity = await this.holidayService.create(createHolidayDto);
-    return new HolidayResponseDto(holiday);
+    return this.holidayService.toHolidayResponseDto(holiday);
   }
 
   @Put(':id')
@@ -32,7 +32,7 @@ export class HolidayController {
     @Body() updateHolidayDto: UpdateHolidayDto,
   ): Promise<HolidayResponseDto> {
     const holiday: HolidayEntity = await this.holidayService.update(id, updateHolidayDto);
-    return new HolidayResponseDto(holiday);
+    return this.holidayService.toHolidayResponseDto(holiday);
   }
 
   @Delete(':id')

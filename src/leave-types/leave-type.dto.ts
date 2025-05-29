@@ -36,35 +36,12 @@ export class UpdateLeaveTypeDto {
   description?: string;
 }
 
-@Exclude()
 export class LeaveTypeResponseDto {
-  @Expose()
   id: LeaveType;
-
-  @Expose()
   name: string;
-
-  @Expose()
   description?: string;
-
-  @Expose()
   createdAt: Date;
-
-  @Expose()
   updatedAt: Date;
-
-  @Expose()
   deletedAt?: Date;
-
-  @Expose()
   leaves: LeaveEntity[];
-
-  constructor(entity: LeaveTypeEntity) {
-    this.id = entity.id;
-    this.name = entity.name;
-    this.description = entity.description;
-    this.createdAt = entity.createdAt;
-    this.updatedAt = entity.updatedAt;
-    this.deletedAt = entity.deletedAt;
-  }
 }

@@ -10,10 +10,10 @@ import { ItemCategoryId } from '../../constants/item-category.enum';
 import { UserEntity } from './users.entity';
 import { ItemStatus } from '../../constants/item-status.enum';
 import { UnitType } from '../../constants/item-unit.enum';
-import { ItemRequestEntity } from './users-items-request.entity';
+import { ItemRequestEntity } from './users-items-requests.entity';
 
 @Entity('users_items')
-export class ItemEntity {
+export class UsersItemEntity {
 
   @PrimaryGeneratedColumn('uuid')
   id: string;

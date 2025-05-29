@@ -5,7 +5,7 @@ import {
 import { FacilityStatus } from '../../constants/facility-status.enum';
   
   @Entity('users_facility_requests')
-  export class FacilityRequestEntity {
+  export class UsersFacilityRequestEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   

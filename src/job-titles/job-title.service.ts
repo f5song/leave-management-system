@@ -6,6 +6,7 @@ import { DepartmentEntity } from '../database/entity/departments.entity';
 import { CreateJobTitleDto, UpdateJobTitleDto } from './job-title.dto';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';
+import { JobTitleResponseDto } from './job-title.dto';
 
 
 @Injectable()
@@ -16,6 +17,20 @@ export class JobTitleService {
     @InjectRepository(DepartmentEntity)
     private readonly departmentRepository: Repository<DepartmentEntity>
   ) {}
+
+    toJobTitleResponseDto(
+      entity: JobTitleEntity
+    ): JobTitleResponseDto {
+    return {
+      id: entity.id,
+      name: entity.name,
+      departmentId: entity.departmentId,
+      departmentName: entity.department.name,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    };
+  }
 
   async create(createJobTitleDto: CreateJobTitleDto) {
     const { id, name, departmentId } = createJobTitleDto;
@@ -38,44 +53,61 @@ export class JobTitleService {
       throw new BadRequestException(`Job title with name ${name} already exists`);
     }
 
-    return this.jobTitleRepository.save({
+    const jobTitle = this.jobTitleRepository.create({
       id,
       name,
-      departmentId
+      departmentId,
     });
+
+    return await this.jobTitleRepository.save(jobTitle);
   }
 
-  async findAll() {
+  async findAll(): Promise<JobTitleEntity[]> {
     return this.jobTitleRepository.find({
+      relations: ['department'],
       where: { deletedAt: null },
-      relations: ['department']
     });
   }
 
-  async findOne(id: JobTitleId) {
+  async findOne(id: JobTitleId): Promise<JobTitleEntity> {
     const jobTitle = await this.jobTitleRepository.findOne({
       where: { id, deletedAt: null },
-      relations: ['department']
+      relations: ['department'],
     });
 
     if (!jobTitle) {
-      throw new NotFoundException(`JobTitle with id ${id} not found`);
+      throw new NotFoundException(`Job title with id ${id} not found`);
     }
 
     return jobTitle;
   }
 
-  async update(id: JobTitleId, updateJobTitleDto: UpdateJobTitleDto) {
+  async update(id: JobTitleId, updateJobTitleDto: UpdateJobTitleDto): Promise<JobTitleEntity> {
     await this.validateJobTitleId(id);
     await this.validateDepartmentExists(updateJobTitleDto.departmentId);
     await this.validateUniqueName(updateJobTitleDto.name, updateJobTitleDto.departmentId, id);
     await this.validateNoReferences(id);
 
-    return this.jobTitleRepository.save({
-      ...updateJobTitleDto,
-      id,
-      updateTime: new Date()
-    });
+    const jobTitle = await this.findOne(id);
+
+    if (updateJobTitleDto.name) {
+      jobTitle.name = updateJobTitleDto.name;
+    }
+
+    if (updateJobTitleDto.departmentId) {
+      jobTitle.departmentId = updateJobTitleDto.departmentId;
+    }
+
+    return await this.jobTitleRepository.save(jobTitle);
+  }
+
+  async remove(id: JobTitleId): Promise<void> {
+    await this.validateJobTitleId(id);
+    await this.validateNoReferences(id);
+
+    const jobTitle = await this.findOne(id);
+    jobTitle.deletedAt = new Date();
+    await this.jobTitleRepository.save(jobTitle);
   }
 
   async validateJobTitleId(id: JobTitleId): Promise<void> {
@@ -130,12 +162,12 @@ export class JobTitleService {
     }
   }
 
-  async remove(id: JobTitleId): Promise<void> {
-    await this.validateJobTitleId(id);
-    await this.validateNoReferences(id);
+  // async remove(id: JobTitleId): Promise<void> {
+  //   await this.validateJobTitleId(id);
+  //   await this.validateNoReferences(id);
 
-    await this.jobTitleRepository.update(id, {
-      deletedAt: new Date()
-    });
-  }
+  //   await this.jobTitleRepository.update(id, {
+  //     deletedAt: new Date()
+  //   });
+  // }
 }

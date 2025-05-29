@@ -13,6 +13,20 @@ export class LeaveTypeService {
     private leaveTypeRepository: Repository<LeaveTypeEntity>,
   ) { }
 
+  toLeaveTypeResponseDto(
+        entity: LeaveTypeEntity
+      ): LeaveTypeResponseDto {
+      return {
+        id: entity.id,
+        name: entity.name,
+        leaves: entity.leaves,
+        description: entity.description,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
+        deletedAt: entity.deletedAt,
+      };
+    }
+
   async create(createLeaveTypeDto: CreateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
     const existing = await this.leaveTypeRepository.findOne({
       where: { id: createLeaveTypeDto.id },
@@ -28,7 +42,7 @@ export class LeaveTypeService {
 
     const leaveType = this.leaveTypeRepository.create(createLeaveTypeDto);
     await this.leaveTypeRepository.save(leaveType);
-    return this.toResponseDto(leaveType);
+    return this.toLeaveTypeResponseDto(leaveType);
   }
 
   async findAll(): Promise<LeaveTypeResponseDto[]> {
@@ -36,7 +50,7 @@ export class LeaveTypeService {
       where: { deletedAt: null },
       order: { id: 'ASC' },
     });
-    return leaveTypes.map(leaveType => this.toResponseDto(leaveType));
+    return leaveTypes.map(leaveType => this.toLeaveTypeResponseDto(leaveType));
   }
 
   async findOne(id: LeaveType): Promise<LeaveTypeEntity> {
@@ -59,7 +73,7 @@ export class LeaveTypeService {
     Object.assign(leaveType, updateLeaveTypeDto);
     leaveType.updatedAt = new Date();
     await this.leaveTypeRepository.save(leaveType);
-    return this.toResponseDto(leaveType);
+    return this.toLeaveTypeResponseDto(leaveType);
   }
 
   async delete(id: LeaveType): Promise<void> {
@@ -79,7 +93,7 @@ export class LeaveTypeService {
 
     leaveType.deletedAt = null;
     await this.leaveTypeRepository.save(leaveType);
-    return this.toResponseDto(leaveType);
+    return this.toLeaveTypeResponseDto(leaveType);
   }
 
   private async validateLeaveTypeExists(id: LeaveType): Promise<void> {
@@ -106,18 +120,6 @@ export class LeaveTypeService {
     Object.assign(leaveType, data);
     leaveType.updatedAt = new Date();
     const updatedLeaveType = await this.leaveTypeRepository.save(leaveType);
-    return this.toResponseDto(updatedLeaveType);
-  }
-
-  private toResponseDto(leaveType: LeaveTypeEntity): LeaveTypeResponseDto {
-    return {
-      id: leaveType.id,
-      name: leaveType.name,
-      leaves: leaveType.leaves,
-      description: leaveType.description,
-      createdAt: leaveType.createdAt,
-      updatedAt: leaveType.updatedAt,
-      deletedAt: leaveType.deletedAt
-    };
+    return this.toLeaveTypeResponseDto(updatedLeaveType);
   }
 }

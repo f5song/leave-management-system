@@ -9,14 +9,15 @@ export class HolidayService {
   constructor(
     @InjectRepository(HolidayEntity)
     private readonly holidayRepository: Repository<HolidayEntity>,
-  ) {}
+  ) { }
 
-  private toResponseDto(holiday: HolidayEntity): HolidayResponseDto {
+  toHolidayResponseDto(holiday: HolidayEntity): HolidayResponseDto {
     return {
       id: holiday.id,
       title: holiday.title,
       startDate: holiday.startDate,
       endDate: holiday.endDate,
+      description: holiday.description,
       totalDays: holiday.totalDays,
       color: holiday.color,
       createdAt: holiday.createdAt,
@@ -30,7 +31,7 @@ export class HolidayService {
       where: { deletedAt: null },
       order: { startDate: 'ASC' },
     });
-    return holidays.map(h => this.toResponseDto(h));
+    return holidays.map(h => this.toHolidayResponseDto(h));
   }
 
   async findOne(id: string): Promise<HolidayResponseDto> {
@@ -38,7 +39,7 @@ export class HolidayService {
       where: { id, deletedAt: null },
     });
     if (!holiday) throw new NotFoundException(`Holiday with id ${id} not found`);
-    return this.toResponseDto(holiday);
+    return this.toHolidayResponseDto(holiday);
   }
 
   async create(createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
@@ -51,7 +52,7 @@ export class HolidayService {
       endDate: createHolidayDto.endDate ? new Date(createHolidayDto.endDate) : null,
     });
     await this.holidayRepository.save(holiday);
-    return this.toResponseDto(holiday);
+    return this.toHolidayResponseDto(holiday);
   }
 
   async update(id: string, updateHolidayDto: UpdateHolidayDto): Promise<HolidayResponseDto> {
@@ -69,7 +70,7 @@ export class HolidayService {
     await this.validateNoOverlap(updatedData, id);
 
     const updatedHoliday = await this.holidayRepository.save(updatedData);
-    return this.toResponseDto(updatedHoliday);
+    return this.toHolidayResponseDto(updatedHoliday);
   }
 
   async softDelete(id: string): Promise<void> {

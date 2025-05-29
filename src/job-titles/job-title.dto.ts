@@ -30,22 +30,11 @@ export class UpdateJobTitleDto {
 
 @Exclude()
 export class JobTitleResponseDto {
-  @Expose()
   id: string;
-
-  @Expose()
   name: string;
-
-  @Expose()
   departmentId: string;
-
-  @Expose()
   departmentName: string | null;
-
-  constructor(jobTitle: JobTitleEntity) {
-    this.id = jobTitle.id;
-    this.name = jobTitle.name;
-    this.departmentId = jobTitle.departmentId;
-    this.departmentName = jobTitle.department ? jobTitle.department.name : null;
-  }
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }

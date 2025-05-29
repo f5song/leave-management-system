@@ -1,4 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn, DeleteDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
+  JoinColumn,
+} from 'typeorm';
 import { UserEntity } from './users.entity';
 import { PermissionEntity } from './permissions.entity';
 
@@ -10,18 +22,17 @@ export class RoleEntity {
   @Column()
   name: string;
 
-  @Column({ nullable: true , name: 'created_by'})
+  @Column({ nullable: true, name: 'created_by' })
   createdById: string;
 
   @OneToMany(() => UserEntity, (user) => user.role)
-  @JoinColumn({ name: 'role_id' })
   user: UserEntity[];
 
-  @ManyToMany(() => PermissionEntity, (rp) => rp.roles)
+  @ManyToMany(() => PermissionEntity, (permission) => permission.roles)
   @JoinTable({
-    name: 'permission_role',
-    joinColumn: { name: 'role_id' },
-    inverseJoinColumn: { name: 'permission_id' },
+    name: 'permission_role', // ชื่อตารางกลาง
+    joinColumn: { name: 'role_id' }, // ชื่อคอลัมน์ฝั่ง Role
+    inverseJoinColumn: { name: 'permission_id' }, // ฝั่ง Permission
   })
   permissions: PermissionEntity[];
 

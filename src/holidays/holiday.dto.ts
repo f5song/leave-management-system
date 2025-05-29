@@ -41,39 +41,15 @@ export class UpdateHolidayDto {
   totalDays: number;
 }
 
-@Exclude()
 export class HolidayResponseDto {
-  @Expose()
   id: string;
-
-  @Expose()
   title: string;
-
-  @Expose()
   startDate: Date;
-
-  @Expose()
   endDate: Date;
-
-  @Expose()
-  description?: string;
-
-  @Expose()
+  description: string;
   totalDays: number;
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
-  updatedAt: Date;
-
-  @Expose()
-  deletedAt?: Date;
-
-  @Expose()
   color: string;
-
-  constructor(holiday: HolidayEntity) {
-    Object.assign(this, holiday);
-  }
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }
