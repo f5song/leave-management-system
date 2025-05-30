@@ -23,7 +23,12 @@ import { DepartmentEntity } from './database/entity/departments.entity';
 import { JobTitleEntity } from './database/entity/job-titles.entity';
 import { UsersItemRequestEntity } from './database/entity/users-items-requests.entity';
 import { UsersFacilityRequestEntity } from './database/entity/users-facility-requests.entity';
-// import { RolePermissionEntity } from './database/entity/role-permission.entity';
+import { UsersItemsRequestsHistoryEntity } from './database/entity/users-items-requests-histories.entity';
+import { UsersItemsRequestsModule } from './users-items-requests/users-items-requests.module';
+import { UsersItemsRequestsHistoriesModule } from './users-items-requests-histories/users-items-requests-histories.module';
+import { UsersItemsModule } from './users-items/users-items.module';
+import { UsersFacilityRequestsModule } from './users-facility-requests/users-facility-requests.module';
+import { UsersItemEntity } from './database/entity/users-items.entity';
 
 @Module({
   imports: [
@@ -34,15 +39,30 @@ import { UsersFacilityRequestEntity } from './database/entity/users-facility-req
     DepartmentModule,
     JobTitleModule,
     UserModule,
-      LeaveTypeModule,
+    LeaveTypeModule,
     LeaveModule,
     HolidayModule,
     RoleModule,
     PermissionModule,
     AuthModule,
     DatabaseModule,
+    UsersItemsModule,
+    UsersItemsRequestsModule,
+    UsersItemsRequestsHistoriesModule,
+    UsersFacilityRequestsModule,
     TypeOrmModule.forFeature([
-      LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserEntity, DepartmentEntity, JobTitleEntity, UsersItemRequestEntity, UsersFacilityRequestEntity
+      LeaveTypeEntity,
+      LeaveEntity,
+      HolidayEntity,
+      RoleEntity,
+      PermissionEntity,
+      UserEntity,
+      DepartmentEntity,
+      JobTitleEntity,
+      UsersItemRequestEntity,
+      UsersFacilityRequestEntity,
+      UsersItemsRequestsHistoryEntity,
+      UsersItemEntity,
     ]),
   ],
   controllers: [AppController],

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersItemRequestEntity } from '../database/entity/users-items-requests.entity';
 import { UsersItemsRequestsHistoryEntity } from '../database/entity/users-items-requests-histories.entity';
-import { CreateItemRequestDto, UpdateItemRequestDto, ItemRequestResponseDto } from './item-request.dto';
+import { CreateItemRequestDto, ItemRequestResponseDto } from './item-request.dto';
 import { ItemRequestStatus } from 'src/constants/item-request-status.enum';
 
 @Injectable()
@@ -113,7 +113,7 @@ export class UsersItemsRequestsService {
     const history = this.historyRepository.create({
       requestId: itemRequest.id,
       actionBy: { id: itemRequest.requestedBy.id },
-      actionType: ItemRequestStatus.CANCELLED,
+      actionType: ItemRequestStatus.REJECTED,
       oldStatus,
     });
   

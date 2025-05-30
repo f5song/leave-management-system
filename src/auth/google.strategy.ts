@@ -23,7 +23,8 @@ export class GoogleAuthService {
 
     return {
       email: payload.email,
-      name: payload.name,
+      firstName: payload.given_name,
+      lastName: payload.family_name,
       picture: payload.picture,
       sub: payload.sub, // google user id
     };

@@ -10,7 +10,7 @@ import { ItemCategoryId } from '../../constants/item-category.enum';
 import { UserEntity } from './users.entity';
 import { ItemStatus } from '../../constants/item-status.enum';
 import { UnitType } from '../../constants/item-unit.enum';
-import { ItemRequestEntity } from './users-items-requests.entity';
+import { UsersItemRequestEntity } from './users-items-requests.entity';
 
 @Entity('users_items')
 export class UsersItemEntity {
@@ -52,7 +52,8 @@ export class UsersItemEntity {
   @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
   deletedAt?: Date;
 
-  @OneToMany(() => ItemRequestEntity, (itemRequest) => itemRequest.item)
-  itemRequests: ItemRequestEntity[];
+  @OneToMany(() => UsersItemRequestEntity, request => request.item)
+  itemRequests: UsersItemRequestEntity[];
+
 
 }

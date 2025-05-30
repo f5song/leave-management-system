@@ -6,6 +6,7 @@ import { LoginDto } from './auth.validation';
 import { AuthResponseDto } from './auth-response.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserEntity } from '../database/entity/users.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 @UsePipes(new ValidationPipe())
@@ -22,6 +23,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @Get('profile')
   getProfile(@Request() req): Promise<UserEntity> {
     return req.user;

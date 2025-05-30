@@ -28,7 +28,7 @@ export class UsersItemsRequestsHistoryEntity {
   @Column('enum', { enum: ItemRequestStatus, nullable: false })
   oldStatus: ItemRequestStatus;
 
-  @CreateDateColumn({ name: 'action_at', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ name: 'action_at'})
   actionAt: Date;
 
   @CreateDateColumn({ name: 'created_at' })

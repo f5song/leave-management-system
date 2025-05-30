@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { UserEntity } from '../database/entity/users.entity';
 
 
@@ -46,39 +46,53 @@ export class AuthService {
   async loginWithGoogle(idToken: string) {
     const googleUser = await this.verifyGoogleToken(idToken);
 
-    // เช็คว่ามี account ที่ตรงกับ google_id หรือยัง
-    let account = await this.userRepository.findOne({
-      where: { googleId: googleUser.googleId },
-      relations: ['createdLeaves', 'leaves', 'itemRequests', 'itemApprovals', 'facilityRequests', 'facilityApprovals']
+    // เช็คว่ามี user ที่ตรงกับ googleId หรือยัง
+    let user = await this.userRepository.findOne({
+      where: { googleId: googleUser.googleId }
     });
 
-    if (!account) {
-      const [firstName = 'ชื่อ', lastName = 'นามสกุล'] = googleUser.name?.split(' ') || [];
-
-      // สร้าง user ก่อน
-      const user = await this.userRepository.save({
-        first_name: firstName,
-        last_name: lastName,
-        email: googleUser.email
+    if (!user) {
+      // หา employee_code ใหม่
+      const lastUser = await this.userRepository.findOne({
+        where: { employeeCode: Not(IsNull()) },
+        order: { createdAt: 'DESC' },
+        select: ['employeeCode']
       });
 
-      // สร้าง account พร้อมเชื่อมโยงกับ user
-      account = await this.userRepository.save({
+      // ถ้าไม่มี user อยู่เลย หรือไม่มี employee_code ให้ใช้ fh_001
+      const nextNumber = lastUser ?
+        parseInt(lastUser.employeeCode.split('_')[1]) + 1 : 1;
+      const paddedNumber = nextNumber.toString().padStart(3, '0');
+      const employeeCode = `fh_${paddedNumber}`;
+
+      // แยกชื่อและนามสกุล
+      const nameParts = googleUser.name?.split(' ') || [];
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // สร้าง user ใหม่
+      user = await this.userRepository.save({
+        employeeCode: employeeCode,
         email: googleUser.email,
-        google_id: googleUser.googleId,
-        user
+        firstName: firstName,
+        lastName: lastName,
+        googleId: googleUser.googleId,
+        avatarUrl: googleUser.picture,
+        roleId: 'role-employee', // กำหนดเป็น user ตามค่า default
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
     }
 
     // สร้าง JWT
     const payload = {
-      sub: account.id,
-      email: account.email,
+      sub: user.id,
+      email: user.email,
     };
 
     return {
       access_token: this.jwtService.sign(payload),
-      account,
+      user
     };
   }
 
@@ -89,7 +103,7 @@ export class AuthService {
     });
   }
 
-  async findOrCreateUserFromGoogle(googleUser: { email: string; sub: string; name: string; picture: string }) {
+  async findOrCreateUserFromGoogle(googleUser: { email: string; sub: string; firstName: string; lastName: string; picture: string }) {
     // ตรวจสอบว่ามี account ที่ตรงกับ google_id หรือยัง
     let account = await this.userRepository.findOne({
       where: { googleId: googleUser.sub },
@@ -97,15 +111,28 @@ export class AuthService {
     });
 
     if (!account) {
-      const [firstName = 'ชื่อ', lastName = 'นามสกุล'] = googleUser.name?.split(' ') || [];
-
       // สร้าง user
       const user = await this.userRepository.save({
-        first_name: firstName,
-        last_name: lastName,
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
         email: googleUser.email,
-        google_id: googleUser.sub,
+        googleId: googleUser.sub,
+        avatarUrl: googleUser.picture,
+        roleId: 'role-employee', // กำหนดเป็น user ตามค่า default
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
+
+      // สร้าง JWT
+      const payload = {
+        sub: user.id,
+        email: user.email,
+      };
+
+      return {
+        access_token: this.jwtService.sign(payload),
+        user
+      };
     }
 
     return account;

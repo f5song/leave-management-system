@@ -65,8 +65,8 @@ export class LeaveEntity {
   @JoinColumn({ name: 'action_by' })
   actionByUser?: UserEntity;
 
-  @Column({ name: 'action_at', type: 'timestamp', nullable: true })
-  actionAt?: Date;
+  @CreateDateColumn({ name: 'action_at'})
+  actionAt: Date;
 
   @Column({ name: 'created_by', type: 'uuid' })
   createdById: string;

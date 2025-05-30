@@ -11,6 +11,7 @@ import { DepartmentEntity } from './entity/departments.entity';
 import { JobTitleEntity } from './entity/job-titles.entity';
 import { UsersFacilityRequestEntity } from './entity/users-facility-requests.entity';
 import { UsersItemRequestEntity } from './entity/users-items-requests.entity';
+import { UsersItemEntity } from './entity/users-items.entity';
 import { UsersItemsRequestsHistoryEntity } from './entity/users-items-requests-histories.entity';
 
 @Module({
@@ -26,7 +27,7 @@ import { UsersItemsRequestsHistoryEntity } from './entity/users-items-requests-h
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DATABASE,
         // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        entities: [LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserEntity, DepartmentEntity, JobTitleEntity, UsersFacilityRequestEntity, UsersItemRequestEntity, UsersItemsRequestsHistoryEntity],
+        entities: [LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserEntity, DepartmentEntity, JobTitleEntity, UsersFacilityRequestEntity, UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UsersItemEntity],
         synchronize: true,
         logging: true
       }),

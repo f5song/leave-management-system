@@ -21,32 +21,32 @@ export class UserService {
     private departmentRepository: Repository<DepartmentEntity>,
     @InjectRepository(RoleEntity)
     private roleRepository: Repository<RoleEntity>
-  ) {}
+  ) { }
 
-    toUserResponseDto(
-      entity: UserEntity
-    ): UserResponseDto {
-      return {
-        id: entity.id,
-        employeeCode: entity.employeeCode,
-        googleId: entity.googleId,
-        email: entity.email,
-        firstName: entity.firstName,
-        lastName: entity.lastName,
-        nickName: entity.nickName,
-        avatarUrl: entity.avatarUrl,
-        birthDate: entity.birthDate,
-        salary: entity.salary,
-        roleId: entity.roleId,
-        jobTitleId: entity.jobTitleId,
-        departmentId: entity.departmentId,
-        approvedBy: entity.approvedBy,
-        approvedAt: entity.approvedAt,
-        createdAt: entity.createdAt,
-        updatedAt: entity.updatedAt,
-        deletedAt: entity.deletedAt,
-      };
-    }
+  toUserResponseDto(
+    entity: UserEntity
+  ): UserResponseDto {
+    return {
+      id: entity.id,
+      employeeCode: entity.employeeCode,
+      googleId: entity.googleId,
+      email: entity.email,
+      firstName: entity.firstName,
+      lastName: entity.lastName,
+      nickName: entity.nickName,
+      avatarUrl: entity.avatarUrl,
+      birthDate: entity.birthDate,
+      salary: entity.salary,
+      roleId: entity.roleId,
+      jobTitleId: entity.jobTitleId,
+      departmentId: entity.departmentId,
+      approvedBy: entity.approvedBy,
+      approvedAt: entity.approvedAt,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    };
+  }
 
   private async validateUserId(id: string): Promise<void> {
 
@@ -168,7 +168,7 @@ export class UserService {
 
   async getUserById(id: string): Promise<UserEntity> {
     await this.validateUserId(id);
-    
+
     const user = await this.userInfoRepository.findOne({
       where: { id }
     });
@@ -184,9 +184,9 @@ export class UserService {
 
   async updateUser(userId: string, data: UpdateUserDto): Promise<UserEntity> {
     await this.validateUserId(userId);
-    
+
     const updateData: Partial<UserEntity> = {};
-    
+
     if (data.email) await this.validateEmail(data.email);
     if (data.roleId) await this.validateRole(data.roleId);
     if (data.jobTitleId) await this.validateJobTitle(data.jobTitleId);
@@ -210,7 +210,7 @@ export class UserService {
     const user = await this.userInfoRepository.findOne({
       where: { id: userId },
     });
-    
+
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
@@ -219,36 +219,48 @@ export class UserService {
       ...updateData,
       updateTime: new Date(),
     });
-    
+
     return await this.userInfoRepository.save(user);
   }
 
   async partialUpdateUser(id: string, partialData: Partial<UserEntity>): Promise<UserEntity> {
     await this.validateUserId(id);
-    
+
     const user = await this.userInfoRepository.findOne({
       where: { id },
     });
-    
+
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    // Validate only the fields that are being updated
+    if (partialData.email) await this.validateEmail(partialData.email);
+    if (partialData.roleId) await this.validateRole(partialData.roleId);
+    if (partialData.jobTitleId) await this.validateJobTitle(partialData.jobTitleId);
+    if (partialData.departmentId) await this.validateDepartment(partialData.departmentId);
+    if (partialData.firstName || partialData.lastName) {
+      await this.validateNames(
+        partialData.firstName || user.firstName,
+        partialData.lastName || user.lastName
+      );
+    }
+    if (partialData.birthDate) await this.validateBirthDate(partialData.birthDate);
 
     Object.assign(user, {
       ...partialData,
       updateTime: new Date(),
     });
-    
+
     return await this.userInfoRepository.save(user);
   }
-
   async deleteUser(id: string): Promise<UserEntity> {
     await this.validateUserId(id);
-    
+
     const user = await this.userInfoRepository.findOne({
       where: { id },
     });
-    
+
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }

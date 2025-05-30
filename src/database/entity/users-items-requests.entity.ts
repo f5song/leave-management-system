@@ -27,8 +27,8 @@ export class UsersItemRequestEntity {
   })
   status: ItemRequestStatus;
 
-  // @Column({ type: 'datetime', name: 'action_at', nullable: true })
-  // actionAt?: Date;
+  @CreateDateColumn({ name: 'action_at' })
+  actionAt: Date;
 
   @Column({ type: 'datetime', name: 'approved_at', nullable: true })
   approvedAt?: Date;
@@ -53,4 +53,5 @@ export class UsersItemRequestEntity {
   @ManyToOne(() => UserEntity, user => user.itemApprovals)
   @JoinColumn({ name: 'approved_by' })
   approvedBy?: UserEntity;
+
 }

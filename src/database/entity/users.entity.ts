@@ -28,7 +28,7 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'employee_code', unique: true })
+  @Column({ name: 'employee_code', unique: true, default: 'fh_0001' })
   employeeCode: string;
 
   @Column({ unique: true, name: 'google_id' })
@@ -37,31 +37,32 @@ export class UserEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column({ name: 'first_name' })
-  firstName: string;
+  @Column({ name: 'first_name', nullable: true })
+  firstName?: string;
 
-  @Column({ name: 'last_name' })
-  lastName: string;
+  @Column({ name: 'last_name', nullable: true })
+  lastName?: string;
 
-  @Column({ name: 'nick_name' })
+  @Column({ name: 'nick_name', nullable: true })
   nickName?: string;
 
   @Column({ name: 'avatar_url', type: 'text', nullable: true })
   avatarUrl?: string;
 
-  @Column({ name: 'birth_date' })
-  birthDate: Date;
+  @Column({ name: 'birth_date', nullable: true })
+  birthDate?: Date;
 
-  @Column()
+  @Column({ default: 0 })
   salary: number;
 
-  @Column({ name: 'role_id' })
+  @Column({ name: 'role_id', default: 'role-employee' })
   roleId: string;
-  @Column({ name: 'job_title_id', type: 'enum', enum: JobTitleId })
-  jobTitleId: JobTitleId;
 
-  @Column({ name: 'department_id', type: 'enum', enum: DepartmentId })
-  departmentId: DepartmentId;
+  @Column({ name: 'job_title_id', type: 'enum', enum: JobTitleId, nullable: true })
+  jobTitleId?: JobTitleId;
+
+  @Column({ name: 'department_id', type: 'enum', enum: DepartmentId, nullable: true })
+  departmentId?: DepartmentId;
 
   // ✅ Self-referencing: คนที่อนุมัติ user คนนี้
   @Column({ name: 'approved_by', type: 'uuid', nullable: true })
@@ -85,11 +86,11 @@ export class UserEntity {
 
   @ManyToOne(() => JobTitleEntity, job => job.users)
   @JoinColumn({ name: 'job_title_id' })
-  jobTitle: JobTitleEntity;
+  jobTitle?: JobTitleEntity;
 
   @ManyToOne(() => DepartmentEntity, dept => dept.id)
   @JoinColumn({ name: 'department_id' })
-  department: DepartmentEntity;
+  department?: DepartmentEntity;
 
   @OneToMany(() => PermissionEntity, perm => perm.createdBy)
   createdPermissions: PermissionEntity[];

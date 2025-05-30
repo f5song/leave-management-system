@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FacilityRequestEntity } from '../database/entity/users-facility-requests.entity';
-import { CreateFacilityRequestDto, UpdateFacilityRequestDto, FacilityRequestResponseDto } from './facility-request.dto';
+import { UsersFacilityRequestEntity } from '../database/entity/users-facility-requests.entity';
+import { CreateFacilityRequestDto, UpdateFacilityRequestDto, FacilityRequestResponseDto } from './users-facility-requests.dto';
 
 @Injectable()
 export class FacilityRequestsService {
   constructor(
-    @InjectRepository(FacilityRequestEntity)
-    private readonly facilityRequestRepository: Repository<FacilityRequestEntity>,
+    @InjectRepository(UsersFacilityRequestEntity)
+    private readonly facilityRequestRepository: Repository<UsersFacilityRequestEntity>,
   ) {}
 
   async create(createDto: CreateFacilityRequestDto): Promise<FacilityRequestResponseDto> {
