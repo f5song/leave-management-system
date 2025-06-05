@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, ParseIntPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from './user.service';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from './user.dto';
+import { CreateUserDto, PatchUserDto, UpdateUserDto, UserResponseDto } from './user.dto';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 
 @ApiTags('Users')
@@ -49,8 +49,11 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserResponseDto })
   @UseGuards(JwtAuthGuard)
-  async partialUpdate(@Param('id') id: string, @Body() partialData: Partial<UpdateUserDto>): Promise<UserResponseDto> {
-    const updatedUser = await this.userService.partialUpdateUser(id, partialData);
+  async patchUser(
+    @Param('id') id: string,
+    @Body() updateData: PatchUserDto
+  ): Promise<UserResponseDto> {
+    const updatedUser = await this.userService.patchUser(id, updateData);
     return this.userService.toUserResponseDto(updatedUser);
   }
 

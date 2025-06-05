@@ -46,84 +46,98 @@ export class AuthService {
   async loginWithGoogle(idToken: string) {
     const googleUser = await this.verifyGoogleToken(idToken);
 
-    // เช็คว่ามี user ที่ตรงกับ googleId หรือยัง
     let user = await this.userRepository.findOne({
       where: { googleId: googleUser.googleId }
     });
 
     if (!user) {
-      // หา employee_code ใหม่
+
       const lastUser = await this.userRepository.findOne({
         where: { employeeCode: Not(IsNull()) },
         order: { createdAt: 'DESC' },
         select: ['employeeCode']
       });
 
-      // ถ้าไม่มี user อยู่เลย หรือไม่มี employee_code ให้ใช้ fh_001
-      const nextNumber = lastUser ?
-        parseInt(lastUser.employeeCode.split('_')[1]) + 1 : 1;
-      const paddedNumber = nextNumber.toString().padStart(3, '0');
-      const employeeCode = `fh_${paddedNumber}`;
+      let employeeCode: string;
+      if (!lastUser || !lastUser.employeeCode) {
+        employeeCode = 'fh-0001';   
+      } else {
+        const match = lastUser.employeeCode.match(/\d+$/);
+        const nextNumber = match ? parseInt(match[0]) + 1 : 1;
+        const paddedNumber = nextNumber.toString().padStart(4, '0');
+        employeeCode = `fh-${paddedNumber}`;
+      }
 
-      // แยกชื่อและนามสกุล
       const nameParts = googleUser.name?.split(' ') || [];
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      // สร้าง user ใหม่
-      user = await this.userRepository.save({
+
+      const newUser = this.userRepository.create({
         employeeCode: employeeCode,
         email: googleUser.email,
         firstName: firstName,
         lastName: lastName,
         googleId: googleUser.googleId,
         avatarUrl: googleUser.picture,
-        roleId: 'role-employee', // กำหนดเป็น user ตามค่า default
+        roleId: 'role-employee',
         createdAt: new Date(),
         updatedAt: new Date()
       });
+
+      user = await this.userRepository.save(newUser);
+      const savedUser = await this.userRepository.findOne({
+        where: { id: user.id },
+        select: ['id', 'email', 'firstName', 'lastName', 'employeeCode', 'roleId', 'googleId', 'avatarUrl']
+      });
+
     }
 
-    // สร้าง JWT
     const payload = {
       sub: user.id,
       email: user.email,
     };
+    const userWithEmployeeCode = await this.userRepository.findOne({
+      where: { id: user.id },
+      select: ['id', 'email', 'firstName', 'lastName', 'employeeCode', 'roleId']
+    });
 
     return {
       access_token: this.jwtService.sign(payload),
-      user
+      user: userWithEmployeeCode
     };
   }
 
-  async validateAccount(accountId: string) {
-    return this.userRepository.findOne({
-      where: { id: accountId },
+  async validateUser(userId: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
       relations: ['createdLeaves', 'leaves', 'itemRequests', 'itemApprovals', 'facilityRequests', 'facilityApprovals']
     });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return user;
   }
 
   async findOrCreateUserFromGoogle(googleUser: { email: string; sub: string; firstName: string; lastName: string; picture: string }) {
-    // ตรวจสอบว่ามี account ที่ตรงกับ google_id หรือยัง
     let account = await this.userRepository.findOne({
       where: { googleId: googleUser.sub },
       relations: ['createdLeaves', 'leaves', 'itemRequests', 'itemApprovals', 'facilityRequests', 'facilityApprovals']
     });
 
     if (!account) {
-      // สร้าง user
       const user = await this.userRepository.save({
         firstName: googleUser.firstName,
         lastName: googleUser.lastName,
         email: googleUser.email,
         googleId: googleUser.sub,
         avatarUrl: googleUser.picture,
-        roleId: 'role-employee', // กำหนดเป็น user ตามค่า default
+        roleId: 'role-employee',
         createdAt: new Date(),
         updatedAt: new Date()
       });
-
-      // สร้าง JWT
       const payload = {
         sub: user.id,
         email: user.email,

@@ -15,7 +15,7 @@ export class LeaveTypeController {
   constructor(private readonly leaveTypeService: LeaveTypeService) { }
 
   @Post()
-  @Roles('admin')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: LeaveTypeResponseDto })
   async create(@Body() createLeaveTypeDto: CreateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
@@ -24,7 +24,7 @@ export class LeaveTypeController {
   }
 
   @Get()
-  @Roles('admin')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveTypeResponseDto] })
   async findAll(): Promise<LeaveTypeResponseDto[]> {
@@ -33,7 +33,7 @@ export class LeaveTypeController {
   }
 
   @Get(':id')
-  @Roles('admin')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async findOne(@Param('id') id: LeaveType): Promise<LeaveTypeResponseDto> {
@@ -42,7 +42,7 @@ export class LeaveTypeController {
   }
 
   @Put(':id')
-  @Roles('admin')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async update(
@@ -54,16 +54,16 @@ export class LeaveTypeController {
   }
 
   @Patch(':id')
-  @Roles('admin')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async partialUpdate(@Param('id') id: LeaveType, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
-    const updatedLeaveType = await this.leaveTypeService.update(id, data);
-    return this.leaveTypeService.toLeaveTypeResponseDto(updatedLeaveType);
+    console.log('Received PATCH body:', data);
+    return await this.leaveTypeService.partialUpdate(id, data);
   }
-
+  
   @Delete(':id')
-  @Roles('admin')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async remove(@Param('id') id: LeaveType): Promise<void> {
@@ -71,7 +71,7 @@ export class LeaveTypeController {
   }
 
   @Post(':id')
-  @Roles('admin')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async restore(@Param('id') id: LeaveType): Promise<LeaveTypeResponseDto> {

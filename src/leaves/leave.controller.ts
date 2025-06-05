@@ -18,18 +18,21 @@ import {
 } from './leave.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 interface AuthenticatedRequest extends Request {
   user: { id: string };
 }
 
 @ApiTags('Leaves')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('leaves')
 export class LeaveController {
   constructor(private readonly leaveService: LeaveService) { }
 
   @Post()
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: LeaveResponseDto })
   async create(
@@ -41,6 +44,7 @@ export class LeaveController {
   }
 
   @Get('me')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   async getMyLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
@@ -49,6 +53,7 @@ export class LeaveController {
   }
 
   @Get()
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   async getAllLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
@@ -57,6 +62,7 @@ export class LeaveController {
   }
 
   @Patch(':id/details')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateDetails(
@@ -69,6 +75,7 @@ export class LeaveController {
   }
 
   @Patch(':id/status')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateStatus(
@@ -81,6 +88,7 @@ export class LeaveController {
   }
 
   @Delete(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async delete(@Param('id') id: string): Promise<void> {

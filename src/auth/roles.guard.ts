@@ -6,14 +6,33 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
+    // Get roles from both class and method level decorators
+    const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler()) ||
+                         this.reflector.get<string[]>('roles', context.getClass());
+    
+    console.log('Required roles:', requiredRoles);
+    
     if (!requiredRoles) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const { user } = context.switchToHttp().getRequest();
+    
+    if (!user || !user.role) {
+      console.error('No user or role found in request:', { user });
+      return false;
+    }
 
-    return requiredRoles.some(role => user.roles?.includes(role));
+    // Convert to lowercase for case-insensitive comparison
+    const userRole = user.role.toLowerCase();
+    const requiredRolesLower = requiredRoles.map(role => role.toLowerCase());
+
+    console.log('Role checking:', {
+      userRole,
+      requiredRoles: requiredRolesLower,
+      match: requiredRolesLower.includes(userRole)
+    });
+
+    return requiredRolesLower.includes(userRole);
   }
 }

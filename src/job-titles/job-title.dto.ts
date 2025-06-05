@@ -15,6 +15,10 @@ export class CreateJobTitleDto {
 
   @IsString()
   @IsNotEmpty()
+  color: string;
+
+  @IsString()
+  @IsNotEmpty()
   departmentId: DepartmentId;
 }
 
@@ -25,6 +29,10 @@ export class UpdateJobTitleDto {
 
   @IsString()
   @IsOptional()
+  color?: string;
+
+  @IsString()
+  @IsOptional()
   departmentId?: DepartmentId;
 }
 
@@ -32,6 +40,7 @@ export class UpdateJobTitleDto {
 export class JobTitleResponseDto {
   id: string;
   name: string;
+  color: string;
   departmentId: string;
   departmentName: string | null;
   createdAt: Date;

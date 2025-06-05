@@ -8,6 +8,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GoogleAuthService } from './google.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { RolesGuard } from './roles.guard';
 import { UserEntity } from '../database/entity/users.entity';
 
 @Module({
@@ -25,7 +26,7 @@ import { UserEntity } from '../database/entity/users.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleAuthService, JwtAuthGuard],
+  providers: [AuthService, JwtStrategy, GoogleAuthService, JwtAuthGuard, RolesGuard],
   exports: [AuthService],
 })
 export class AuthModule {}

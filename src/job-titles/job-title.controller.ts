@@ -5,10 +5,12 @@ import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { JobTitleEntity } from 'src/database/entity/job-titles.entity';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Job Titles')
 @Controller('job-titles')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) {}
@@ -21,6 +23,7 @@ export class JobTitleController {
   }
 
   @Get(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: JobTitleEntity })
   async findOne(@Param('id') id: JobTitleId): Promise<JobTitleEntity> {
@@ -28,6 +31,7 @@ export class JobTitleController {
   }
 
   @Post()
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: JobTitleEntity })
   async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<JobTitleEntity> {
@@ -35,6 +39,7 @@ export class JobTitleController {
   }
 
   @Put(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: JobTitleEntity })
   async update(
@@ -45,6 +50,7 @@ export class JobTitleController {
   }
 
   @Delete(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: JobTitleEntity })
   async remove(@Param('id') id: JobTitleId): Promise<void> {

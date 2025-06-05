@@ -8,7 +8,7 @@ import { RoleEntity } from '../database/entity/roles.entity';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentId } from 'src/constants/department.enum';
-import { UserResponseDto } from './user.dto';
+import { UserResponseDto, PatchUserDto } from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -46,6 +46,30 @@ export class UserService {
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,
     };
+  }
+
+  async patchUser(id: string, updateData: PatchUserDto): Promise<UserEntity> {
+    const user = await this.userInfoRepository.findOne({
+      where: { id },
+      relations: ['jobTitle', 'department', 'role']
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    // Update only the provided fields
+    if (updateData.email) user.email = updateData.email;
+    if (updateData.firstName) user.firstName = updateData.firstName;
+    if (updateData.lastName) user.lastName = updateData.lastName;
+    if (updateData.nickName) user.nickName = updateData.nickName;
+    if (updateData.avatarUrl) user.avatarUrl = updateData.avatarUrl;
+    if (updateData.birthDate) user.birthDate = updateData.birthDate;
+    if (updateData.jobTitleId) user.jobTitleId = updateData.jobTitleId;
+    if (updateData.departmentId) user.departmentId = updateData.departmentId;
+    if (updateData.roleId) user.roleId = updateData.roleId;
+    if (updateData.salary) user.salary = updateData.salary;
+    return await this.userInfoRepository.save(user);
   }
 
   private async validateUserId(id: string): Promise<void> {
@@ -118,16 +142,23 @@ export class UserService {
     }
   }
 
-  private async validateBirthDate(birthDate: Date): Promise<void> {
+  private async validateBirthDate(birthDate: string | Date): Promise<void> {
     if (!birthDate) {
       throw new BadRequestException('Birth date is required');
+    }
+
+    // Convert to Date if string
+    const date = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
+    
+    if (isNaN(date.getTime())) {
+      throw new BadRequestException('Invalid birth date format');
     }
 
     const today = new Date();
     const minAge = 18;
     const maxAge = 100;
 
-    const age = today.getFullYear() - birthDate.getFullYear();
+    const age = today.getFullYear() - date.getFullYear();
     if (age < minAge || age > maxAge) {
       throw new BadRequestException(`Age must be between ${minAge} and ${maxAge} years`);
     }
@@ -206,6 +237,10 @@ export class UserService {
     if (data.roleId) updateData.roleId = data.roleId;
     if (data.jobTitleId) updateData.jobTitleId = data.jobTitleId;
     if (data.departmentId) updateData.departmentId = data.departmentId;
+    if (data.nickName) updateData.nickName = data.nickName;
+    if (data.avatarUrl) updateData.avatarUrl = data.avatarUrl;
+    if (data.salary) updateData.salary = data.salary;
+
 
     const user = await this.userInfoRepository.findOne({
       where: { id: userId },
@@ -217,43 +252,12 @@ export class UserService {
 
     Object.assign(user, {
       ...updateData,
-      updateTime: new Date(),
+      updatedAt: new Date(),
     });
 
     return await this.userInfoRepository.save(user);
   }
 
-  async partialUpdateUser(id: string, partialData: Partial<UserEntity>): Promise<UserEntity> {
-    await this.validateUserId(id);
-
-    const user = await this.userInfoRepository.findOne({
-      where: { id },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    // Validate only the fields that are being updated
-    if (partialData.email) await this.validateEmail(partialData.email);
-    if (partialData.roleId) await this.validateRole(partialData.roleId);
-    if (partialData.jobTitleId) await this.validateJobTitle(partialData.jobTitleId);
-    if (partialData.departmentId) await this.validateDepartment(partialData.departmentId);
-    if (partialData.firstName || partialData.lastName) {
-      await this.validateNames(
-        partialData.firstName || user.firstName,
-        partialData.lastName || user.lastName
-      );
-    }
-    if (partialData.birthDate) await this.validateBirthDate(partialData.birthDate);
-
-    Object.assign(user, {
-      ...partialData,
-      updateTime: new Date(),
-    });
-
-    return await this.userInfoRepository.save(user);
-  }
   async deleteUser(id: string): Promise<UserEntity> {
     await this.validateUserId(id);
 

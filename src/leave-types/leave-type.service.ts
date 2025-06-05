@@ -76,6 +76,24 @@ export class LeaveTypeService {
     return this.toLeaveTypeResponseDto(leaveType);
   }
 
+  async partialUpdate(id: LeaveType, partialData: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
+    const leaveType = await this.findOne(id);
+    if (!leaveType) {
+      throw new NotFoundException(`Leave type with ID ${id} not found`);
+    }
+    
+    // Update only the provided fields
+    Object.keys(partialData).forEach(key => {
+      if (partialData[key] !== undefined) {
+        leaveType[key] = partialData[key];
+      }
+    });
+    
+    leaveType.updatedAt = new Date();
+    await this.leaveTypeRepository.save(leaveType);
+    return this.toLeaveTypeResponseDto(leaveType);
+  }
+
   async delete(id: LeaveType): Promise<void> {
     const leaveType = await this.findOne(id);
     leaveType.deletedAt = new Date();
@@ -115,11 +133,11 @@ export class LeaveTypeService {
     });
   }
 
-  async partialUpdate(id: LeaveType, data: Partial<{ name: string; description: string; is_active: boolean }>): Promise<LeaveTypeResponseDto> {
-    const leaveType = await this.findOne(id);
-    Object.assign(leaveType, data);
-    leaveType.updatedAt = new Date();
-    const updatedLeaveType = await this.leaveTypeRepository.save(leaveType);
-    return this.toLeaveTypeResponseDto(updatedLeaveType);
-  }
+  // async partialUpdate(id: LeaveType, data: Partial<{ name: string; description: string; is_active: boolean }>): Promise<LeaveTypeResponseDto> {
+  //   const leaveType = await this.findOne(id);
+  //   Object.assign(leaveType, data);
+  //   leaveType.updatedAt = new Date();
+  //   const updatedLeaveType = await this.leaveTypeRepository.save(leaveType);
+  //   return this.toLeaveTypeResponseDto(updatedLeaveType);
+  // }
 }

@@ -3,14 +3,17 @@ import { UsersItemsRequestsHistoriesService } from './users-items-requests-histo
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ItemsRequestsHistoryResponseDto } from './items-requests-history.dto';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Users Items Requests Histories')
 @Controller('users-items-requests-histories')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersItemsRequestsHistoriesController {
   constructor(private readonly usersItemsRequestsHistoriesService: UsersItemsRequestsHistoriesService) {}
 
   @Get()
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [ItemsRequestsHistoryResponseDto] })
   findAll() {
@@ -18,6 +21,7 @@ export class UsersItemsRequestsHistoriesController {
   }
 
   @Get(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemsRequestsHistoryResponseDto })
   findOne(@Param('id') id: string) {

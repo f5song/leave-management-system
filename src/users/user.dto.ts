@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsArray, MinLength, IsEmail, IsNumber, IsOptional, IsDate, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, IsArray, MinLength, IsEmail, IsNumber, IsOptional, IsDate, IsUUID, IsDateString } from 'class-validator';
 import { DepartmentId } from 'src/constants/department.enum';
 import { JobTitleId } from 'src/constants/jobtitle.enum';
 import { DepartmentEntity } from 'src/database/entity/departments.entity';
@@ -12,14 +12,9 @@ import { UsersItemRequestEntity } from 'src/database/entity/users-items-requests
 import { UserEntity } from 'src/database/entity/users.entity';
 
 export class RegisterUserDto {
+  @IsEmail()
   @IsNotEmpty()
-  @IsString()
-  username: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(6)
-  password: string;
+  email: string;
 
   @IsArray()
   @IsString({ each: true })
@@ -27,13 +22,13 @@ export class RegisterUserDto {
 }
 
 export class LoginUserDto {
+  @IsEmail()
   @IsNotEmpty()
-  @IsString()
-  username: string;
+  email: string;
 
-  @IsNotEmpty()
-  @IsString()
-  password: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // password: string;
 }
 
 export class CreateUserDto {
@@ -44,6 +39,12 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   lastName: string;
+
+  @IsString()
+  nickName?: string;
+
+  @IsString()
+  avatarUrl?: string;
 
   @IsEmail()
   @IsNotEmpty()
@@ -62,26 +63,32 @@ export class CreateUserDto {
   departmentId?: DepartmentId;
 
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   birthDate?: Date;
 }
 
 export class UpdateUserDto {
-  @IsOptional()
   @IsString()
-  firstName?: string;
+  nickName?: string;
 
-  @IsOptional()
   @IsString()
-  lastName?: string;
+  avatarUrl?: string;
 
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @IsOptional()
   @IsString()
-  roleId?: string;
+  @IsNotEmpty()
+  firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  roleId: string;
 
   @IsOptional()
   @IsString()
@@ -92,7 +99,7 @@ export class UpdateUserDto {
   departmentId?: DepartmentId;
 
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   birthDate?: Date;
 
   @IsOptional()
@@ -104,23 +111,64 @@ export class UpdateUserDto {
   @IsUUID('4', { each: true })
   approvedUsers?: string[];
 
+  @IsOptional()
+  @IsNumber()
+  salary?: number;
+}
+
+export class PatchUserDto {
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  nickName?: string;
+
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string;
+
+  @IsOptional()
+  @IsDateString()
+  birthDate?: Date;
+
+  @IsOptional()
+  @IsString()
+  jobTitleId?: JobTitleId;
+
+  @IsOptional()
+  @IsString()
+  departmentId?: DepartmentId;
+
+  @IsOptional()
+  @IsString()
+  employeeCode?: string;
+
+  @IsOptional()
+  @IsString()
+  roleId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  googleId?: string;
 
   @IsOptional()
   @IsNumber()
   salary?: number;
 
   @IsOptional()
-  @IsString()
-  createdAt?: Date;
-
-  @IsOptional()
-  @IsString()
-  updatedAt?: Date;
-
-  @IsOptional()
-  @IsString()
-  deletedAt?: Date;
-
+  @IsArray()
+  @IsUUID('4', { each: true })
+  approvedUsers?: string[];
 }
 
 export class UserResponseDto {

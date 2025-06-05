@@ -28,8 +28,9 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'employee_code', unique: true, default: 'fh_0001' })
-  employeeCode: string;
+  @Column({ name: 'employee_code', unique: true, nullable: true })
+  employeeCode: string | null;
+
 
   @Column({ unique: true, name: 'google_id' })
   googleId: string;

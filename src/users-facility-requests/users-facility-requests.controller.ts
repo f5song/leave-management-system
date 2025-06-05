@@ -1,16 +1,19 @@
-import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FacilityRequestsService } from './users-facility-requests.service';
 import { CreateFacilityRequestDto, UpdateFacilityRequestDto, FacilityRequestResponseDto } from './users-facility-requests.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @ApiTags('Users Facility Requests')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users-facility-requests')
 export class FacilityRequestsController {
   constructor(private readonly facilityRequestsService: FacilityRequestsService) {}
 
   @Post()
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: FacilityRequestResponseDto })
   async create(@Body() dto: CreateFacilityRequestDto): Promise<FacilityRequestResponseDto> {
@@ -18,6 +21,7 @@ export class FacilityRequestsController {
   }
 
   @Get()
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [FacilityRequestResponseDto] })
   async findAll(): Promise<FacilityRequestResponseDto[]> {
@@ -25,6 +29,7 @@ export class FacilityRequestsController {
   }
 
   @Get(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: FacilityRequestResponseDto })
   async findOne(@Param('id') id: string): Promise<FacilityRequestResponseDto> {
@@ -32,6 +37,7 @@ export class FacilityRequestsController {
   }
 
   @Patch(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: FacilityRequestResponseDto })
   async update(@Param('id') id: string, @Body() dto: UpdateFacilityRequestDto): Promise<FacilityRequestResponseDto> {
@@ -39,6 +45,7 @@ export class FacilityRequestsController {
   }
 
   @Delete(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: FacilityRequestResponseDto })
   async remove(@Param('id') id: string): Promise<FacilityRequestResponseDto> {

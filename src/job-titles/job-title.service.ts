@@ -16,14 +16,15 @@ export class JobTitleService {
     private readonly jobTitleRepository: Repository<JobTitleEntity>,
     @InjectRepository(DepartmentEntity)
     private readonly departmentRepository: Repository<DepartmentEntity>
-  ) {}
+  ) { }
 
-    toJobTitleResponseDto(
-      entity: JobTitleEntity
-    ): JobTitleResponseDto {
+  toJobTitleResponseDto(
+    entity: JobTitleEntity
+  ): JobTitleResponseDto {
     return {
       id: entity.id,
       name: entity.name,
+      color: entity.color,
       departmentId: entity.departmentId,
       departmentName: entity.department.name,
       createdAt: entity.createdAt,
@@ -33,9 +34,12 @@ export class JobTitleService {
   }
 
   async create(createJobTitleDto: CreateJobTitleDto) {
-    const { id, name, departmentId } = createJobTitleDto;
+    const { id, name, color, departmentId } = createJobTitleDto;
 
-    // Check if job title with same id already exists
+    await this.validateJobTitleId(id);
+    await this.validateDepartmentExists(departmentId);
+    await this.validateUniqueName(name, departmentId);
+
     const existingById = await this.jobTitleRepository.findOne({
       where: { id },
       select: ['id']
@@ -44,7 +48,6 @@ export class JobTitleService {
       throw new BadRequestException(`Job title with id ${id} already exists`);
     }
 
-    // Check if job title with same name already exists
     const existingByName = await this.jobTitleRepository.findOne({
       where: { name },
       select: ['name']
@@ -56,6 +59,7 @@ export class JobTitleService {
     const jobTitle = this.jobTitleRepository.create({
       id,
       name,
+      color,
       departmentId,
     });
 
@@ -135,7 +139,7 @@ export class JobTitleService {
 
   async validateUniqueName(name: string, departmentId: DepartmentId, currentId?: JobTitleId): Promise<void> {
     if (!name || !departmentId) return;
-  
+
     const jobTitle = await this.jobTitleRepository.findOne({
       where: {
         name,
@@ -144,22 +148,23 @@ export class JobTitleService {
         ...(currentId && { id: Not(currentId as JobTitleId) }),
       },
     });
-  
+
     if (jobTitle) {
       throw new Error('Job title name must be unique within the department');
     }
   }
 
   async validateNoReferences(id: JobTitleId): Promise<void> {
-    const hasReferences = await this.jobTitleRepository.createQueryBuilder('jobTitle')
-      .leftJoinAndSelect('jobTitle.users', 'users')
+    const referenceCount = await this.jobTitleRepository.createQueryBuilder('jobTitle')
+      .leftJoin('jobTitle.users', 'users')
       .where('jobTitle.id = :id', { id })
-      .andWhere('users.deletedAt IS NULL')
+      .andWhere('users.deleted_at IS NULL')
       .getCount();
 
-    if (hasReferences[0].count > 0) {
+    if (referenceCount > 0) {
       throw new Error('Cannot update or delete job title as it has users associated with it');
     }
+
   }
 
   // async remove(id: JobTitleId): Promise<void> {

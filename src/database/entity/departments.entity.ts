@@ -1,5 +1,7 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
 import { DepartmentId } from '../../constants/department.enum';
+import { UserEntity } from './users.entity';
+import { JobTitleEntity } from './job-titles.entity';
 
 @Entity('departments')
 export class DepartmentEntity {
@@ -9,7 +11,7 @@ export class DepartmentEntity {
   @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column({ default: '#000000' })
   color: string;
 
   @CreateDateColumn({ name: 'created_at' })
@@ -20,5 +22,13 @@ export class DepartmentEntity {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;
+
+  @OneToMany(() => UserEntity, user => user.department)
+  users: UserEntity[];
+
+  @OneToMany(() => JobTitleEntity, jobTitle => jobTitle.department)
+  jobTitles: JobTitleEntity[];
+
+
 
 }

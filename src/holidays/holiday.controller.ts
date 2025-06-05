@@ -5,15 +5,18 @@ import { HolidayEntity } from '../database/entity/holidays.entity';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Holidays')
 @Controller('holidays')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class HolidayController {
   constructor(private readonly holidayService: HolidayService) {}
 
   @Get()
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [HolidayResponseDto] })
   async findAll(): Promise<HolidayResponseDto[]> {
@@ -22,6 +25,7 @@ export class HolidayController {
   }
 
   @Get(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   async findOne(@Param('id') id: string): Promise<HolidayResponseDto> {
@@ -30,6 +34,7 @@ export class HolidayController {
   }
 
   @Post()
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: HolidayResponseDto })
   async create(@Body() createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
@@ -38,6 +43,7 @@ export class HolidayController {
   }
 
   @Put(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   async update(
@@ -49,6 +55,7 @@ export class HolidayController {
   }
 
   @Delete(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   @HttpCode(HttpStatus.NO_CONTENT)

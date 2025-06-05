@@ -7,7 +7,7 @@ import { DepartmentId } from 'src/constants/department.enum';
 
 @Injectable()
 export class DepartmentService {
-  constructor(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+  constructor(
     @InjectRepository(DepartmentEntity)
     private departmentRepository: Repository<DepartmentEntity>
   ) { }
@@ -15,78 +15,81 @@ export class DepartmentService {
   toDepartmentResponseDto(
     entity: DepartmentEntity
   ): DepartmentResponseDto {
-  return {
-    id: entity.id,
-    name: entity.name,
-    color: entity.color,
-    createdAt: entity.createdAt,
-    updatedAt: entity.updatedAt,
-    deletedAt: entity.deletedAt,
-  };
-}
-
-  async validateDepartmentId(id: string) {
-  if (!Number.isInteger(id)) {
-    throw new BadRequestException('Invalid department ID format');
+    return {
+      id: entity.id,
+      name: entity.name,
+      color: entity.color,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+      users: entity.users,
+      jobTitles: entity.jobTitles,
+    };
   }
-}
+
+  async validateDepartmentId(id: DepartmentId) {
+    const validIds = Object.values(DepartmentId);
+    if (!validIds.includes(id)) {
+      throw new BadRequestException(`Invalid department ID: ${id}. Valid IDs are: ${validIds.join(', ')}`);
+    }
+  }
 
   async validateUniqueName(name: string) {
-  const existingDepartment = await this.departmentRepository.findOne({
-    where: { name, deletedAt: null },
-  });
-  if (existingDepartment) {
-    throw new BadRequestException('Department name already exists');
+    const existingDepartment = await this.departmentRepository.findOne({
+      where: { name, deletedAt: null },
+    });
+    if (existingDepartment) {
+      throw new BadRequestException('Department name already exists');
+    }
   }
-}
 
   async validateNameLength(name: string) {
-  if (name.length < 2 || name.length > 100) {
-    throw new BadRequestException('Department name must be between 2 and 100 characters');
+    if (name.length < 2 || name.length > 100) {
+      throw new BadRequestException('Department name must be between 2 and 100 characters');
+    }
   }
-}
 
-  async validateNoReferences(id: string): Promise < void> {
-  // ตรวจสอบว่ามี user ที่อ้างอิงถึงแผนกนี้หรือไม่
-  const hasUsers = await this.departmentRepository
-    .createQueryBuilder('department')
-    .leftJoinAndSelect('department.users', 'users')
-    .where('users.departmentId = :id', { id })
-    .andWhere('users.deleteTime IS NULL')
-    .getOne();
+  async validateNoReferences(id: DepartmentId): Promise<void> {
+    // ตรวจสอบว่ามี user ที่อ้างอิงถึงแผนกนี้หรือไม่
+    const hasUsers = await this.departmentRepository
+      .createQueryBuilder('department')
+      .leftJoinAndSelect('department.users', 'users')
+      .where('users.departmentId = :id', { id })
+      .andWhere('users.deletedAt IS NULL')
+      .getOne();
 
-  if(hasUsers) {
-    throw new BadRequestException('Cannot delete department that has users');
-  }
+    if (hasUsers) {
+      throw new BadRequestException('Cannot delete department that has users');
+    }
 
     // ตรวจสอบว่ามี job title ที่อ้างอิงถึงแผนกนี้หรือไม่
     const hasJobTitles = await this.departmentRepository
-    .createQueryBuilder('department')
-    .leftJoinAndSelect('department.jobTitles', 'jobTitles')
-    .where('jobTitles.departmentId = :id', { id })
-    .andWhere('jobTitles.deleteTime IS NULL')
-    .getOne();
+      .createQueryBuilder('department')
+      .leftJoinAndSelect('department.jobTitles', 'jobTitles')
+      .where('jobTitles.departmentId = :id', { id })
+      .andWhere('jobTitles.deletedAt IS NULL')
+      .getOne();
 
-  if(hasJobTitles) {
-    throw new BadRequestException('Cannot delete department that has job titles');
+    if (hasJobTitles) {
+      throw new BadRequestException('Cannot delete department that has job titles');
+    }
   }
-}
 
-  async create(createDepartmentDto: CreateDepartmentDto): Promise < DepartmentResponseDto > {
-  const { name, description } = createDepartmentDto;
+  async create(createDepartmentDto: CreateDepartmentDto): Promise<DepartmentResponseDto> {
+    const { name, color } = createDepartmentDto;
 
-  await this.validateNameLength(name);
-  await this.validateUniqueName(name);
+    await this.validateNameLength(name);
+    await this.validateUniqueName(name);
 
-  const department = this.departmentRepository.create({
-    name,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
-
-  await this.departmentRepository.save(department);
-  return this.toDepartmentResponseDto(department);
-}
+    const department = this.departmentRepository.create({
+      name,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    department.color = color;
+    await this.departmentRepository.save(department);
+    return this.toDepartmentResponseDto(department);
+  }
 
   async findAll(): Promise<DepartmentResponseDto[]> {
     const departments = await this.departmentRepository.find({
@@ -98,81 +101,105 @@ export class DepartmentService {
   }
 
 
-  async findOne(id: DepartmentId): Promise < DepartmentResponseDto > {
-  const department = await this.departmentRepository.findOne({
-    where: { id, deletedAt: null },
-  });
-  if(!department) {
-    throw new NotFoundException(`Department #${id} not found`);
-  }
+  async findOne(id: DepartmentId): Promise<DepartmentResponseDto> {
+    const department = await this.departmentRepository.findOne({
+      where: { id, deletedAt: null },
+    });
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
     return this.toDepartmentResponseDto(department);
-}
-
-  async update(id: DepartmentId, updateDepartmentDto: UpdateDepartmentDto): Promise < DepartmentResponseDto > {
-  const { name, description } = updateDepartmentDto;
-
-  await this.validateDepartmentId(id);
-  await this.validateNameLength(name);
-  await this.validateUniqueName(name);
-
-  const department = await this.departmentRepository.findOne({
-    where: { id, deletedAt: null },
-  });
-
-  if(!department) {
-    throw new NotFoundException(`Department #${id} not found`);
   }
+
+  async update(id: DepartmentId, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
+    const { name, color } = updateDepartmentDto;
+
+    await this.validateDepartmentId(id);
+    await this.validateNameLength(name);
+    await this.validateUniqueName(name);
+
+    const department = await this.departmentRepository.findOne({
+      where: { id, deletedAt: null },
+    });
+
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
 
     department.name = name;
-  department.updatedAt = new Date();
+    department.updatedAt = new Date();
 
-  await this.departmentRepository.save(department);
-  return this.toDepartmentResponseDto(department);
-}
-
-  async remove(id: DepartmentId): Promise < void> {
-  await this.validateDepartmentId(id);
-  await this.validateNoReferences(id);
-
-  const department = await this.departmentRepository.findOne({
-    where: { id, deletedAt: null },
-  });
-
-  if(!department) {
-    throw new NotFoundException(`Department #${id} not found`);
+    await this.departmentRepository.save(department);
+    return this.toDepartmentResponseDto(department);
   }
+
+  async remove(id: DepartmentId): Promise<void> {
+    await this.validateDepartmentId(id);
+    await this.validateNoReferences(id);
+
+    const department = await this.departmentRepository.findOne({
+      where: { id, deletedAt: null },
+    });
+
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
 
     department.deletedAt = new Date();
-  await this.departmentRepository.save(department);
-  return;
-}
+    await this.departmentRepository.save(department);
+    return;
+  }
 
   async restoreDepartment(id: DepartmentId) {
-  await this.validateDepartmentId(id);
+    await this.validateDepartmentId(id);
 
-  const department = await this.departmentRepository.findOne({
-    where: { id, deletedAt: Not(IsNull()) },
-  });
+    const department = await this.departmentRepository.findOne({
+      where: { id, deletedAt: Not(IsNull()) },
+      withDeleted: true,
+    });
 
-  if (!department) {
-    throw new NotFoundException(`Department #${id} not found`);
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
+
+    department.deletedAt = null;
+    return this.toDepartmentResponseDto(await this.departmentRepository.save(department));
   }
 
-  department.deletedAt = null;
-  return this.toDepartmentResponseDto(await this.departmentRepository.save(department));
-}
+  async partialUpdate(id: DepartmentId, partialData: Partial<UpdateDepartmentDto>): Promise<DepartmentResponseDto> {
+    await this.validateDepartmentId(id);
 
-  async permanentlyDeleteDepartment(id: DepartmentId) {
-  await this.validateDepartmentId(id);
+    const department = await this.departmentRepository.findOne({
+      where: { id, deletedAt: null },
+    });
 
-  const department = await this.departmentRepository.findOne({
-    where: { id },
-  });
+    if (!department) {
+      throw new NotFoundException(`Department #${id} not found`);
+    }
 
-  if (!department) {
-    throw new NotFoundException(`Department #${id} not found`);
+    // Update only the provided fields
+    if (partialData.name) {
+      await this.validateNameLength(partialData.name);
+      await this.validateUniqueName(partialData.name);
+      department.name = partialData.name;
+    }
+
+    department.updatedAt = new Date();
+    await this.departmentRepository.save(department);
+    return this.toDepartmentResponseDto(department);
   }
 
-  return this.departmentRepository.delete(id);
-}
+  //   async permanentlyDeleteDepartment(id: DepartmentId) {
+  //     await this.validateDepartmentId(id);
+
+  //     const department = await this.departmentRepository.findOne({
+  //       where: { id },
+  //     });
+
+  //     if (!department) {
+  //       throw new NotFoundException(`Department #${id} not found`);
+  //     }
+
+  //     return this.departmentRepository.delete(id);
+  //   }
 }

@@ -3,6 +3,7 @@ import { PermissionService } from './permission.service';
 import { CreatePermissionDto, UpdatePermissionDto, PermissionResponseDto } from './permission.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @ApiTags('Permissions')
 @Controller('permissions')
@@ -11,6 +12,7 @@ export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: PermissionResponseDto })
   async create(@Body() dto: CreatePermissionDto): Promise<PermissionResponseDto> {
@@ -19,6 +21,7 @@ export class PermissionController {
   }
 
   @Get()
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [PermissionResponseDto] })
   async findAll(): Promise<PermissionResponseDto[]> {
@@ -27,6 +30,7 @@ export class PermissionController {
   }
 
   @Get(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
   async findOne(@Param('id') id: string): Promise<PermissionResponseDto> {
@@ -35,6 +39,7 @@ export class PermissionController {
   }
 
   @Patch(':id' )
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
   async update(@Param('id') id: string, @Body() dto: UpdatePermissionDto): Promise<PermissionResponseDto> {
@@ -43,6 +48,7 @@ export class PermissionController {
   }
 
   @Delete(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
   async remove(@Param('id') id: string): Promise<PermissionResponseDto> {

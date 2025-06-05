@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersItemsService } from './users-items.service';
 import { UsersItemEntity } from '../database/entity/users-items.entity';
@@ -7,15 +7,19 @@ import { UsersItemRequestEntity } from '../database/entity/users-items-requests.
 import { ItemRequestStatus } from '../constants/item-request-status.enum';
 import { UserItemResponseDto } from './users-items.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Users Items')
 @Controller('users-items')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersItemsController {
   constructor(private readonly usersItemsService: UsersItemsService) { }
 
   // แสดงรายการอุปกรณ์ทั้งหมด
   @Get()
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserItemResponseDto] })
   async findAll(): Promise<UserItemResponseDto[]> {
     const items = await this.usersItemsService.findAll();
@@ -24,6 +28,8 @@ export class UsersItemsController {
 
   // แสดงรายการอุปกรณ์ตาม ID
   @Get(':id')
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async findOne(@Param('id') id: string): Promise<UserItemResponseDto> {
     const item = await this.usersItemsService.findOne(id);
@@ -32,6 +38,8 @@ export class UsersItemsController {
 
   // สร้างรายการอุปกรณ์ใหม่
   @Post()
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UserItemResponseDto })
   async create(@Body() item: Partial<UsersItemEntity>): Promise<UserItemResponseDto> {
     const createdItem = await this.usersItemsService.create(item);
@@ -40,6 +48,8 @@ export class UsersItemsController {
 
   // อัพเดทรายการอุปกรณ์
   @Put(':id')
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async update(
     @Param('id') id: string,
@@ -51,6 +61,8 @@ export class UsersItemsController {
 
   // ลบรายการอุปกรณ์
   @Delete(':id')
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async remove(@Param('id') id: string): Promise<void> {
     return this.usersItemsService.remove(id);
@@ -58,6 +70,8 @@ export class UsersItemsController {
 
   // สร้างคำร้องขออุปกรณ์
   @Post('requests')
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UsersItemRequestEntity })
   async createRequest(
     @Req() req,
@@ -69,6 +83,8 @@ export class UsersItemsController {
 
   // อัพเดทสถานะคำร้องขอ
   @Put('requests/:requestId/approve')
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UsersItemRequestEntity })
   async approveRequest(
     @Param('requestId') requestId: string,
@@ -84,6 +100,8 @@ export class UsersItemsController {
 
   // แสดงรายการคำร้องขอทั้งหมด
   @Get('requests')
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UsersItemRequestEntity] })
   async findRequests(): Promise<UsersItemRequestEntity[]> {
     return this.usersItemsService.findAllRequests();
@@ -91,6 +109,8 @@ export class UsersItemsController {
 
   // แสดงรายการคำร้องขอของผู้ใช้
   @Get('requests/user')
+  @Roles('role-admin', 'role-employee')
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UsersItemRequestEntity] })
   async findUserRequests(@Req() req): Promise<UsersItemRequestEntity[]> {
     return this.usersItemsService.findAllRequests();

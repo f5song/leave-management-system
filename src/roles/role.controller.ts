@@ -3,6 +3,7 @@ import { RoleService } from './role.service';
 import { CreateRoleDto, UpdateRoleDto, RoleResponseDto } from './role.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -10,7 +11,8 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  @Post()
+  @Post() 
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: RoleResponseDto })
   async create(@Body() createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
@@ -19,6 +21,7 @@ export class RoleController {
   }
 
   @Get()
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [RoleResponseDto] })
   async findAll(): Promise<RoleResponseDto[]> {
@@ -27,6 +30,7 @@ export class RoleController {
   }
 
   @Get(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: RoleResponseDto })
   async findOne(@Param('id') id: string): Promise<RoleResponseDto> {
@@ -35,6 +39,7 @@ export class RoleController {
   }
 
   @Put(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: RoleResponseDto })
   async update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto): Promise<RoleResponseDto> {
@@ -43,6 +48,7 @@ export class RoleController {
   }
 
   @Patch(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: RoleResponseDto })
   async partialUpdate(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto): Promise<RoleResponseDto> {
@@ -51,6 +57,7 @@ export class RoleController {
   }
 
   @Delete(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse()
   async remove(@Param('id') id: string): Promise<RoleResponseDto> {

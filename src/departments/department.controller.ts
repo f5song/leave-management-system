@@ -8,26 +8,31 @@ import {
   Body,
   UsePipes,
   ValidationPipe,
+  Patch,
 } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import {
   CreateDepartmentDto,
   UpdateDepartmentDto,
   DepartmentResponseDto,
+  PartialUpdateDepartmentDto,
 } from './department.dto';
 import { DepartmentId } from 'src/constants/department.enum';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Departments')
 @Controller('departments')
 @UsePipes(new ValidationPipe({ transform: true }))
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) { }
 
   @Post()
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: DepartmentResponseDto })
   async create(
@@ -38,6 +43,7 @@ export class DepartmentController {
   }
 
   @Get()
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [DepartmentResponseDto] })
   async findAll(): Promise<DepartmentResponseDto[]> {
@@ -47,6 +53,7 @@ export class DepartmentController {
 
 
   @Get(':id')
+  @Roles('role-admin', 'role-employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: DepartmentResponseDto })
   async findOne(@Param('id') id: DepartmentId): Promise<DepartmentResponseDto> {
@@ -55,6 +62,7 @@ export class DepartmentController {
   }
 
   @Put(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: DepartmentResponseDto })
   async update(
@@ -68,7 +76,23 @@ export class DepartmentController {
     return this.departmentService.toDepartmentResponseDto(updatedDepartment);
   }
 
+  @Patch(':id')
+  @Roles('role-admin')
+  @ApiBearerAuth('access-token')
+  @ApiOkResponse({ type: DepartmentResponseDto })
+  async partialUpdate(
+    @Param('id') id: DepartmentId,
+    @Body() partialData: PartialUpdateDepartmentDto,
+  ): Promise<DepartmentResponseDto> {
+    const updatedDepartment = await this.departmentService.partialUpdate(
+      id,
+      partialData,
+    );
+    return this.departmentService.toDepartmentResponseDto(updatedDepartment);
+  }
+
   @Delete(':id')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: DepartmentResponseDto })
   async remove(@Param('id') id: DepartmentId): Promise<void> {
@@ -76,6 +100,7 @@ export class DepartmentController {
   }
 
   @Delete(':id/restore')
+  @Roles('role-admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: DepartmentResponseDto })
   async restoreDepartment(
@@ -85,12 +110,13 @@ export class DepartmentController {
     return this.departmentService.toDepartmentResponseDto(restoredDepartment);
   }
 
-  @Delete(':id/permanent')
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: DepartmentResponseDto })
-  async permanentlyDeleteDepartment(
-    @Param('id') id: DepartmentId,
-  ): Promise<void> {
-    await this.departmentService.permanentlyDeleteDepartment(id);
-  }
+  // @Delete(':id/permanent')
+  // @Roles('role-admin')
+  // @ApiBearerAuth('access-token')
+  // @ApiOkResponse({ type: DepartmentResponseDto })
+  // async permanentlyDeleteDepartment(
+  //   @Param('id') id: DepartmentId,
+  // ): Promise<void> {
+  //   await this.departmentService.permanentlyDeleteDepartment(id);
+  // }
 }
