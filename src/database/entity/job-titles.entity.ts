@@ -9,15 +9,15 @@ import {
   OneToMany,
 } from 'typeorm';
 import { DepartmentEntity } from './departments.entity';
-import { JobTitleId } from '../../constants/jobtitle.enum';
-import { DepartmentId } from 'src/constants/department.enum';
+import { EJobTitleId } from '@common/constants/jobtitle.enum';
+import { EDepartmentId } from '@common/constants/department.enum';
 import { UserEntity } from './users.entity';
 
 @Entity('job_titles')
 export class JobTitleEntity {
 
-  @PrimaryColumn({ type: 'enum', enum: JobTitleId })
-  id: JobTitleId;
+  @PrimaryColumn({ type: 'enum', enum: EJobTitleId })
+  id: EJobTitleId;
 
   @Column({ unique: true })
   name: string;
@@ -25,8 +25,8 @@ export class JobTitleEntity {
   @Column()
   color: string;
 
-  @Column({ type: 'enum', enum: DepartmentId })
-  departmentId: DepartmentId;
+  @Column({ type: 'enum', enum: EDepartmentId })
+  departmentId: EDepartmentId;
 
   @ManyToOne(() => DepartmentEntity, (department) => department.id)
   @JoinColumn({ name: 'department_id' })

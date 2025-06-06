@@ -6,10 +6,10 @@ import {
   PrimaryGeneratedColumn,
   OneToMany
 } from 'typeorm';
-import { ItemCategoryId } from '../../constants/item-category.enum';
+import { EItemCategoryId } from '@common/constants/item-category.enum';
 import { UserEntity } from './users.entity';
-import { ItemStatus } from '../../constants/item-status.enum';
-import { UnitType } from '../../constants/item-unit.enum';
+import { EItemStatus } from '@common/constants/item-status.enum';
+import { EUnitType } from '@common/constants/item-unit.enum';
 import { UsersItemRequestEntity } from './users-items-requests.entity';
 
 @Entity('users_items')
@@ -17,9 +17,6 @@ export class UsersItemEntity {
 
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({ type: 'enum', enum: ItemCategoryId })
-  categoryId: ItemCategoryId;
 
   @Column()
   name: string;
@@ -30,11 +27,8 @@ export class UsersItemEntity {
   @Column({ default: 0 })
   quantity: number;
 
-  @Column({ type: 'enum', enum: UnitType, default: UnitType.PIECE })
-  unit: UnitType;
-
-  @Column({ type: 'enum', enum: ItemStatus, default: ItemStatus.AVAILABLE })
-  status: ItemStatus;
+  @Column({ type: 'enum', enum: EItemStatus, default: EItemStatus.AVAILABLE })
+  status: EItemStatus;
 
   @Column({ name: 'created_by', type: 'uuid' })
   createdById: string;
@@ -54,6 +48,5 @@ export class UsersItemEntity {
 
   @OneToMany(() => UsersItemRequestEntity, request => request.item)
   itemRequests: UsersItemRequestEntity[];
-
 
 }

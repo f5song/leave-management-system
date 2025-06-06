@@ -1,0 +1,6 @@
+export enum EItemCategoryId {
+    IT_EQUIPMENT = 'IT_EQUIPMENT',
+    FURNITURE = 'FURNITURE',
+    STATIONERY = 'STATIONERY',
+    OTHER = 'OTHER',
+}

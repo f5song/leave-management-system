@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { UsersItemRequestEntity } from './users-items-requests.entity';
 import { UserEntity } from './users.entity';
-import { ItemRequestStatus } from '../../constants/item-request-status.enum';
+import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
 
 @Entity('users_items_requests_history')
 export class UsersItemsRequestsHistoryEntity {
@@ -11,32 +11,27 @@ export class UsersItemsRequestsHistoryEntity {
   @Column('uuid', { nullable: false })
   requestId: string;
 
+  @Column('uuid', { nullable: true })
+  actionBy: UserEntity;
+
+  @Column('enum', { enum: EItemRequestStatus, nullable: false })
+  actionType: EItemRequestStatus;
+
+  @CreateDateColumn({ name: 'action_at'})
+  actionAt: Date;
+
+  @Column()
+  borrow_start_date: Date;
+
+  @Column()
+  borrow_end_date: Date;
+
   @ManyToOne(() => UsersItemRequestEntity, (request) => request.history)
   @JoinColumn({ name: 'request_id' })
   request: UsersItemRequestEntity;
-
-  @Column('uuid', { nullable: true })
-  actionBy: UserEntity;
 
   @ManyToOne(() => UserEntity, (user) => user.actionedRequestsHistory)
   @JoinColumn({ name: 'action_by' })
   actionedBy: UserEntity;
 
-  @Column('enum', { enum: ItemRequestStatus, nullable: false })
-  actionType: ItemRequestStatus;
-
-  @Column('enum', { enum: ItemRequestStatus, nullable: false })
-  oldStatus: ItemRequestStatus;
-
-  @CreateDateColumn({ name: 'action_at'})
-  actionAt: Date;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
-
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt: Date;
 }

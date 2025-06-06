@@ -20,8 +20,8 @@ import { HolidayEntity } from './holidays.entity';
 import { UsersItemRequestEntity } from './users-items-requests.entity';
 import { UsersFacilityRequestEntity } from './users-facility-requests.entity';
 import { UsersItemsRequestsHistoryEntity } from './users-items-requests-histories.entity';
-import { JobTitleId } from 'src/constants/jobtitle.enum';
-import { DepartmentId } from 'src/constants/department.enum';
+import { EJobTitleId } from '@common/constants/jobtitle.enum';
+import { EDepartmentId } from '@common/constants/department.enum';
 
 @Entity('users')
 export class UserEntity {
@@ -59,11 +59,11 @@ export class UserEntity {
   @Column({ name: 'role_id', default: 'role-employee' })
   roleId: string;
 
-  @Column({ name: 'job_title_id', type: 'enum', enum: JobTitleId, nullable: true })
-  jobTitleId?: JobTitleId;
+  @Column({ name: 'job_title_id', type: 'enum', enum: EJobTitleId, nullable: true })
+  jobTitleId?: EJobTitleId;
 
-  @Column({ name: 'department_id', type: 'enum', enum: DepartmentId, nullable: true })
-  departmentId?: DepartmentId;
+  @Column({ name: 'department_id', type: 'enum', enum: EDepartmentId, nullable: true })
+  departmentId?: EDepartmentId;
 
   // ✅ Self-referencing: คนที่อนุมัติ user คนนี้
   @Column({ name: 'approved_by', type: 'uuid', nullable: true })

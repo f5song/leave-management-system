@@ -1,12 +1,12 @@
 import { LeaveEntity } from './leaves.entity';
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, PrimaryColumn, OneToMany } from 'typeorm';
-import { LeaveType } from '../../constants/leave-type.enum';
+import { ELeaveType } from '@common/constants/leave-type.enum';
 
 @Entity('leave_types')
 export class LeaveTypeEntity {
 
-  @PrimaryColumn('enum', { enum: LeaveType, default: LeaveType.ANNUAL })
-  id: LeaveType;
+  @PrimaryColumn('enum', { enum: ELeaveType, default: ELeaveType.ANNUAL })
+  id: ELeaveType;
 
   @Column()
   name: string;

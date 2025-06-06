@@ -1,12 +1,12 @@
 import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
-import { DepartmentId } from '../../constants/department.enum';
+import { EDepartmentId } from '@common/constants/department.enum';
 import { UserEntity } from './users.entity';
 import { JobTitleEntity } from './job-titles.entity';
 
 @Entity('departments')
 export class DepartmentEntity {
-  @PrimaryColumn({ type: 'enum', enum: DepartmentId })
-  id: DepartmentId;
+  @PrimaryColumn({ type: 'enum', enum: EDepartmentId })
+  id: EDepartmentId;
 
   @Column({ unique: true })
   name: string;

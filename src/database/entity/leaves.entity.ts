@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { LeaveTypeEntity } from './leave-types.entity';
 import { UserEntity } from './users.entity';
-import { LeaveType } from '../../constants/leave-type.enum';
-import { LeaveStatus } from '../../constants/leave-status.enum';
+import { ELeaveType } from '@common/constants/leave-type.enum';
+import { ELeaveStatus } from '@common/constants/leave-status.enum';
 
 @Entity('leaves')
 export class LeaveEntity {
@@ -42,10 +42,10 @@ export class LeaveEntity {
 
   @Column({
     type: 'enum',
-    enum: LeaveType,
+    enum: ELeaveType,
     name: 'leave_type_id'
   })
-  leaveTypeId: LeaveType;
+  leaveTypeId: ELeaveType;
 
   @ManyToOne(() => LeaveTypeEntity, (type) => type.id)
   @JoinColumn({ name: 'leave_type_id' })
@@ -53,10 +53,10 @@ export class LeaveEntity {
 
   @Column({
     type: 'enum',
-    enum: LeaveStatus,
-    default: LeaveStatus.PENDING,
+    enum: ELeaveStatus,
+    default: ELeaveStatus.PENDING,
   })
-  status: LeaveStatus;
+  status: ELeaveStatus;
 
   @Column({ name: 'action_by', type: 'uuid', nullable: true })
   actionBy?: string;
