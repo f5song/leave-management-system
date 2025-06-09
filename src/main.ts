@@ -4,9 +4,14 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { swaggerConfig } from './swagger/swagger.config';
+import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
+import { SeedService } from './database/seed/seed.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  await app.get(SeedService).seed();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);

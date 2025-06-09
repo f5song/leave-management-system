@@ -1,6 +1,7 @@
 import { IsNumber, IsString, IsNotEmpty, IsOptional, IsDateString, IsUUID, IsArray } from "class-validator";
 import { EJobTitleId } from "@common/constants/jobtitle.enum";
 import { EDepartmentId } from "@common/constants/department.enum";
+import { ERole } from "@common/constants/roles.enum";
 
 export class UpdateUserDto {
   @IsString()
@@ -23,7 +24,7 @@ export class UpdateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  roleId: string;
+  roleId: ERole;
 
   @IsOptional()
   @IsString()
@@ -50,3 +51,4 @@ export class UpdateUserDto {
   @IsNumber()
   salary?: number;
 }
+

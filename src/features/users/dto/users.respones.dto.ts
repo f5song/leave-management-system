@@ -1,5 +1,6 @@
 import { EJobTitleId } from "@common/constants/jobtitle.enum";
 import { EDepartmentId } from "@common/constants/department.enum";
+import { ERole } from "@common/constants/roles.enum";
 
 export class UserResponseDto {
   id: string;
@@ -12,7 +13,7 @@ export class UserResponseDto {
   avatarUrl?: string;
   birthDate: Date;
   salary: number;
-  roleId: string;
+  roleId: ERole;
   jobTitleId: EJobTitleId;
   departmentId: EDepartmentId;
   approvedBy?: string;

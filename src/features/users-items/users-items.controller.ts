@@ -21,7 +21,7 @@ export class UsersItemsController {
 
   // แสดงรายการอุปกรณ์ทั้งหมด
   @Get()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserItemResponseDto] })
   async findAll(): Promise<UserItemResponseDto[]> {
@@ -31,7 +31,7 @@ export class UsersItemsController {
 
   // แสดงรายการอุปกรณ์ตาม ID
   @Get(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async findOne(@Param('id') id: string): Promise<UserItemResponseDto> {
@@ -40,7 +40,7 @@ export class UsersItemsController {
   }
 
   // สร้างรายการอุปกรณ์ใหม่
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UserItemResponseDto })
   async create(@Body() item: CreateItemDto): Promise<UserItemResponseDto> {
@@ -49,7 +49,7 @@ export class UsersItemsController {
 
   // อัพเดทรายการอุปกรณ์
   @Put(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async update(
@@ -62,7 +62,7 @@ export class UsersItemsController {
 
   // ลบรายการอุปกรณ์
   @Delete(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async remove(@Param('id') id: string): Promise<void> {
@@ -71,7 +71,7 @@ export class UsersItemsController {
 
   // สร้างคำร้องขออุปกรณ์
   @Post('requests')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: ItemRequestResponseDto })
   async createRequest(
@@ -84,7 +84,7 @@ export class UsersItemsController {
 
   // อัพเดทสถานะคำร้องขอ
   @Put('requests/:requestId/approve')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemRequestResponseDto })
   async approveRequest(
@@ -102,7 +102,7 @@ export class UsersItemsController {
 
   // แสดงรายการคำร้องขอทั้งหมด
   @Get('requests')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UsersItemRequestEntity] })
   async findRequests(): Promise<UsersItemRequestEntity[]> {
@@ -111,7 +111,7 @@ export class UsersItemsController {
 
   // แสดงรายการคำร้องขอของผู้ใช้
   @Get('requests/user')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UsersItemRequestEntity] })
   async findUserRequests(@Req() req): Promise<UsersItemRequestEntity[]> {

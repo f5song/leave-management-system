@@ -1,22 +1,12 @@
-import {
-  Entity,
-  PrimaryColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
-import { DepartmentEntity } from './departments.entity';
-import { EJobTitleId } from '@common/constants/jobtitle.enum';
-import { EDepartmentId } from '@common/constants/department.enum';
-import { UserEntity } from './users.entity';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from "typeorm";
+import { EJobTitleId } from "@common/constants/jobtitle.enum";
+import { DepartmentEntity } from "./departments.entity";
+import { UserEntity } from "./users.entity";
+import { EDepartmentId } from "@src/common/constants/department.enum";
 
 @Entity('job_titles')
 export class JobTitleEntity {
-
-  @PrimaryColumn({ type: 'enum', enum: EJobTitleId })
+  @PrimaryColumn({ type: 'varchar', length: 50 })
   id: EJobTitleId;
 
   @Column({ unique: true })
@@ -25,12 +15,9 @@ export class JobTitleEntity {
   @Column()
   color: string;
 
-  @Column({ type: 'enum', enum: EDepartmentId })
-  departmentId: EDepartmentId;
-
   @ManyToOne(() => DepartmentEntity, (department) => department.id)
   @JoinColumn({ name: 'department_id' })
-  department: DepartmentEntity;
+  departmentId: EDepartmentId;
 
   @Column({ type: 'timestamp', nullable: true, name: 'deleted_at' })
   deletedAt: Date | null;

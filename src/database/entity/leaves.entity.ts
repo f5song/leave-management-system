@@ -41,8 +41,8 @@ export class LeaveEntity {
   totalDays: number;
 
   @Column({
-    type: 'enum',
-    enum: ELeaveType,
+    type: 'varchar',
+    length: 50,
     name: 'leave_type_id'
   })
   leaveTypeId: ELeaveType;

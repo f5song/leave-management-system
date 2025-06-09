@@ -11,6 +11,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/guards/roles.decorator';
 
 @ApiTags('Job Titles')
+@ApiBearerAuth('access-token')
 @Controller('job-titles')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(ClassSerializerInterceptor)
@@ -18,31 +19,27 @@ export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) {}
 
   @Get()
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [JobTitleEntity] })
   async findAll(): Promise<JobTitleEntity[]> {
     return this.jobTitleService.findAll();
   }
 
   @Get(':id')
-  @Roles('role-admin', 'role-employee')
-  @ApiBearerAuth('access-token')
+  @Roles('admin', 'employee')
   @ApiOkResponse({ type: JobTitleEntity })
   async findOne(@Param('id') id: EJobTitleId): Promise<JobTitleEntity> {
     return this.jobTitleService.findOne(id);
   }
 
   @Post()
-  @Roles('role-admin')
-  @ApiBearerAuth('access-token')
+  @Roles('admin')
   @ApiCreatedResponse({ type: JobTitleEntity })
   async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<JobTitleEntity> {
     return this.jobTitleService.create(createJobTitleDto);
   }
 
   @Put(':id')
-  @Roles('role-admin')
-  @ApiBearerAuth('access-token')
+  @Roles('admin')
   @ApiOkResponse({ type: JobTitleEntity })
   async update(
     @Param('id') id: EJobTitleId,
@@ -52,8 +49,7 @@ export class JobTitleController {
   }
 
   @Delete(':id')
-  @Roles('role-admin')
-  @ApiBearerAuth('access-token')
+  @Roles('admin')
   @ApiOkResponse({ type: JobTitleEntity })
   async remove(@Param('id') id: EJobTitleId): Promise<void> {
     await this.jobTitleService.remove(id);

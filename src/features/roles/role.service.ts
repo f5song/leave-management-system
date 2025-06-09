@@ -6,6 +6,7 @@ import { UserEntity } from '../../database/entity/users.entity';
 import { CreateRoleDto } from './dto/create.roles.dto';
 import { UpdateRoleDto } from './dto/update.roles.dto';
 import { RoleResponseDto } from './dto/roles.respones.dto';
+import { ERole } from '@src/common/constants/roles.enum';
 
 @Injectable()
 export class RoleService {
@@ -32,7 +33,7 @@ export class RoleService {
     };
   }
 
-  private async validateRoleId(id: string): Promise<void> {
+  private async validateRoleId(id: ERole): Promise<void> {
     const role = await this.roleRepository.findOne({
       where: { id },
     });
@@ -77,7 +78,7 @@ export class RoleService {
     });
   }
 
-  async findOne(id: string): Promise<RoleEntity> {
+  async findOne(id: ERole): Promise<RoleEntity> {
     await this.validateRoleId(id);
     const role = await this.roleRepository.findOne({
       where: { id, deletedAt: null },
@@ -109,7 +110,7 @@ export class RoleService {
     });
   }
 
-  async update(id: string, data: UpdateRoleDto): Promise<RoleEntity> {
+  async update(id: ERole, data: UpdateRoleDto): Promise<RoleEntity> {
     await this.validateRoleId(id);
     
     if (data.name) {
@@ -133,7 +134,7 @@ export class RoleService {
     return this.roleRepository.save(role);
   }
 
-  async remove(id: string): Promise<RoleEntity> {
+  async remove(id: ERole): Promise<RoleEntity> {
     await this.validateRoleId(id);
     
     const role = await this.roleRepository.findOne({

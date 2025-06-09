@@ -17,7 +17,7 @@ export class LeaveTypeController {
   constructor(private readonly leaveTypeService: LeaveTypeService) { }
 
   @Post()
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: LeaveTypeResponseDto })
   async create(@Body() createLeaveTypeDto: CreateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
@@ -26,7 +26,7 @@ export class LeaveTypeController {
   }
 
   @Get()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveTypeResponseDto] })
   async findAll(): Promise<LeaveTypeResponseDto[]> {
@@ -35,7 +35,7 @@ export class LeaveTypeController {
   }
 
   @Get(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async findOne(@Param('id') id: ELeaveType): Promise<LeaveTypeResponseDto> {
@@ -44,7 +44,7 @@ export class LeaveTypeController {
   }
 
   @Put(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async update(
@@ -56,7 +56,7 @@ export class LeaveTypeController {
   }
 
   @Patch(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async partialUpdate(@Param('id') id: ELeaveType, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
@@ -65,7 +65,7 @@ export class LeaveTypeController {
   }
   
   @Delete(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async remove(@Param('id') id: ELeaveType): Promise<void> {
@@ -73,7 +73,7 @@ export class LeaveTypeController {
   }
 
   @Post(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveTypeResponseDto })
   async restore(@Param('id') id: ELeaveType): Promise<LeaveTypeResponseDto> {

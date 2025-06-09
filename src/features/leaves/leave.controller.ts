@@ -31,7 +31,7 @@ export class LeaveController {
   constructor(private readonly leaveService: LeaveService) { }
 
   @Post()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: LeaveResponseDto })
   async create(
@@ -43,7 +43,7 @@ export class LeaveController {
   }
 
   @Get('me')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   async getMyLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
@@ -52,7 +52,7 @@ export class LeaveController {
   }
 
   @Get()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   async getAllLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
@@ -61,7 +61,7 @@ export class LeaveController {
   }
 
   @Patch(':id/details')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateDetails(
@@ -74,7 +74,7 @@ export class LeaveController {
   }
 
   @Patch(':id/status')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateStatus(
@@ -87,7 +87,7 @@ export class LeaveController {
   }
 
   @Delete(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async delete(@Param('id') id: string): Promise<void> {

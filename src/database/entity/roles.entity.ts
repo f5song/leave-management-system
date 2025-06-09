@@ -1,6 +1,5 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
@@ -10,14 +9,16 @@ import {
   ManyToMany,
   JoinTable,
   JoinColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { PermissionEntity } from './permissions.entity';
+import { ERole } from '@common/constants/roles.enum';
 
 @Entity('roles')
 export class RoleEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn({ type: 'varchar', length: 50 })
+  id: ERole;
 
   @Column()
   name: string;

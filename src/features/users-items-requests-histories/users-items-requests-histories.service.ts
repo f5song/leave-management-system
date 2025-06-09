@@ -22,7 +22,7 @@ export class UsersItemsRequestsHistoriesService {
     return {
       id: entity.id,
       requestId: entity.requestId,
-      actionBy: entity.actionBy.id,
+      actionBy: entity.actionBy,
       actionType: entity.actionType,
       actionAt: entity.actionAt,
       borrow_start_date: entity.borrow_start_date,

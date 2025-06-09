@@ -69,7 +69,7 @@ export class UsersItemsRequestsService {
     // Create history record
     const history = this.historyRepository.create({
       requestId: itemRequest.id,
-      actionBy: { id: approvedBy },
+      actionBy: approvedBy,
       actionType: EItemRequestStatus.APPROVED,
     });
     await this.historyRepository.save(history);
@@ -86,7 +86,7 @@ export class UsersItemsRequestsService {
     // Create history record
     const history = this.historyRepository.create({
       requestId: itemRequest.id,
-      actionBy: { id: approvedBy },
+      actionBy: approvedBy,
       actionType: EItemRequestStatus.REJECTED,
     });
     await this.historyRepository.save(history);
@@ -113,7 +113,7 @@ export class UsersItemsRequestsService {
     // Create history record
     const history = this.historyRepository.create({
       requestId: itemRequest.id,
-      actionBy: { id: itemRequest.requestedBy.id },
+      actionBy:   itemRequest.requestedBy.id,
       actionType: EItemRequestStatus.REJECTED,
     });
 

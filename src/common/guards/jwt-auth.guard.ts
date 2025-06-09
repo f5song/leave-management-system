@@ -7,11 +7,4 @@ export class JwtAuthGuard extends AuthGuard(EAuthGuard.JWT) {
     canActivate(context: ExecutionContext) {
         return super.canActivate(context);
     }
-
-    handleRequest(err: any, user: any) {
-        if (err || !user) {
-            throw err || new UnauthorizedException('Unauthorized access.');
-        }
-        return user;
-    }
 }

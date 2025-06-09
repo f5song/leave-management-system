@@ -3,7 +3,7 @@ import { JobTitleEntity } from "@src/database/entity/job-titles.entity";
 import { UserEntity } from "@src/database/entity/users.entity";
 
 export class DepartmentResponseDto {
-  id: EDepartmentId;
+  id: string;
   name: string;
   color: string;
   createdAt: Date;

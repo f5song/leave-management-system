@@ -18,7 +18,7 @@ export class HolidayController {
   constructor(private readonly holidayService: HolidayService) {}
 
   @Get()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [HolidayResponseDto] })
   async findAll(): Promise<HolidayResponseDto[]> {
@@ -27,7 +27,7 @@ export class HolidayController {
   }
 
   @Get(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   async findOne(@Param('id') id: string): Promise<HolidayResponseDto> {
@@ -36,7 +36,7 @@ export class HolidayController {
   }
 
   @Post()
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: HolidayResponseDto })
   async create(@Body() createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
@@ -45,7 +45,7 @@ export class HolidayController {
   }
 
   @Put(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   async update(
@@ -57,7 +57,7 @@ export class HolidayController {
   }
 
   @Delete(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   @HttpCode(HttpStatus.NO_CONTENT)

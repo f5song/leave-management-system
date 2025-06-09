@@ -10,6 +10,7 @@ import { EJobTitleId } from '@common/constants/jobtitle.enum';
 import { EDepartmentId } from '@common/constants/department.enum';
 import { UpdateUserDto } from './dto/update.users.dto';
 import { UserResponseDto } from './dto/users.respones.dto';
+import { ERole } from '@src/common/constants/roles.enum';
 
 @Injectable()
 export class UserService {
@@ -102,7 +103,7 @@ export class UserService {
     }
   }
 
-  private async validateRole(roleId: string): Promise<void> {
+  private async validateRole(roleId: ERole): Promise<void> {
 
     const role = await this.roleRepository.findOne({
       where: { id: roleId },

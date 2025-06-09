@@ -5,7 +5,7 @@ import { ELeaveType } from '@common/constants/leave-type.enum';
 @Entity('leave_types')
 export class LeaveTypeEntity {
 
-  @PrimaryColumn('enum', { enum: ELeaveType, default: ELeaveType.ANNUAL })
+  @PrimaryColumn({ type: 'varchar', length: 50 })
   id: ELeaveType;
 
   @Column()

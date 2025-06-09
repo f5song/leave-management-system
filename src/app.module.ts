@@ -29,6 +29,7 @@ import { UsersItemsRequestsHistoriesModule } from './features/users-items-reques
 import { UsersItemsModule } from './features/users-items/users-items.module';
 import { UsersFacilityRequestsModule } from './features/users-facility-requests/users-facility-requests.module';
 import { UsersItemEntity } from './database/entity/users-items.entity';
+import { SeedService } from './database/seed/seed.service';
 
 @Module({
   imports: [
@@ -66,6 +67,6 @@ import { UsersItemEntity } from './database/entity/users-items.entity';
     ]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SeedService],
 })
 export class AppModule { }

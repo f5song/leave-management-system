@@ -4,6 +4,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { UserEntity } from '../../database/entity/users.entity';
+import { ERole } from '@src/common/constants/roles.enum';
 
 
 @Injectable()
@@ -80,7 +81,7 @@ export class AuthService {
         lastName: lastName,
         googleId: googleUser.googleId,
         avatarUrl: googleUser.picture,
-        roleId: 'role-employee',
+        roleId: ERole.EMPLOYEE,
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -134,7 +135,7 @@ export class AuthService {
         email: googleUser.email,
         googleId: googleUser.sub,
         avatarUrl: googleUser.picture,
-        roleId: 'role-employee',
+        roleId: ERole.EMPLOYEE,
         createdAt: new Date(),
         updatedAt: new Date()
       });

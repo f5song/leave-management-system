@@ -15,7 +15,7 @@ export class FacilityRequestsController {
   constructor(private readonly facilityRequestsService: FacilityRequestsService) {}
 
   @Post()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: FacilityRequestResponseDto })
   async create(@Body() dto: CreateFacilityRequestDto): Promise<FacilityRequestResponseDto> {
@@ -23,7 +23,7 @@ export class FacilityRequestsController {
   }
 
   @Get()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [FacilityRequestResponseDto] })
   async findAll(): Promise<FacilityRequestResponseDto[]> {
@@ -31,7 +31,7 @@ export class FacilityRequestsController {
   }
 
   @Get(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: FacilityRequestResponseDto })
   async findOne(@Param('id') id: string): Promise<FacilityRequestResponseDto> {
@@ -39,7 +39,7 @@ export class FacilityRequestsController {
   }
 
   @Patch(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: FacilityRequestResponseDto })
   async update(@Param('id') id: string, @Body() dto: UpdateFacilityRequestDto): Promise<FacilityRequestResponseDto> {
@@ -47,7 +47,7 @@ export class FacilityRequestsController {
   }
 
   @Delete(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: FacilityRequestResponseDto })
   async remove(@Param('id') id: string): Promise<FacilityRequestResponseDto> {

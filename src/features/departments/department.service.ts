@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { DepartmentEntity } from '../../database/entity/departments.entity';
@@ -6,6 +6,7 @@ import { CreateDepartmentDto } from './dto/create.department.dto';
 import { UpdateDepartmentDto } from './dto/update.department.dto';
 import { DepartmentResponseDto } from './dto/department.response.dto';
 import { EDepartmentId } from '@common/constants/department.enum';
+import { errorMessage } from '@src/common/constants/error-message';
 
 @Injectable()
 export class DepartmentService {
@@ -29,10 +30,14 @@ export class DepartmentService {
     };
   }
 
-  async validateDepartmentId(id: EDepartmentId) {
-    const validIds = Object.values(EDepartmentId);
+  async validateDepartmentId(id: string) {
+    const validIds = Object.values(id);
     if (!validIds.includes(id)) {
-      throw new BadRequestException(`Invalid department ID: ${id}. Valid IDs are: ${validIds.join(', ')}`);
+      throw new HttpException({
+        message: errorMessage['0006'],
+        code: '0006',
+      },
+        HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -41,17 +46,16 @@ export class DepartmentService {
       where: { name, deletedAt: null },
     });
     if (existingDepartment) {
-      throw new BadRequestException('Department name already exists');
+    throw new HttpException({
+      message: errorMessage['0002'],
+      code: '0002',
+    },
+      HttpStatus.BAD_REQUEST);
     }
   }
 
-  async validateNameLength(name: string) {
-    if (name.length < 2 || name.length > 100) {
-      throw new BadRequestException('Department name must be between 2 and 100 characters');
-    }
-  }
 
-  async validateNoReferences(id: EDepartmentId): Promise<void> {
+  async validateNoReferences(id: string): Promise<void> {
     // ตรวจสอบว่ามี user ที่อ้างอิงถึงแผนกนี้หรือไม่
     const hasUsers = await this.departmentRepository
       .createQueryBuilder('department')
@@ -61,7 +65,11 @@ export class DepartmentService {
       .getOne();
 
     if (hasUsers) {
-      throw new BadRequestException('Cannot delete department that has users');
+      throw new HttpException({
+        message: errorMessage['0004'],
+        code: '0004',
+      },
+        HttpStatus.BAD_REQUEST);
     }
 
     // ตรวจสอบว่ามี job title ที่อ้างอิงถึงแผนกนี้หรือไม่
@@ -73,14 +81,17 @@ export class DepartmentService {
       .getOne();
 
     if (hasJobTitles) {
-      throw new BadRequestException('Cannot delete department that has job titles');
+      throw new HttpException({
+        message: errorMessage['0005'],
+        code: '0005',
+      },
+        HttpStatus.BAD_REQUEST);
     }
   }
 
   async create(createDepartmentDto: CreateDepartmentDto): Promise<DepartmentResponseDto> {
     const { name, color } = createDepartmentDto;
 
-    await this.validateNameLength(name);
     await this.validateUniqueName(name);
 
     const department = this.departmentRepository.create({
@@ -103,21 +114,24 @@ export class DepartmentService {
   }
 
 
-  async findOne(id: EDepartmentId): Promise<DepartmentResponseDto> {
+  async findOne(id: string): Promise<DepartmentResponseDto> {
     const department = await this.departmentRepository.findOne({
       where: { id, deletedAt: null },
     });
     if (!department) {
-      throw new NotFoundException(`Department #${id} not found`);
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
     }
     return this.toDepartmentResponseDto(department);
   }
 
-  async update(id: EDepartmentId, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
+  async update(id: string, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
     const { name, color } = updateDepartmentDto;
 
     await this.validateDepartmentId(id);
-    await this.validateNameLength(name);
     await this.validateUniqueName(name);
 
     const department = await this.departmentRepository.findOne({
@@ -125,7 +139,11 @@ export class DepartmentService {
     });
 
     if (!department) {
-      throw new NotFoundException(`Department #${id} not found`);
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
     }
 
     department.name = name;
@@ -136,7 +154,7 @@ export class DepartmentService {
     return this.toDepartmentResponseDto(department);
   }
 
-  async remove(id: EDepartmentId): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.validateDepartmentId(id);
     await this.validateNoReferences(id);
 
@@ -145,7 +163,11 @@ export class DepartmentService {
     });
 
     if (!department) {
-      throw new NotFoundException(`Department #${id} not found`);
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
     }
 
     department.deletedAt = new Date();
@@ -153,7 +175,7 @@ export class DepartmentService {
     return;
   }
 
-  async restoreDepartment(id: EDepartmentId) {
+  async restoreDepartment(id: string) {
     await this.validateDepartmentId(id);
 
     const department = await this.departmentRepository.findOne({
@@ -162,14 +184,18 @@ export class DepartmentService {
     });
 
     if (!department) {
-      throw new NotFoundException(`Department #${id} not found`);
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
     }
 
     department.deletedAt = null;
     return this.toDepartmentResponseDto(await this.departmentRepository.save(department));
   }
 
-  async partialUpdate(id: EDepartmentId, partialData: Partial<UpdateDepartmentDto>): Promise<DepartmentResponseDto> {
+  async partialUpdate(id: string, partialData: Partial<UpdateDepartmentDto>): Promise<DepartmentResponseDto> {
     await this.validateDepartmentId(id);
 
     const department = await this.departmentRepository.findOne({
@@ -177,12 +203,15 @@ export class DepartmentService {
     });
 
     if (!department) {
-      throw new NotFoundException(`Department #${id} not found`);
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
     }
 
     // Update only the provided fields
     if (partialData.name) {
-      await this.validateNameLength(partialData.name);
       await this.validateUniqueName(partialData.name);
       department.name = partialData.name;
     }
@@ -204,7 +233,11 @@ export class DepartmentService {
   //     });
 
   //     if (!department) {
-  //       throw new NotFoundException(`Department #${id} not found`);
+  //       throw new HttpException({
+  //         message: errorMessage['0001'],
+  //         code: '0001',
+  //       },
+  //         HttpStatus.BAD_REQUEST);
   //     }
 
   //     return this.departmentRepository.delete(id);

@@ -15,6 +15,7 @@ import { ELeaveType } from '@common/constants/leave-type.enum';
 import { ELeaveStatus } from '@common/constants/leave-status.enum';
 import { LeaveResponseDto } from './dto/leaves.respones.dto';
 import { UpdateLeaveDto } from './dto/update.leaves.dto';
+import { ERole } from '@src/common/constants/roles.enum';
   
   @Injectable()
   export class LeaveService {
@@ -107,7 +108,7 @@ import { UpdateLeaveDto } from './dto/update.leaves.dto';
         relations: ['roles', 'roles.permissions'],
       });
   
-      if (!approver || approver.roleId !== "Admin") {
+      if (!approver || approver.roleId !== ERole.ADMIN) {
         throw new ForbiddenException('You do not have permission to approve leave requests');
       }
     }
@@ -147,7 +148,7 @@ import { UpdateLeaveDto } from './dto/update.leaves.dto';
         where: { id: currentUserId },
       });
   
-      if (!currentUser || currentUser.roleId !== "Admin") {
+      if (!currentUser || currentUser.roleId !== ERole.ADMIN) {
         throw new ForbiddenException('Only admin can view all leave requests');
       }
   

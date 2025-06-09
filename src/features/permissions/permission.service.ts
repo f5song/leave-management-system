@@ -6,6 +6,8 @@ import { CreatePermissionDto } from './dto/create.permissions.dto';
 import { PermissionResponseDto } from './dto/permissions.respones.dto';
 import { UserEntity } from '../../database/entity/users.entity';
 import { UpdatePermissionDto } from './dto/update.permissions.dto';
+import { EPermission } from '@src/common/constants/permission.enum';
+import { ERole } from '@src/common/constants/roles.enum';
 
 @Injectable()
 export class PermissionService {
@@ -29,7 +31,7 @@ export class PermissionService {
       };
     }
 
-  private async validatePermissionId(id: string): Promise<void> {
+  private async validatePermissionId(id: EPermission): Promise<void> {
 
     const permission = await this.permissionRepository.findOne({
       where: { id },
@@ -97,7 +99,7 @@ export class PermissionService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: EPermission) {
     await this.validatePermissionId(id);
     return this.permissionRepository.findOne({
       where: { id, deletedAt: null },
@@ -105,7 +107,7 @@ export class PermissionService {
     });
   }
 
-  async update(id: string, dto: UpdatePermissionDto) {
+  async update(id: EPermission, dto: UpdatePermissionDto) {
     await this.validatePermissionId(id);
 
     if (dto.name) {
@@ -126,7 +128,7 @@ export class PermissionService {
     return await this.permissionRepository.save(permission);
   }
 
-  async softDelete(id: string) {
+  async softDelete(id: EPermission) {
     await this.validatePermissionId(id);
 
     const permission = await this.permissionRepository.findOne({
@@ -141,7 +143,7 @@ export class PermissionService {
     return await this.permissionRepository.save(permission);
   }
 
-  async getPermissionById(id: string) {
+  async getPermissionById(id: EPermission) {
     await this.validatePermissionId(id);
     return this.permissionRepository.findOne({
       where: { id },
@@ -149,10 +151,9 @@ export class PermissionService {
     });
   }
 
-  async getPermissionsByRole(roleId: string) {
+  async getPermissionsByRole(roleId: ERole) {
     return this.permissionRepository.createQueryBuilder('permission')
-      .leftJoinAndSelect('permission.rolePermissions', 'rolePermission')
-      .leftJoinAndSelect('rolePermission.role', 'role')
+      .leftJoinAndSelect('permission.roles', 'role')
       .where('role.id = :roleId', { roleId })
       .andWhere('role.deletedAt IS NULL')
       .andWhere('permission.deletedAt IS NULL')

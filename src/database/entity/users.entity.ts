@@ -22,6 +22,7 @@ import { UsersFacilityRequestEntity } from './users-facility-requests.entity';
 import { UsersItemsRequestsHistoryEntity } from './users-items-requests-histories.entity';
 import { EJobTitleId } from '@common/constants/jobtitle.enum';
 import { EDepartmentId } from '@common/constants/department.enum';
+import { ERole } from '@common/constants/roles.enum';
 
 @Entity('users')
 export class UserEntity {
@@ -56,13 +57,13 @@ export class UserEntity {
   @Column({ default: 0 })
   salary: number;
 
-  @Column({ name: 'role_id', default: 'role-employee' })
-  roleId: string;
+  @Column({ name: 'role_id', default: 'employee' , nullable: true})
+  roleId: ERole;
 
-  @Column({ name: 'job_title_id', type: 'enum', enum: EJobTitleId, nullable: true })
+  @Column({ name: 'job_title_id', type: 'varchar', length: 50, nullable: true })
   jobTitleId?: EJobTitleId;
 
-  @Column({ name: 'department_id', type: 'enum', enum: EDepartmentId, nullable: true })
+  @Column({ name: 'department_id', type: 'varchar', length: 50, nullable: true })
   departmentId?: EDepartmentId;
 
   // ✅ Self-referencing: คนที่อนุมัติ user คนนี้

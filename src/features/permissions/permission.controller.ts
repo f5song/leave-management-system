@@ -6,6 +6,7 @@ import { PermissionResponseDto } from './dto/permissions.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/guards/roles.decorator';
+import { EPermission } from '@src/common/constants/permission.enum';
 
 @ApiTags('Permissions')
 @Controller('permissions')
@@ -14,7 +15,7 @@ export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: PermissionResponseDto })
   async create(@Body() dto: CreatePermissionDto): Promise<PermissionResponseDto> {
@@ -23,7 +24,7 @@ export class PermissionController {
   }
 
   @Get()
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [PermissionResponseDto] })
   async findAll(): Promise<PermissionResponseDto[]> {
@@ -32,28 +33,28 @@ export class PermissionController {
   }
 
   @Get(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
-  async findOne(@Param('id') id: string): Promise<PermissionResponseDto> {
+  async findOne(@Param('id') id: EPermission): Promise<PermissionResponseDto> {
     const permission = await this.permissionService.findOne(id);
     return this.permissionService.toPermissionResponseDto(permission);
   }
 
   @Patch(':id' )
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
-  async update(@Param('id') id: string, @Body() dto: UpdatePermissionDto): Promise<PermissionResponseDto> {
+  async update(@Param('id') id: EPermission, @Body() dto: UpdatePermissionDto): Promise<PermissionResponseDto> {
     const updatedPermission = await this.permissionService.update(id, dto);
     return this.permissionService.toPermissionResponseDto(updatedPermission);
   }
 
   @Delete(':id')
-  @Roles('role-admin')
+  @Roles('admin')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
-  async remove(@Param('id') id: string): Promise<PermissionResponseDto> {
+  async remove(@Param('id') id: EPermission): Promise<PermissionResponseDto> {
     return this.permissionService.softDelete(id);
   }
 }

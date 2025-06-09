@@ -1,6 +1,7 @@
 import { EJobTitleId } from "@common/constants/jobtitle.enum";
 import { EDepartmentId } from "@common/constants/department.enum";
 import { IsOptional, IsString, IsNotEmpty, IsEmail, IsDateString } from "class-validator";
+import { ERole } from "@common/constants/roles.enum";
 
 export class CreateUserDto {
   @IsString()
@@ -23,7 +24,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  roleId: string;
+  roleId: ERole;
 
   @IsOptional()
   @IsString()

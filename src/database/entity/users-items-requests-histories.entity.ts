@@ -12,7 +12,7 @@ export class UsersItemsRequestsHistoryEntity {
   requestId: string;
 
   @Column('uuid', { nullable: true })
-  actionBy: UserEntity;
+  actionBy: string;
 
   @Column('enum', { enum: EItemRequestStatus, nullable: false })
   actionType: EItemRequestStatus;

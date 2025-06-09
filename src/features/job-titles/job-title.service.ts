@@ -27,7 +27,6 @@ export class JobTitleService {
       name: entity.name,
       color: entity.color,
       departmentId: entity.departmentId,
-      departmentName: entity.department.name,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,

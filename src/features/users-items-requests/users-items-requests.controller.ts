@@ -15,7 +15,7 @@ export class UsersItemsRequestsController {
   constructor(private readonly usersItemsRequestsService: UsersItemsRequestsService) {}
 
   @Post()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: ItemRequestResponseDto })
   async create(@Body() dto: CreateItemRequestDto): Promise<ItemRequestResponseDto> {
@@ -23,7 +23,7 @@ export class UsersItemsRequestsController {
   }
 
   @Get()
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
   async findAllPending(): Promise<ItemRequestResponseDto[]> {
@@ -31,7 +31,7 @@ export class UsersItemsRequestsController {
   }
 
   @Get(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemRequestResponseDto })
   async findOne(@Param('id') id: string): Promise<ItemRequestResponseDto> {
@@ -39,7 +39,7 @@ export class UsersItemsRequestsController {
   }
 
   @Get('user/:userId')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
   async findAllByUser(@Param('userId') userId: string): Promise<ItemRequestResponseDto[]> {
@@ -47,7 +47,7 @@ export class UsersItemsRequestsController {
   }
 
   @Patch(':id/approve')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemRequestResponseDto })
   async approve(@Param('id') id: string, @Request() req): Promise<ItemRequestResponseDto> {
@@ -55,7 +55,7 @@ export class UsersItemsRequestsController {
   }
 
   @Patch(':id/reject')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemRequestResponseDto })
   async reject(@Param('id') id: string, @Request() req): Promise<ItemRequestResponseDto> {
@@ -63,7 +63,7 @@ export class UsersItemsRequestsController {
   }
 
   @Delete(':id')
-  @Roles('role-admin', 'role-employee')
+  @Roles('admin', 'employee')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemRequestResponseDto })
   async remove(@Param('id') id: string): Promise<ItemRequestResponseDto> {
