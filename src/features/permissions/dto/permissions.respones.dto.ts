@@ -1,10 +1,10 @@
-import { RoleEntity } from "@src/database/entity/roles.entity";
+import { PermissionRoleEntity } from "@src/database/entity/permission-role";
 
 export class PermissionResponseDto {
   id: string;
   name: string;
-  roles: RoleEntity[];
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
+  permissionRoles: PermissionRoleEntity[];
 }

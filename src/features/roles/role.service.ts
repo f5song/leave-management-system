@@ -26,7 +26,7 @@ export class RoleService {
       createdById: entity.createdById,
       createdBy: entity.createdBy,
       user: entity.user,
-      permissions: entity.permissions,
+      permissions: entity.permissionRoles.map(permission => permission.permission),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,

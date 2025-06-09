@@ -6,13 +6,11 @@ import {
   DeleteDateColumn,
   OneToMany,
   ManyToOne,
-  ManyToMany,
-  JoinTable,
   JoinColumn,
   PrimaryColumn,
 } from 'typeorm';
 import { UserEntity } from './users.entity';
-import { PermissionEntity } from './permissions.entity';
+import { PermissionRoleEntity } from './permission-role';
 import { ERole } from '@common/constants/roles.enum';
 
 @Entity('roles')
@@ -29,13 +27,8 @@ export class RoleEntity {
   @OneToMany(() => UserEntity, (user) => user.role)
   user: UserEntity[];
 
-  @ManyToMany(() => PermissionEntity, (permission) => permission.roles)
-  @JoinTable({
-    name: 'permission_role', // ชื่อตารางกลาง
-    joinColumn: { name: 'role_id' }, // ชื่อคอลัมน์ฝั่ง Role
-    inverseJoinColumn: { name: 'permission_id' }, // ฝั่ง Permission
-  })
-  permissions: PermissionEntity[];
+  @OneToMany(() => PermissionRoleEntity, (pr) => pr.role)
+  permissionRoles: PermissionRoleEntity[];
 
   @ManyToOne(() => UserEntity, (user) => user.createdRoles)
   @JoinColumn({ name: 'created_by' })

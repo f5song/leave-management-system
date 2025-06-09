@@ -24,7 +24,7 @@ export class PermissionService {
       return {
         id: entity.id,
         name: entity.name,
-        roles: entity.roles,
+        permissionRoles: entity.permissionRoles,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
         deletedAt: entity.deletedAt,
