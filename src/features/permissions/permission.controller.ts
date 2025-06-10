@@ -5,7 +5,7 @@ import { UpdatePermissionDto } from './dto/update.permissions.dto';
 import { PermissionResponseDto } from './dto/permissions.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Roles } from '../../common/guards/roles-permission.decorator';
+import { Roles } from '../../common/decorators/roles-permission.decorator';
 import { EPermission } from '@src/common/constants/permission.enum';
 
 @ApiTags('Permissions')

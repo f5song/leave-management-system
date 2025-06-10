@@ -5,7 +5,7 @@ import { FacilityRequestResponseDto } from './dto/users-facility-requests.repone
 import { CreateFacilityRequestDto } from './dto/create.users-facility-requests.dto';
 import { UpdateFacilityRequestDto } from './dto/update.users-facility-requests.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { Roles } from '../../common/guards/roles-permission.decorator';
+import { Roles } from '../../common/decorators/roles-permission.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('Users Facility Requests')

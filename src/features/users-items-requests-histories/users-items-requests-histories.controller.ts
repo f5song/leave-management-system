@@ -3,7 +3,7 @@ import { UsersItemsRequestsHistoriesService } from './users-items-requests-histo
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles-permission.decorator';
+import { Roles } from '../../common/decorators/roles-permission.decorator';
 import { ItemsRequestsHistoryResponseDto } from './dto/users-items-requests-histories.respones.dto';
 import { CreateItemsRequestsHistoryDto } from './dto/create.users-items-requests-histories.dto';
 import { UpdateItemsRequestsHistoryDto } from './dto/update.users-items-requests-histories.dto';

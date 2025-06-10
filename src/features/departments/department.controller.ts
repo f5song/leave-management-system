@@ -1,15 +1,12 @@
 import {
   Controller,
   Get,
-  Post,
-  Put,
-  Delete,
   Param,
   Body,
   UsePipes,
   ValidationPipe,
-  Patch,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import {
@@ -19,15 +16,15 @@ import { ApiTags, ApiOkResponse, ApiBearerAuth, ApiBadRequestResponse, ApiUnauth
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles-permission.decorator';
 import { DepartmentResponseDto } from './response/department.respones';
 import { ResponseObject } from '@common/dto/common-response.dto';
 import { ValidateParamDepartmentId } from './dto/department.validate';
-import { UpdateDepartmentResponseDto } from './response/update.department.respone';
 import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
 import { errorMessage } from '@src/common/constants/error-message';
 import { ERole } from '@src/common/constants/roles.enum';
 import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
+import { RolesPermission } from '@src/common/decorators/roles-permission.decorator';
+import { EPermission } from '@src/common/constants/permission.enum';
 
 @ApiTags('Departments')
 @Controller('departments')
@@ -89,7 +86,7 @@ export class DepartmentController {
     }
   ])
 
-  @Roles(ERole.ADMIN, ERole.EMPLOYEE)
+  @RolesPermission({ role: ERole.ADMIN, permissions: [EPermission.READ_DEPARTMENT] })
   @ApiOkResponse({ type: [DepartmentResponseDto] })
   async findAll(): Promise<ResponseObject<DepartmentResponseDto[]>> {
     const departments = await this.departmentService.findAll();
@@ -102,7 +99,7 @@ export class DepartmentController {
 
 
   @Get(':id')
-  @Roles(ERole.ADMIN, ERole.EMPLOYEE)
+  @RolesPermission({ role: ERole.ADMIN, permissions: [EPermission.READ_DEPARTMENT] })
   @ApiOkResponse({ type: DepartmentResponseDto })
   async findOne(@Param() param: ValidateParamDepartmentId): Promise<ResponseObject<DepartmentResponseDto>> {
     const department = await this.departmentService.findOne(param.id);
@@ -114,7 +111,7 @@ export class DepartmentController {
   }
 
   @Put(':id')
-  @Roles(ERole.ADMIN)
+  @RolesPermission({ role: ERole.ADMIN, permissions: [EPermission.UPDATE_DEPARTMENT] })
   async update(
     @Param() param: ValidateParamDepartmentId,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
