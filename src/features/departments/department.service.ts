@@ -2,11 +2,9 @@ import { Injectable, NotFoundException, BadRequestException, HttpException, Http
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { DepartmentEntity } from '../../database/entity/departments.entity';
-import { CreateDepartmentDto } from './dto/create.department.dto';
 import { UpdateDepartmentDto } from './dto/update.department.dto';
 import { EDepartmentId } from '@common/constants/department.enum';
 import { errorMessage } from '@src/common/constants/error-message';
-import { UpdateDepartmentResponseDto } from './response/update.department.respone';
 import { DepartmentResponseDto } from './response/department.respones';
 
 @Injectable()
@@ -15,27 +13,6 @@ export class DepartmentService {
     @InjectRepository(DepartmentEntity)
     private departmentRepository: Repository<DepartmentEntity>
   ) { }
-
-  toDepartmentResponseDto(
-    entity: DepartmentEntity
-  ): DepartmentResponseDto {
-    return {
-      id: entity.id,
-      name: entity.name,
-      color: entity.color
-    };
-  }
-
-  toUpdateDepartmentResponseDto(
-    entity: DepartmentEntity
-  ): UpdateDepartmentResponseDto {
-    return {
-      id: entity.id,
-      name: entity.name,
-      color: entity.color,
-      updated_at: entity.updatedAt
-    };
-  }
 
   async validateUniqueName(name: string) {
     const existingDepartment = await this.departmentRepository.findOne({
@@ -103,8 +80,12 @@ export class DepartmentService {
       order: { name: 'ASC' },
       take: 15,
     });
-    const departmentPromises = departments.map(dept => this.toDepartmentResponseDto(dept));
-    return Promise.all(departmentPromises);
+
+    return departments.map(dept => ({
+      id: dept.id,
+      name: dept.name,
+      color: dept.color,
+    }));
   }
 
 
@@ -113,6 +94,7 @@ export class DepartmentService {
       select: ['id', 'name', 'color'],
       where: { id },
     });
+
     if (!department) {
       throw new HttpException({
         message: errorMessage['0001'],
@@ -120,7 +102,8 @@ export class DepartmentService {
       },
         HttpStatus.BAD_REQUEST);
     }
-    return this.toDepartmentResponseDto(department);
+
+    return department;
   }
 
   async update(id: EDepartmentId, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
@@ -145,7 +128,7 @@ export class DepartmentService {
     department.color = color;
 
     await this.departmentRepository.save(department);
-    return this.toUpdateDepartmentResponseDto(department);
+    return department;
   }
 
   // async remove(id: EDepartmentId): Promise<void> {
@@ -190,33 +173,33 @@ export class DepartmentService {
   //   return this.toDepartmentResponseDto(department);
   // }
 
-  async partialUpdate(id: EDepartmentId, partialData: Partial<UpdateDepartmentDto>): Promise<DepartmentResponseDto> {
+  // async partialUpdate(id: EDepartmentId, partialData: Partial<UpdateDepartmentDto>): Promise<DepartmentResponseDto> {
 
-    const department = await this.departmentRepository.findOne({
-      select: ['id', 'name', 'color', 'deletedAt'],
-      where: { id },
-    });
+  //   const department = await this.departmentRepository.findOne({
+  //     select: ['id', 'name', 'color', 'deletedAt'],
+  //     where: { id },
+  //   });
 
-    if (!department) {
-      throw new HttpException({
-        message: errorMessage['0001'],
-        code: '0001',
-      },
-        HttpStatus.BAD_REQUEST);
-    }
+  //   if (!department) {
+  //     throw new HttpException({
+  //       message: errorMessage['0001'],
+  //       code: '0001',
+  //     },
+  //       HttpStatus.BAD_REQUEST);
+  //   }
 
-    if (partialData.name) {
-      await this.validateUniqueName(partialData.name);
-      department.name = partialData.name;
-    }
+  //   if (partialData.name) {
+  //     await this.validateUniqueName(partialData.name);
+  //     department.name = partialData.name;
+  //   }
 
-    if (partialData.color) {
-      department.color = partialData.color;
-    }
+  //   if (partialData.color) {
+  //     department.color = partialData.color;
+  //   }
 
-    await this.departmentRepository.save(department);
-    return this.toUpdateDepartmentResponseDto(department);
-  }
+  //   await this.departmentRepository.save(department);
+  //   return this.toUpdateDepartmentResponseDto(department);
+  // }
 
   //   async permanentlyDeleteDepartment(id: DepartmentId) {
   //     await this.validateDepartmentId(id);

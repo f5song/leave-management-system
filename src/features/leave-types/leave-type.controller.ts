@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Put, Patch, Delete, Param, Body, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles.decorator';
+import { Roles } from '../../common/guards/roles-permission.decorator';
 import { LeaveTypeService } from './leave-type.service';
 import { LeaveTypeResponseDto } from './dto/leave-types.respones.dto';
 import { CreateLeaveTypeDto } from './dto/create.leave-types.dto';

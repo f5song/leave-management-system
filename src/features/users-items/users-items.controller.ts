@@ -8,7 +8,7 @@ import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
 import { UserItemResponseDto } from './dto/users-items.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles.decorator';
+import { Roles } from '../../common/guards/roles-permission.decorator';
 import { CreateItemDto } from './dto/create.users-items.dto';
 import { UpdateItemDto } from './dto/update.users-items.dto';
 import { ItemRequestResponseDto } from '../users-items-requests/dto/users-items-requests.respones.dto';

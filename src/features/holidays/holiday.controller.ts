@@ -8,7 +8,7 @@ import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nest
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles.decorator';
+import { Roles } from '../../common/guards/roles-permission.decorator';
 
 @ApiTags('Holidays')
 @Controller('holidays')

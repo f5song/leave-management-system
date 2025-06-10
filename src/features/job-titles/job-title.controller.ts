@@ -8,7 +8,7 @@ import { JobTitleEntity } from '../../database/entity/job-titles.entity';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles.decorator';
+import { Roles } from '../../common/guards/roles-permission.decorator';
 
 @ApiTags('Job Titles')
 @ApiBearerAuth('access-token')

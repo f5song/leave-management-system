@@ -18,7 +18,7 @@ import { UpdateLeaveDto } from './dto/update.leaves.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles.decorator';
+import { Roles } from '../../common/guards/roles-permission.decorator';
 
 interface AuthenticatedRequest extends Request {
   user: { id: string };

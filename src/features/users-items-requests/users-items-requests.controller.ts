@@ -5,7 +5,7 @@ import { ItemRequestResponseDto } from './dto/users-items-requests.respones.dto'
 import { CreateItemRequestDto } from './dto/create.users-items-requests.dto';
 import { UpdateItemRequestDto } from './dto/update.users-items-requests.dto';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { Roles } from '../../common/guards/roles.decorator';
+import { Roles } from '../../common/guards/roles-permission.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('Users Items Requests')

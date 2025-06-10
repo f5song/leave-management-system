@@ -15,15 +15,19 @@ import { DepartmentService } from './department.service';
 import {
   UpdateDepartmentDto
 } from './dto/update.department.dto';
-import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse, ApiBearerAuth, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/guards/roles.decorator';
+import { Roles } from '../../common/guards/roles-permission.decorator';
 import { DepartmentResponseDto } from './response/department.respones';
 import { ResponseObject } from '@common/dto/common-response.dto';
 import { ValidateParamDepartmentId } from './dto/department.validate';
 import { UpdateDepartmentResponseDto } from './response/update.department.respone';
+import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
+import { errorMessage } from '@src/common/constants/error-message';
+import { ERole } from '@src/common/constants/roles.enum';
+import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
 
 @ApiTags('Departments')
 @Controller('departments')
@@ -34,70 +38,58 @@ export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) { }
 
   @Get()
-  @ApiOkResponse({
-    description: 'Success',
-    schema: {
-      example: {
-        code: 200,
-        message: 'SUCCESS',
-        data: {
-          id: 'HR',
-          name: 'Human Resources',
-          color: '#FF5733',
-        },
-      },
+  @ApiResponseSuccess({
+    statusCode: HttpStatus.OK,
+    example: {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: [
+        { id: 'HR_TEST', name: 'Human Resources test', color: '#FF5733' },
+        { id: 'HR', name: 'Human Resources test234234', color: '#00000' },
+        { id: 'IT', name: 'Information Technology', color: '#3355FF' },
+      ],
     },
   })
-  @ApiBadRequestResponse({
-    description: 'Bad Request',
-    content: {
-      'application/json': {
-        examples: {
-          DepartmentAlreadyExists: {
-            summary: 'Department name already exists',
-            value: {
-              code: '0002',
-              message: 'Department name already exists',
-            },
-          },
-          InvalidNameLength: {
-            summary: 'Name must be between 2 and 100 characters',
-            value: {
-              code: '0003',
-              message: 'Department name must be between 2 and 100 characters',
-            },
-          },
-          CannotDeleteWithUsers: {
-            summary: 'Cannot delete department with users',
-            value: {
-              code: '0004',
-              message: 'Cannot delete department that has users',
-            },
-          },
-        },
-      },
+  
+  @ApiResponseError([
+    {
+      code: '0001',
+      message: errorMessage['0001'],
+      statusCode: HttpStatus.NOT_FOUND,
     },
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-    schema: {
-      example: {
-        code: '401',
-        message: 'Unauthorized',
-      },
+    {
+      code: '0002',
+      message: errorMessage['0002'],
+      statusCode: HttpStatus.BAD_REQUEST,
     },
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found',
-    schema: {
-      example: {
-        code: '0001',
-        message: 'Department not found',
-      },
+    {
+      code: '0003',
+      message: errorMessage['0003'],
+      statusCode: HttpStatus.BAD_REQUEST,
     },
-  })
-  @Roles('admin', 'employee')
+    {
+      code: '0004',
+      message: errorMessage['0004'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0005',
+      message: errorMessage['0005'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0006',
+      message: errorMessage['0006'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+
+  @Roles(ERole.ADMIN, ERole.EMPLOYEE)
   @ApiOkResponse({ type: [DepartmentResponseDto] })
   async findAll(): Promise<ResponseObject<DepartmentResponseDto[]>> {
     const departments = await this.departmentService.findAll();
@@ -110,7 +102,7 @@ export class DepartmentController {
 
 
   @Get(':id')
-  @Roles('admin', 'employee')
+  @Roles(ERole.ADMIN, ERole.EMPLOYEE)
   @ApiOkResponse({ type: DepartmentResponseDto })
   async findOne(@Param() param: ValidateParamDepartmentId): Promise<ResponseObject<DepartmentResponseDto>> {
     const department = await this.departmentService.findOne(param.id);
@@ -122,7 +114,7 @@ export class DepartmentController {
   }
 
   @Put(':id')
-  @Roles('admin')
+  @Roles(ERole.ADMIN)
   async update(
     @Param() param: ValidateParamDepartmentId,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
@@ -138,23 +130,23 @@ export class DepartmentController {
     };
   }
 
-  @Patch(':id')
-  @Roles('admin')
-  @ApiOkResponse({ type: UpdateDepartmentResponseDto })
-  async partialUpdate(
-    @Param() param: ValidateParamDepartmentId,
-    @Body() partialData: UpdateDepartmentDto,
-  ): Promise<ResponseObject<DepartmentResponseDto>> {
-    const department = await this.departmentService.partialUpdate(
-      param.id,
-      partialData,
-    );
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: department,
-    };
-  }
+  // @Patch(':id')
+  // @Roles('admin')
+  // @ApiOkResponse({ type: UpdateDepartmentResponseDto })
+  // async partialUpdate(
+  //   @Param() param: ValidateParamDepartmentId,
+  //   @Body() partialData: UpdateDepartmentDto,
+  // ): Promise<ResponseObject<DepartmentResponseDto>> {
+  //   const department = await this.departmentService.partialUpdate(
+  //     param.id,
+  //     partialData,
+  //   );
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: department,
+  //   };
+  // }
 
 
   // @Delete(':id/restore')
