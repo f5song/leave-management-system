@@ -6,7 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '../../common/strategies/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GoogleAuthService } from './google.strategy';
+import { GoogleAuthService } from './google.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserEntity } from '../../database/entity/users.entity';

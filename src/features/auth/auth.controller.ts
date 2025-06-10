@@ -1,8 +1,7 @@
 import { Controller, Post, Get, Request, UseGuards, Body } from '@nestjs/common';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GoogleAuthService } from './google.strategy';
-import { LoginDto } from './dto/auth.validation';
+import { LoginDto } from './dto/auth.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserEntity } from '../../database/entity/users.entity';
@@ -12,7 +11,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @UsePipes(new ValidationPipe())
 export class AuthController {
   constructor(
-    private authService: AuthService,
+    private authService: AuthService
   ) {}
 
   @Post('google-login')

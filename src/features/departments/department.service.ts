@@ -4,9 +4,10 @@ import { Repository, Not, IsNull } from 'typeorm';
 import { DepartmentEntity } from '../../database/entity/departments.entity';
 import { CreateDepartmentDto } from './dto/create.department.dto';
 import { UpdateDepartmentDto } from './dto/update.department.dto';
-import { DepartmentResponseDto } from './dto/department.response.dto';
 import { EDepartmentId } from '@common/constants/department.enum';
 import { errorMessage } from '@src/common/constants/error-message';
+import { UpdateDepartmentResponseDto } from './response/update.department.respone';
+import { DepartmentResponseDto } from './response/department.respones';
 
 @Injectable()
 export class DepartmentService {
@@ -21,42 +22,36 @@ export class DepartmentService {
     return {
       id: entity.id,
       name: entity.name,
-      color: entity.color,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      deletedAt: entity.deletedAt,
-      users: entity.users,
-      jobTitles: entity.jobTitles,
+      color: entity.color
     };
   }
 
-  async validateDepartmentId(id: string) {
-    const validIds = Object.values(id);
-    if (!validIds.includes(id)) {
+  toUpdateDepartmentResponseDto(
+    entity: DepartmentEntity
+  ): UpdateDepartmentResponseDto {
+    return {
+      id: entity.id,
+      name: entity.name,
+      color: entity.color,
+      updated_at: entity.updatedAt
+    };
+  }
+
+  async validateUniqueName(name: string) {
+    const existingDepartment = await this.departmentRepository.findOne({
+      where: { name },
+    });
+    if (existingDepartment) {
       throw new HttpException({
-        message: errorMessage['0006'],
-        code: '0006',
+        message: errorMessage['0002'],
+        code: '0002',
       },
         HttpStatus.BAD_REQUEST);
     }
   }
 
-  async validateUniqueName(name: string) {
-    const existingDepartment = await this.departmentRepository.findOne({
-      where: { name, deletedAt: null },
-    });
-    if (existingDepartment) {
-    throw new HttpException({
-      message: errorMessage['0002'],
-      code: '0002',
-    },
-      HttpStatus.BAD_REQUEST);
-    }
-  }
 
-
-  async validateNoReferences(id: string): Promise<void> {
-    // ตรวจสอบว่ามี user ที่อ้างอิงถึงแผนกนี้หรือไม่
+  async validateNoReferences(id: EDepartmentId): Promise<void> {
     const hasUsers = await this.departmentRepository
       .createQueryBuilder('department')
       .leftJoinAndSelect('department.users', 'users')
@@ -72,7 +67,6 @@ export class DepartmentService {
         HttpStatus.BAD_REQUEST);
     }
 
-    // ตรวจสอบว่ามี job title ที่อ้างอิงถึงแผนกนี้หรือไม่
     const hasJobTitles = await this.departmentRepository
       .createQueryBuilder('department')
       .leftJoinAndSelect('department.jobTitles', 'jobTitles')
@@ -89,34 +83,35 @@ export class DepartmentService {
     }
   }
 
-  async create(createDepartmentDto: CreateDepartmentDto): Promise<DepartmentResponseDto> {
-    const { name, color } = createDepartmentDto;
+  // async create(createDepartmentDto: CreateDepartmentDto): Promise<DepartmentResponseDto> {
+  //   const {id, name, color } = createDepartmentDto;
 
-    await this.validateUniqueName(name);
+  //   await this.validateUniqueName(name);
 
-    const department = this.departmentRepository.create({
-      name,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    department.color = color;
-    await this.departmentRepository.save(department);
-    return this.toDepartmentResponseDto(department);
-  }
+  //   const department = this.departmentRepository.create({
+  //     id,
+  //     name,
+  //     color,
+  //   });
+  //   await this.departmentRepository.save(department);
+  //   return this.toDepartmentResponseDto(department);
+  // }
 
   async findAll(): Promise<DepartmentResponseDto[]> {
     const departments = await this.departmentRepository.find({
-      where: { deletedAt: null },
+      select: ['id', 'name', 'color'],
       order: { name: 'ASC' },
+      take: 15,
     });
     const departmentPromises = departments.map(dept => this.toDepartmentResponseDto(dept));
     return Promise.all(departmentPromises);
   }
 
 
-  async findOne(id: string): Promise<DepartmentResponseDto> {
+  async findOne(id: EDepartmentId): Promise<DepartmentResponseDto> {
     const department = await this.departmentRepository.findOne({
-      where: { id, deletedAt: null },
+      select: ['id', 'name', 'color'],
+      where: { id },
     });
     if (!department) {
       throw new HttpException({
@@ -128,14 +123,14 @@ export class DepartmentService {
     return this.toDepartmentResponseDto(department);
   }
 
-  async update(id: string, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
+  async update(id: EDepartmentId, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
     const { name, color } = updateDepartmentDto;
 
-    await this.validateDepartmentId(id);
     await this.validateUniqueName(name);
 
     const department = await this.departmentRepository.findOne({
-      where: { id, deletedAt: null },
+      select: ['id', 'name', 'color'],
+      where: { id },
     });
 
     if (!department) {
@@ -148,18 +143,58 @@ export class DepartmentService {
 
     department.name = name;
     department.color = color;
-    department.updatedAt = new Date();
 
     await this.departmentRepository.save(department);
-    return this.toDepartmentResponseDto(department);
+    return this.toUpdateDepartmentResponseDto(department);
   }
 
-  async remove(id: string): Promise<void> {
-    await this.validateDepartmentId(id);
-    await this.validateNoReferences(id);
+  // async remove(id: EDepartmentId): Promise<void> {
+  //   await this.validateDepartmentId(id);
+  //   await this.validateNoReferences(id);
+
+  //   const department = await this.departmentRepository.findOne({
+  //     select: ['id', 'deletedAt'],
+  //     where: { id },
+  //   });
+
+  //   if (!department) {
+  //     throw new HttpException({
+  //       message: errorMessage['0001'],
+  //       code: '0001',
+  //     },
+  //       HttpStatus.BAD_REQUEST);
+  //   }
+
+  //   await this.departmentRepository.softDelete(id);
+  //   return;
+  // }
+
+  // async restoreDepartment(id: EDepartmentId) {
+  //   await this.validateDepartmentId(id);
+
+  //   const department = await this.departmentRepository.findOne({
+  //     select: ['id', 'name', 'color', 'deletedAt'],
+  //     where: { id },
+  //     withDeleted: true,
+  //   });
+
+  //   if (!department) {
+  //     throw new HttpException({
+  //       message: errorMessage['0001'],
+  //       code: '0001',
+  //     },
+  //       HttpStatus.BAD_REQUEST);
+  //   }
+  //   await this.departmentRepository.restore(id);
+
+  //   return this.toDepartmentResponseDto(department);
+  // }
+
+  async partialUpdate(id: EDepartmentId, partialData: Partial<UpdateDepartmentDto>): Promise<DepartmentResponseDto> {
 
     const department = await this.departmentRepository.findOne({
-      where: { id, deletedAt: null },
+      select: ['id', 'name', 'color', 'deletedAt'],
+      where: { id },
     });
 
     if (!department) {
@@ -170,47 +205,6 @@ export class DepartmentService {
         HttpStatus.BAD_REQUEST);
     }
 
-    department.deletedAt = new Date();
-    await this.departmentRepository.save(department);
-    return;
-  }
-
-  async restoreDepartment(id: string) {
-    await this.validateDepartmentId(id);
-
-    const department = await this.departmentRepository.findOne({
-      where: { id, deletedAt: Not(IsNull()) },
-      withDeleted: true,
-    });
-
-    if (!department) {
-      throw new HttpException({
-        message: errorMessage['0001'],
-        code: '0001',
-      },
-        HttpStatus.BAD_REQUEST);
-    }
-
-    department.deletedAt = null;
-    return this.toDepartmentResponseDto(await this.departmentRepository.save(department));
-  }
-
-  async partialUpdate(id: string, partialData: Partial<UpdateDepartmentDto>): Promise<DepartmentResponseDto> {
-    await this.validateDepartmentId(id);
-
-    const department = await this.departmentRepository.findOne({
-      where: { id, deletedAt: null },
-    });
-
-    if (!department) {
-      throw new HttpException({
-        message: errorMessage['0001'],
-        code: '0001',
-      },
-        HttpStatus.BAD_REQUEST);
-    }
-
-    // Update only the provided fields
     if (partialData.name) {
       await this.validateUniqueName(partialData.name);
       department.name = partialData.name;
@@ -220,9 +214,8 @@ export class DepartmentService {
       department.color = partialData.color;
     }
 
-    department.updatedAt = new Date();
     await this.departmentRepository.save(department);
-    return this.toDepartmentResponseDto(department);
+    return this.toUpdateDepartmentResponseDto(department);
   }
 
   //   async permanentlyDeleteDepartment(id: DepartmentId) {

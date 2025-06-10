@@ -29,6 +29,7 @@ import { UsersItemsRequestsHistoriesModule } from './features/users-items-reques
 import { UsersItemsModule } from './features/users-items/users-items.module';
 import { UsersFacilityRequestsModule } from './features/users-facility-requests/users-facility-requests.module';
 import { UsersItemEntity } from './database/entity/users-items.entity';
+import { PermissionRoleEntity } from './database/entity/permission-role';
 import { SeedService } from './database/seed/seed.service';
 
 @Module({
@@ -64,6 +65,7 @@ import { SeedService } from './database/seed/seed.service';
       UsersFacilityRequestEntity,
       UsersItemsRequestsHistoryEntity,
       UsersItemEntity,
+      PermissionRoleEntity
     ]),
   ],
   controllers: [AppController],

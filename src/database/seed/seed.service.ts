@@ -26,6 +26,7 @@ import { usersItemsSeedData } from "./users-items";
 import { usersSeedData } from "./users";
 import { holidaysSeedData } from "./holidays";
 import { permissionRoleSeedData } from "./permission-role";
+import { PermissionRoleEntity } from "../entity/permission-role";
 
 
 @Injectable()
@@ -56,6 +57,8 @@ export class SeedService {
         private readonly itemRepository: Repository<UsersItemEntity>,
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
+        @InjectRepository(PermissionRoleEntity)
+        private readonly permissionRoleRepository: Repository<PermissionRoleEntity>,
     ) { }
 
 
@@ -77,8 +80,8 @@ export class SeedService {
             const permission = await this.permissionRepository.create(permissionsSeedData)
             await this.permissionRepository.save(permission)
 
-            // const permissionRole = await this.permissionRepository.create(permissionRoleSeedData)
-            // await this.permissionRepository.save(permissionRole)
+            const permissionRole = await this.permissionRoleRepository.create(permissionRoleSeedData)
+            await this.permissionRoleRepository.save(permissionRole)
 
             const user = await this.userRepository.create(usersSeedData)
             await this.userRepository.save(user)

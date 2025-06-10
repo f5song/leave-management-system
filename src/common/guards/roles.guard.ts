@@ -1,38 +1,45 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { errorMessage } from '@src/common/constants/error-message';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
-    // Get roles from both class and method level decorators
-    const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler()) ||
-                         this.reflector.get<string[]>('roles', context.getClass());
-    
-    console.log('Required roles:', requiredRoles);
-    
+    const requiredRoles =
+      this.reflector.get<string[]>('roles', context.getHandler()) ||
+      this.reflector.get<string[]>('roles', context.getClass());
+
     if (!requiredRoles) {
       return true;
     }
 
     const { user } = context.switchToHttp().getRequest();
-    
+
     if (!user || !user.role) {
-      console.error('No user or role found in request:', { user });
-      return false;
+      throw new HttpException(
+        {
+          message: errorMessage['403'],
+          code: '403',
+        },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
-    // Convert to lowercase for case-insensitive comparison
     const userRole = user.role.toLowerCase();
-    const requiredRolesLower = requiredRoles.map(role => role.toLowerCase());
+    const requiredRolesLower = requiredRoles.map((role) => role.toLowerCase());
 
-    console.log('Role checking:', {
-      userRole,
-      requiredRoles: requiredRolesLower,
-      match: requiredRolesLower.includes(userRole)
-    });
+    if (!requiredRolesLower.includes(userRole)) {
+      throw new HttpException(
+        {
+          message: errorMessage['403'], // ใช้ข้อความ Forbidden
+          code: '403',
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
-    return requiredRolesLower.includes(userRole);
+    return true;
   }
 }

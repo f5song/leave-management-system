@@ -5,5 +5,5 @@ export enum EDepartmentId {
     FINANCE = 'FINANCE',
     SALES = 'SALES',
     OTHER = 'OTHER',
-    CEO = 'CEO',
+    HR_TEST = 'HR_TEST',
 }

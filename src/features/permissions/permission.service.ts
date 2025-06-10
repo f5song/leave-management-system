@@ -44,10 +44,6 @@ export class PermissionService {
   }
 
   private async validatePermissionName(name: string): Promise<void> {
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      throw new BadRequestException('Permission name is required and cannot be empty');
-    }
-
     const existingPermission = await this.permissionRepository.findOne({
       where: {
         name: name.trim(),
