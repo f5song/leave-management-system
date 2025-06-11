@@ -3,10 +3,12 @@ import { UsersItemsRequestsHistoriesService } from './users-items-requests-histo
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles-permission.decorator';
-import { ItemsRequestsHistoryResponseDto } from './dto/users-items-requests-histories.respones.dto';
+import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
+import { ItemsRequestsHistoryResponseDto } from './respones/users-items-requests-histories.respones.dto';
 import { CreateItemsRequestsHistoryDto } from './dto/create.users-items-requests-histories.dto';
 import { UpdateItemsRequestsHistoryDto } from './dto/update.users-items-requests-histories.dto';
+import { EPermission } from '@src/common/constants/permission.enum';
+import { ERole } from '@src/common/constants/roles.enum';
 
 @ApiTags('Users Items Requests Histories')
 @Controller('users-items-requests-histories')
@@ -15,7 +17,7 @@ export class UsersItemsRequestsHistoriesController {
   constructor(private readonly usersItemsRequestsHistoriesService: UsersItemsRequestsHistoriesService) {}
 
   @Get()
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [ItemsRequestsHistoryResponseDto] })
   findAll() {
@@ -23,7 +25,7 @@ export class UsersItemsRequestsHistoriesController {
   }
 
   @Get(':id')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemsRequestsHistoryResponseDto })
   @ApiNotFoundResponse({ description: 'History not found' })
@@ -32,7 +34,7 @@ export class UsersItemsRequestsHistoriesController {
   }
 
   @Post()
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: ItemsRequestsHistoryResponseDto })
   async create(@Body() createDto: CreateItemsRequestsHistoryDto) {
@@ -40,7 +42,7 @@ export class UsersItemsRequestsHistoriesController {
   }
 
   @Put(':id')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemsRequestsHistoryResponseDto })
   @ApiNotFoundResponse({ description: 'History not found' })
@@ -52,7 +54,7 @@ export class UsersItemsRequestsHistoriesController {
   }
 
   @Delete(':id')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ description: 'Successfully deleted' })
   @ApiNotFoundResponse({ description: 'History not found' })

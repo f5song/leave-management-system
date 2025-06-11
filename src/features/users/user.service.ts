@@ -9,7 +9,7 @@ import { CreateUserDto } from './dto/create.users.dto';
 import { EJobTitleId } from '@common/constants/jobtitle.enum';
 import { EDepartmentId } from '@common/constants/department.enum';
 import { UpdateUserDto } from './dto/update.users.dto';
-import { UserResponseDto } from './dto/users.respones.dto';
+import { UserResponseDto } from './respones/users.respones.dto';
 import { ERole } from '@src/common/constants/roles.enum';
 
 @Injectable()

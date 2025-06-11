@@ -2,11 +2,12 @@ import { Controller, Get, Post, Put, Delete, Param, Body, Patch, UseGuards } fro
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create.roles.dto';
 import { UpdateRoleDto } from './dto/update.roles.dto';
-import { RoleResponseDto } from './dto/roles.respones.dto';
+import { RoleResponseDto } from './respones/roles.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Roles } from '../../common/decorators/roles-permission.decorator';
+import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
 import { ERole } from '@src/common/constants/roles.enum';
+import { EPermission } from '@src/common/constants/permission.enum';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -15,7 +16,7 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post() 
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_ROLE] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: RoleResponseDto })
   async create(@Body() createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
@@ -24,7 +25,7 @@ export class RoleController {
   }
 
   @Get()
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_ROLE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [RoleResponseDto] })
   async findAll(): Promise<RoleResponseDto[]> {
@@ -33,7 +34,7 @@ export class RoleController {
   }
 
   @Get(':id')
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_ROLE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: RoleResponseDto })
   async findOne(@Param('id') id: ERole): Promise<RoleResponseDto> {
@@ -42,7 +43,7 @@ export class RoleController {
   }
 
   @Put(':id')
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_ROLE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: RoleResponseDto })
   async update(@Param('id') id: ERole, @Body() updateRoleDto: UpdateRoleDto): Promise<RoleResponseDto> {
@@ -51,7 +52,7 @@ export class RoleController {
   }
 
   @Patch(':id')
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_ROLE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: RoleResponseDto })
   async partialUpdate(@Param('id') id: ERole, @Body() updateRoleDto: UpdateRoleDto): Promise<RoleResponseDto> {
@@ -60,7 +61,7 @@ export class RoleController {
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_ROLE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse()
   async remove(@Param('id') id: ERole): Promise<RoleResponseDto> {

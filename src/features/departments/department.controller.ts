@@ -28,25 +28,18 @@ import { EPermission } from '@src/common/constants/permission.enum';
 
 @ApiTags('Departments')
 @Controller('departments')
-@UsePipes(new ValidationPipe({ transform: true }))
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RolesGuard)
+
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) { }
 
   @Get()
   @ApiResponseSuccess({
-    statusCode: HttpStatus.OK,
-    example: {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: [
-        { id: 'HR_TEST', name: 'Human Resources test', color: '#FF5733' },
-        { id: 'HR', name: 'Human Resources test234234', color: '#00000' },
-        { id: 'IT', name: 'Information Technology', color: '#3355FF' },
-      ],
+    type: [DepartmentResponseDto],
     },
-  })
+  )
   
   @ApiResponseError([
     {
@@ -85,9 +78,7 @@ export class DepartmentController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
-
-  @RolesPermission({ role: ERole.ADMIN, permissions: [EPermission.READ_DEPARTMENT] })
-  @ApiOkResponse({ type: [DepartmentResponseDto] })
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_DEPARTMENT] })
   async findAll(): Promise<ResponseObject<DepartmentResponseDto[]>> {
     const departments = await this.departmentService.findAll();
     return {
@@ -99,8 +90,49 @@ export class DepartmentController {
 
 
   @Get(':id')
-  @RolesPermission({ role: ERole.ADMIN, permissions: [EPermission.READ_DEPARTMENT] })
-  @ApiOkResponse({ type: DepartmentResponseDto })
+  @ApiResponseSuccess({
+    type: [DepartmentResponseDto],
+    },
+  )
+  
+  @ApiResponseError([
+    {
+      code: '0001',
+      message: errorMessage['0001'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0002',
+      message: errorMessage['0002'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0003',
+      message: errorMessage['0003'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0004',
+      message: errorMessage['0004'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0005',
+      message: errorMessage['0005'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0006',
+      message: errorMessage['0006'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_DEPARTMENT] })
   async findOne(@Param() param: ValidateParamDepartmentId): Promise<ResponseObject<DepartmentResponseDto>> {
     const department = await this.departmentService.findOne(param.id);
     return {
@@ -111,7 +143,49 @@ export class DepartmentController {
   }
 
   @Put(':id')
-  @RolesPermission({ role: ERole.ADMIN, permissions: [EPermission.UPDATE_DEPARTMENT] })
+  @ApiResponseSuccess({
+    type: [DepartmentResponseDto],
+    },
+  )
+  
+  @ApiResponseError([
+    {
+      code: '0001',
+      message: errorMessage['0001'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0002',
+      message: errorMessage['0002'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0003',
+      message: errorMessage['0003'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0004',
+      message: errorMessage['0004'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0005',
+      message: errorMessage['0005'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0006',
+      message: errorMessage['0006'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])  
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_DEPARTMENT] })
   async update(
     @Param() param: ValidateParamDepartmentId,
     @Body() updateDepartmentDto: UpdateDepartmentDto,

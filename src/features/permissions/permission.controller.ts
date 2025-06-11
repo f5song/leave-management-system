@@ -2,11 +2,12 @@ import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards } from '@n
 import { PermissionService } from './permission.service';
 import { CreatePermissionDto } from './dto/create.permissions.dto';
 import { UpdatePermissionDto } from './dto/update.permissions.dto';
-import { PermissionResponseDto } from './dto/permissions.respones.dto';
+import { PermissionResponseDto } from './respones/permissions.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Roles } from '../../common/decorators/roles-permission.decorator';
 import { EPermission } from '@src/common/constants/permission.enum';
+import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
+import { ERole } from '@src/common/constants/roles.enum';
 
 @ApiTags('Permissions')
 @Controller('permissions')
@@ -15,7 +16,7 @@ export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_PERMISSION] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: PermissionResponseDto })
   async create(@Body() dto: CreatePermissionDto): Promise<PermissionResponseDto> {
@@ -24,7 +25,7 @@ export class PermissionController {
   }
 
   @Get()
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_PERMISSION] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [PermissionResponseDto] })
   async findAll(): Promise<PermissionResponseDto[]> {
@@ -33,7 +34,7 @@ export class PermissionController {
   }
 
   @Get(':id')
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_PERMISSION] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
   async findOne(@Param('id') id: EPermission): Promise<PermissionResponseDto> {
@@ -42,7 +43,7 @@ export class PermissionController {
   }
 
   @Patch(':id' )
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_PERMISSION] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
   async update(@Param('id') id: EPermission, @Body() dto: UpdatePermissionDto): Promise<PermissionResponseDto> {
@@ -51,7 +52,7 @@ export class PermissionController {
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_PERMISSION] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
   async remove(@Param('id') id: EPermission): Promise<PermissionResponseDto> {

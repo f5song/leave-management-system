@@ -2,14 +2,6 @@ import { IsOptional, IsString, IsInt, IsUUID, IsDate } from 'class-validator';
 import { UserEntity } from '../../database/entity/users.entity';
 import { PermissionEntity } from '../../database/entity/permissions.entity';
 
-export class CreateRoleDto {
-  @IsString()
-  name: string;
-
-  @IsOptional()
-  @IsString()
-  createdBy?: string;
-}
 
 export class UpdateRoleDto {
   @IsOptional()

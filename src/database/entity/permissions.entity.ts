@@ -10,7 +10,6 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { UserEntity } from './users.entity';
-import { RoleEntity } from './roles.entity';
 import { EPermission } from '@src/common/constants/permission.enum';
 import { PermissionRoleEntity } from './permission-role';
 

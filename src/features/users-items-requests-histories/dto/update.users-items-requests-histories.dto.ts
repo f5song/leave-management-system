@@ -1,11 +1,11 @@
 import { IsEnum, IsOptional, IsString, IsDate } from "class-validator";
-import { EItemRequestHistoryStatus } from "@common/constants/item-request-history-status.enum";
+import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
 
 export class UpdateItemsRequestsHistoryDto {
 
-  @IsEnum(EItemRequestHistoryStatus)
+  @IsEnum(EItemRequestStatus)
   @IsOptional()
-  status?: EItemRequestHistoryStatus;
+  status?: EItemRequestStatus;
   
   @IsString()
   @IsOptional()

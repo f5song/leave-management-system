@@ -28,14 +28,3 @@ export class UpdateLeaveDto {
   @IsEnum(ELeaveStatus)
   status: ELeaveStatus;
 }
-
-
-export class UpdateLeaveStatusDto {
-  @IsEnum(ELeaveStatus)
-  status: ELeaveStatus;
-
-  // @IsOptional()
-  // @IsString()
-  // @Length(0, 255)
-  // comment?: string; // ความเห็นจากผู้อนุมัติ (ถ้ามี)
-}

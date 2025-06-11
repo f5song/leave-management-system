@@ -5,7 +5,7 @@ import { RoleEntity } from '../../database/entity/roles.entity';
 import { UserEntity } from '../../database/entity/users.entity';
 import { CreateRoleDto } from './dto/create.roles.dto';
 import { UpdateRoleDto } from './dto/update.roles.dto';
-import { RoleResponseDto } from './dto/roles.respones.dto';
+import { RoleResponseDto } from './respones/roles.respones.dto';
 import { ERole } from '@src/common/constants/roles.enum';
 
 @Injectable()

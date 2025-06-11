@@ -2,63 +2,246 @@ import { Controller, Get, Post, Put, Delete, Param, Body, UsePipes, ValidationPi
 import { HolidayService } from './holiday.service';
 import { CreateHolidayDto} from './dto/create.holidays.dto';
 import { UpdateHolidayDto } from './dto/update.holidays.dto';
-import { HolidayResponseDto } from './dto/holidays.respones.dto';
+import { HolidayResponseDto } from './response/holidays.respones.dto';
 import { HolidayEntity } from '../../database/entity/holidays.entity';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles-permission.decorator';
+import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
+import { EPermission } from '@common/constants/permission.enum';
+import { ERole } from '@common/constants/roles.enum';
+import { ResponseObject } from '@common/dto/common-response.dto';
+import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
+import { errorMessage } from '@src/common/constants/error-message';
+import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
 
 @ApiTags('Holidays')
 @Controller('holidays')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiBearerAuth('access-token')
+
 export class HolidayController {
   constructor(private readonly holidayService: HolidayService) {}
 
   @Get()
-  @Roles('admin', 'employee')
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: [HolidayResponseDto] })
-  async findAll(): Promise<HolidayResponseDto[]> {
-    const holidays: HolidayEntity[] = await this.holidayService.findAll();
-    return holidays.map(holiday => this.holidayService.toHolidayResponseDto(holiday));
+  @ApiResponseSuccess({ type: [HolidayResponseDto] })
+  @ApiResponseError([
+    {
+      code: '0201',
+      message: errorMessage['0201'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0202',
+      message: errorMessage['0202'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0203',
+      message: errorMessage['0203'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0204',
+      message: errorMessage['0204'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0205',
+      message: errorMessage['0205'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_HOLIDAY] })
+  async findAll(): Promise<ResponseObject<HolidayResponseDto[]>> {
+    const holidays = await this.holidayService.findAll();
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: holidays,
+    };
   }
 
   @Get(':id')
-  @Roles('admin', 'employee')
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: HolidayResponseDto })
-  async findOne(@Param('id') id: string): Promise<HolidayResponseDto> {
-    const holiday: HolidayEntity = await this.holidayService.findOne(id);
-    return this.holidayService.toHolidayResponseDto(holiday);
+  @ApiResponseSuccess({ type: HolidayResponseDto })
+  @ApiResponseError([
+    {
+      code: '0201',
+      message: errorMessage['0201'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0202',
+      message: errorMessage['0202'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0203',
+      message: errorMessage['0203'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0204',
+      message: errorMessage['0204'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0205',
+      message: errorMessage['0205'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_HOLIDAY] })
+  async findOne(@Param('id') id: string): Promise<ResponseObject<HolidayResponseDto>> {
+    const holiday = await this.holidayService.findOne(id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: holiday,
+    };
   }
 
   @Post()
-  @Roles('admin')
-  @ApiBearerAuth('access-token')
+  @ApiResponseSuccess({ type: HolidayResponseDto })
+  @ApiResponseError([
+    {
+      code: '0201',
+      message: errorMessage['0201'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0202',
+      message: errorMessage['0202'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0203',
+      message: errorMessage['0203'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0204',
+      message: errorMessage['0204'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0205',
+      message: errorMessage['0205'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_HOLIDAY] })
   @ApiCreatedResponse({ type: HolidayResponseDto })
-  async create(@Body() createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
-    const holiday: HolidayEntity = await this.holidayService.create(createHolidayDto);
-    return this.holidayService.toHolidayResponseDto(holiday);
+  async create(@Body() createHolidayDto: CreateHolidayDto): Promise<ResponseObject<HolidayResponseDto>> {
+    const holiday = await this.holidayService.create(createHolidayDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: holiday,
+    };
   }
 
   @Put(':id')
-  @Roles('admin')
-  @ApiBearerAuth('access-token')
+  @ApiResponseSuccess({ type: HolidayResponseDto })
+  @ApiResponseError([
+    {
+      code: '0201',
+      message: errorMessage['0201'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0202',
+      message: errorMessage['0202'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0203',
+      message: errorMessage['0203'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0204',
+      message: errorMessage['0204'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0205',
+      message: errorMessage['0205'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_HOLIDAY] })
   @ApiOkResponse({ type: HolidayResponseDto })
   async update(
     @Param('id') id: string,
     @Body() updateHolidayDto: UpdateHolidayDto,
-  ): Promise<HolidayResponseDto> {
-    const holiday: HolidayEntity = await this.holidayService.update(id, updateHolidayDto);
-    return this.holidayService.toHolidayResponseDto(holiday);
+  ): Promise<ResponseObject<HolidayResponseDto>> {
+    const holiday = await this.holidayService.update(id, updateHolidayDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: holiday,
+    };
   }
 
   @Delete(':id')
-  @Roles('admin')
-  @ApiBearerAuth('access-token')
+  @ApiResponseSuccess({ type: HolidayResponseDto })
+  @ApiResponseError([
+    {
+      code: '0201',
+      message: errorMessage['0201'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0202',
+      message: errorMessage['0202'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0203',
+      message: errorMessage['0203'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0204',
+      message: errorMessage['0204'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0205',
+      message: errorMessage['0205'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_HOLIDAY] })
   @ApiOkResponse({ type: HolidayResponseDto })
   @HttpCode(HttpStatus.NO_CONTENT)
   async softDelete(@Param('id') id: string): Promise<void> {

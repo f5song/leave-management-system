@@ -5,7 +5,7 @@ import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-ite
 import { CreateItemsRequestsHistoryDto } from './dto/create.users-items-requests-histories.dto';
 import { UpdateItemsRequestsHistoryDto } from './dto/update.users-items-requests-histories.dto';
 import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
-import { ItemsRequestsHistoryResponseDto } from './dto/users-items-requests-histories.respones.dto';
+import { ItemsRequestsHistoryResponseDto } from './respones/users-items-requests-histories.respones.dto';
 
 
 

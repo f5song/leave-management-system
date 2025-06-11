@@ -11,3 +11,9 @@ import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-ite
   exports: [UsersItemsRequestsHistoriesService],
 })
 export class UsersItemsRequestsHistoriesModule {}
+
+// export const errorMessage = {
+//   '400': 'Bad request',
+//   '404': 'Not found',
+//   '500': 'Internal server error',
+// }

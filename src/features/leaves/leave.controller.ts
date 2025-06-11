@@ -12,14 +12,16 @@ import {
 import { LeaveService } from './leave.service';
 import {
   LeaveResponseDto,
-} from './dto/leaves.respones.dto';
+} from './respones/leaves.respones.dto';
 import { CreateLeaveDto } from './dto/create.leaves.dto';
 import { UpdateLeaveDto } from './dto/update.leaves.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles-permission.decorator';
-
+import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
+import { EPermission } from '@common/constants/permission.enum';
+import { ERole } from '@common/constants/roles.enum';
+import { ELeaveType } from '@common/constants/leave-type.enum';
 interface AuthenticatedRequest extends Request {
   user: { id: string };
 }
@@ -31,7 +33,7 @@ export class LeaveController {
   constructor(private readonly leaveService: LeaveService) { }
 
   @Post()
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_LEAVE] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: LeaveResponseDto })
   async create(
@@ -43,7 +45,7 @@ export class LeaveController {
   }
 
   @Get('me')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   async getMyLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
@@ -52,7 +54,7 @@ export class LeaveController {
   }
 
   @Get()
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   async getAllLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
@@ -61,7 +63,7 @@ export class LeaveController {
   }
 
   @Patch(':id/details')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_LEAVE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateDetails(
@@ -74,7 +76,7 @@ export class LeaveController {
   }
 
   @Patch(':id/status')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_LEAVE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateStatus(
@@ -87,7 +89,7 @@ export class LeaveController {
   }
 
   @Delete(':id')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_LEAVE] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async delete(@Param('id') id: string): Promise<void> {

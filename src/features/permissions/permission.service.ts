@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PermissionEntity } from '../../database/entity/permissions.entity';
 import { CreatePermissionDto } from './dto/create.permissions.dto';
-import { PermissionResponseDto } from './dto/permissions.respones.dto';
+import { PermissionResponseDto } from './respones/permissions.respones.dto';
 import { UserEntity } from '../../database/entity/users.entity';
 import { UpdatePermissionDto } from './dto/update.permissions.dto';
 import { EPermission } from '@src/common/constants/permission.enum';

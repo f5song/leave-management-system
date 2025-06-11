@@ -10,7 +10,7 @@ import {
   import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
   import { UserEntity } from "../../../database/entity/users.entity";
   import { UsersItemEntity } from "../../../database/entity/users-items.entity";
-  import { ItemsRequestsHistoryResponseDto } from "../../users-items-requests-histories/dto/users-items-requests-histories.respones.dto";
+  import { ItemsRequestsHistoryResponseDto } from "../../users-items-requests-histories/respones/users-items-requests-histories.respones.dto";
   
   export class ItemRequestResponseDto {
     @IsUUID()

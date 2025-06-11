@@ -3,9 +3,12 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create.users.dto';
-import { UserResponseDto } from './dto/users.respones.dto';
+import { UserResponseDto } from './respones/users.respones.dto';
 import { UpdateUserDto } from './dto/update.users.dto';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
+import { EPermission } from '@src/common/constants/permission.enum';
+import { ERole } from '@src/common/constants/roles.enum';
 
 @ApiTags('Users')
 @Controller('users')
@@ -22,8 +25,7 @@ export class UserController {
   @Get(':id')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserResponseDto })
-  @UseGuards(JwtAuthGuard)
-
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER] })
   async getUserById(@Param('id') id: string): Promise<UserResponseDto> {
     const userEntity = await this.userService.getUserById(id);
     return this.userService.toUserResponseDto(userEntity);
@@ -32,7 +34,7 @@ export class UserController {
   @Get()
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserResponseDto] })
-  @UseGuards(JwtAuthGuard)
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER] })
   async getAllUsers(): Promise<UserResponseDto[]> {
     const userEntities = await this.userService.getAllUsers();
     return userEntities.map(entity => this.userService.toUserResponseDto(entity));
@@ -41,28 +43,28 @@ export class UserController {
   @Put(':id')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserResponseDto })
-  @UseGuards(JwtAuthGuard)
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER] })
   async updateUser(@Param('id') id: string, @Body() updateData: UpdateUserDto): Promise<UserResponseDto> {
     const updatedUser = await this.userService.updateUser(id, updateData);
     return this.userService.toUserResponseDto(updatedUser);
   }
 
-  @Patch(':id')
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: UserResponseDto })
-  @UseGuards(JwtAuthGuard)
-  async patchUser(
-    @Param('id') id: string,
-    @Body() updateData: UpdateUserDto
-  ): Promise<UserResponseDto> {
-    const updatedUser = await this.userService.patchUser(id, updateData);
-    return this.userService.toUserResponseDto(updatedUser);
-  }
+  // @Patch(':id')
+  // @ApiBearerAuth('access-token')
+  // @ApiOkResponse({ type: UserResponseDto })
+  // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_USER] })
+  // async patchUser(
+  //   @Param('id') id: string,
+  //   @Body() updateData: UpdateUserDto
+  // ): Promise<UserResponseDto> {
+  //   const updatedUser = await this.userService.patchUser(id, updateData);
+  //   return this.userService.toUserResponseDto(updatedUser);
+  // }
 
   @Delete(':id')
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserResponseDto })
-  @UseGuards(JwtAuthGuard)
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_USER] })
   async deleteUser(@Param('id') id: string): Promise<UserResponseDto> {
     const deletedUser = await this.userService.deleteUser(id);
     return this.userService.toUserResponseDto(deletedUser);

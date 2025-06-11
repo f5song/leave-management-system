@@ -18,25 +18,17 @@ export class RolesGuard implements CanActivate {
       throw new HttpException({ message: errorMessage['403'], code: '403' }, HttpStatus.FORBIDDEN);
     }
 
-    // ตรวจสอบ role ถ้ามีการกำหนด requiredRoles.role
     if (requiredRoles?.role && requiredRoles.role.length > 0) {
-      // แปลง user.role เป็น array เสมอ (รองรับกรณี role เดียวหรือหลาย role)
-      const userRoles: ERole[] = Array.isArray(user.role) ? user.role : [user.role];
-
-      // เช็คอย่างน้อยหนึ่ง role ของ user ตรงกับที่ requiredRoles กำหนดหรือไม่
-      const hasRole = requiredRoles.role.some(r => userRoles.includes(r));
-      const eiei =  requiredRoles.role.includes(user.role)
+      const hasRole = requiredRoles.role.includes(user.role)
 
       if (!hasRole) {
         throw new HttpException({ message: errorMessage['403'], code: '403' }, HttpStatus.FORBIDDEN);
       }
     }
 
-    // ตรวจสอบ permission ถ้ามีการกำหนด requiredRoles.permissions
     if (requiredRoles?.permissions && requiredRoles.permissions.length > 0) {
       const userPermissions: EPermission[] = user.permissions || [];
 
-      // user ต้องมี permission ครบทุกตัวที่ requiredRoles ต้องการ
       const hasPermission = requiredRoles.permissions.every(p => userPermissions.includes(p));
 
       if (!hasPermission) {

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LeaveTypeEntity } from '../../database/entity/leave-types.entity';
 import { CreateLeaveTypeDto } from './dto/create.leave-types.dto';
-import { LeaveTypeResponseDto } from './dto/leave-types.respones.dto';
+import { LeaveTypeResponseDto } from './respones/leave-types.respones.dto';
 import { ELeaveType } from '@common/constants/leave-type.enum';
 import { UpdateLeaveTypeDto } from './dto/update.leave-types.dto';
 

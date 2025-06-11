@@ -1,26 +1,6 @@
 import { IsNotEmpty, IsString, IsNumber, IsPositive, IsOptional, IsDate, IsUUID } from 'class-validator';
 import { RoleEntity } from '../../database/entity/roles.entity';
 
-export class UpdatePermissionDto {
-    @IsOptional()
-    @IsString()
-    @IsNotEmpty()
-    name?: string;
-
-    @IsOptional()
-    @IsNumber()
-    @IsPositive()
-    roleId?: number;
-
-    @IsOptional()
-    @IsString()
-    @IsNotEmpty()
-    createdById?: string;
-
-    @IsOptional()
-    @IsDate()
-    updateTime?: Date;
-}
 
 export class CreatePermissionDto {
     @IsString()

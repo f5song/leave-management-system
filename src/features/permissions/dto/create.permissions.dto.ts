@@ -13,4 +13,6 @@ export class CreatePermissionDto {
     @IsNotEmpty()
     @IsUUID()
     createdById: string;
+
+    
 }

@@ -4,7 +4,7 @@ import { Repository, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 import { HolidayEntity } from '../../database/entity/holidays.entity';
 import { CreateHolidayDto } from './dto/create.holidays.dto';
 import { UpdateHolidayDto } from './dto/update.holidays.dto';
-import { HolidayResponseDto } from './dto/holidays.respones.dto';
+import { HolidayResponseDto } from './response/holidays.respones.dto';
 
 @Injectable()
 export class HolidayService {
@@ -79,7 +79,7 @@ export class HolidayService {
     const holiday = await this.holidayRepository.findOne({ where: { id, deletedAt: null } });
     if (!holiday) throw new NotFoundException(`Holiday with id ${id} not found`);
 
-    await this.holidayRepository.update(id, { deletedAt: new Date() });
+    await this.holidayRepository.softRemove(holiday);
   }
 
   private async validateDateRange(data: CreateHolidayDto | UpdateHolidayDto | any): Promise<void> {

@@ -6,7 +6,7 @@ import { DepartmentEntity } from '../../database/entity/departments.entity';
 import { CreateJobTitleDto } from './dto/create.job-titles.dto';
 import { EJobTitleId } from '@common/constants/jobtitle.enum';
 import { EDepartmentId } from '@common/constants/department.enum';
-import { JobTitleResponseDto } from './dto/job-titles.respones.dto';
+import { JobTitleResponseDto } from './respones/job-titles.respones.dto';
 import { UpdateJobTitleDto } from './dto/update.job-titles.dto';
 
 
@@ -32,6 +32,60 @@ export class JobTitleService {
       deletedAt: entity.deletedAt,
     };
   }
+
+  async validateJobTitleId(id: EJobTitleId): Promise<void> {
+    const jobTitle = await this.jobTitleRepository.findOne({
+      where: { id, deletedAt: null },
+      relations: ['department']
+    });
+
+    if (!jobTitle) {
+      throw new NotFoundException(`JobTitle with id ${id} not found`);
+    }
+  }
+
+  async validateDepartmentExists(departmentId: EDepartmentId): Promise<void> {
+    if (!departmentId) return;
+
+    const department = await this.departmentRepository.findOne({
+      where: { id: departmentId, deletedAt: null }
+    });
+
+    if (!department) {
+      throw new NotFoundException(`Department with id ${departmentId} not found`);
+    }
+  }
+
+  async validateUniqueName(name: string, departmentId: EDepartmentId, currentId?: EJobTitleId): Promise<void> {
+    if (!name || !departmentId) return;
+
+    const jobTitle = await this.jobTitleRepository.findOne({
+      where: {
+        name,
+        departmentId,
+        deletedAt: null,
+        ...(currentId && { id: Not(currentId as EJobTitleId) }),
+      },
+    });
+
+    if (jobTitle) {
+      throw new Error('Job title name must be unique within the department');
+    }
+  }
+
+  async validateNoReferences(id: EJobTitleId): Promise<void> {
+    const referenceCount = await this.jobTitleRepository.createQueryBuilder('jobTitle')
+      .leftJoin('jobTitle.users', 'users')
+      .where('jobTitle.id = :id', { id })
+      .andWhere('users.deleted_at IS NULL')
+      .getCount();
+
+    if (referenceCount > 0) {
+      throw new Error('Cannot update or delete job title as it has users associated with it');
+    }
+
+  }
+
 
   async create(createJobTitleDto: CreateJobTitleDto) {
     const { id, name, color, departmentId } = createJobTitleDto;
@@ -105,7 +159,8 @@ export class JobTitleService {
     return await this.jobTitleRepository.save(jobTitle);
   }
 
-  async remove(id: EJobTitleId): Promise<void> {
+
+  async softDelete(id: EJobTitleId): Promise<void> {
     await this.validateJobTitleId(id);
     await this.validateNoReferences(id);
 
@@ -114,59 +169,7 @@ export class JobTitleService {
     await this.jobTitleRepository.save(jobTitle);
   }
 
-  async validateJobTitleId(id: EJobTitleId): Promise<void> {
-    const jobTitle = await this.jobTitleRepository.findOne({
-      where: { id, deletedAt: null },
-      relations: ['department']
-    });
-
-    if (!jobTitle) {
-      throw new NotFoundException(`JobTitle with id ${id} not found`);
-    }
-  }
-
-  async validateDepartmentExists(departmentId: EDepartmentId): Promise<void> {
-    if (!departmentId) return;
-
-    const department = await this.departmentRepository.findOne({
-      where: { id: departmentId, deletedAt: null }
-    });
-
-    if (!department) {
-      throw new NotFoundException(`Department with id ${departmentId} not found`);
-    }
-  }
-
-  async validateUniqueName(name: string, departmentId: EDepartmentId, currentId?: EJobTitleId): Promise<void> {
-    if (!name || !departmentId) return;
-
-    const jobTitle = await this.jobTitleRepository.findOne({
-      where: {
-        name,
-        departmentId,
-        deletedAt: null,
-        ...(currentId && { id: Not(currentId as EJobTitleId) }),
-      },
-    });
-
-    if (jobTitle) {
-      throw new Error('Job title name must be unique within the department');
-    }
-  }
-
-  async validateNoReferences(id: EJobTitleId): Promise<void> {
-    const referenceCount = await this.jobTitleRepository.createQueryBuilder('jobTitle')
-      .leftJoin('jobTitle.users', 'users')
-      .where('jobTitle.id = :id', { id })
-      .andWhere('users.deleted_at IS NULL')
-      .getCount();
-
-    if (referenceCount > 0) {
-      throw new Error('Cannot update or delete job title as it has users associated with it');
-    }
-
-  }
-
+  
   // async remove(id: JobTitleId): Promise<void> {
   //   await this.validateJobTitleId(id);
   //   await this.validateNoReferences(id);

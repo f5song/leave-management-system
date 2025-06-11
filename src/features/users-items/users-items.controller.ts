@@ -5,13 +5,15 @@ import { UsersItemsService } from './users-items.service';
 import { UsersItemEntity } from '../../database/entity/users-items.entity';
 import { UsersItemRequestEntity } from '../../database/entity/users-items-requests.entity';
 import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
-import { UserItemResponseDto } from './dto/users-items.respones.dto';
+import { UserItemResponseDto } from './respones/users-items.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles-permission.decorator';
 import { CreateItemDto } from './dto/create.users-items.dto';
 import { UpdateItemDto } from './dto/update.users-items.dto';
-import { ItemRequestResponseDto } from '../users-items-requests/dto/users-items-requests.respones.dto';
+import { ItemRequestResponseDto } from '../users-items-requests/respones/users-items-requests.respones.dto';
+import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
+import { EPermission } from '@common/constants/permission.enum';
+import { ERole } from '@common/constants/roles.enum';
 
 @ApiTags('Users Items')
 @Controller('users-items')
@@ -21,7 +23,7 @@ export class UsersItemsController {
 
   // แสดงรายการอุปกรณ์ทั้งหมด
   @Get()
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserItemResponseDto] })
   async findAll(): Promise<UserItemResponseDto[]> {
@@ -31,7 +33,7 @@ export class UsersItemsController {
 
   // แสดงรายการอุปกรณ์ตาม ID
   @Get(':id')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async findOne(@Param('id') id: string): Promise<UserItemResponseDto> {
@@ -40,7 +42,7 @@ export class UsersItemsController {
   }
 
   // สร้างรายการอุปกรณ์ใหม่
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UserItemResponseDto })
   async create(@Body() item: CreateItemDto): Promise<UserItemResponseDto> {
@@ -49,7 +51,7 @@ export class UsersItemsController {
 
   // อัพเดทรายการอุปกรณ์
   @Put(':id')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async update(
@@ -62,7 +64,7 @@ export class UsersItemsController {
 
   // ลบรายการอุปกรณ์
   @Delete(':id')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async remove(@Param('id') id: string): Promise<void> {
@@ -71,7 +73,7 @@ export class UsersItemsController {
 
   // สร้างคำร้องขออุปกรณ์
   @Post('requests')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: ItemRequestResponseDto })
   async createRequest(
@@ -84,7 +86,7 @@ export class UsersItemsController {
 
   // อัพเดทสถานะคำร้องขอ
   @Put('requests/:requestId/approve')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: ItemRequestResponseDto })
   async approveRequest(
@@ -102,7 +104,7 @@ export class UsersItemsController {
 
   // แสดงรายการคำร้องขอทั้งหมด
   @Get('requests')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UsersItemRequestEntity] })
   async findRequests(): Promise<UsersItemRequestEntity[]> {
@@ -111,7 +113,7 @@ export class UsersItemsController {
 
   // แสดงรายการคำร้องขอของผู้ใช้
   @Get('requests/user')
-  @Roles('admin', 'employee')
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UsersItemRequestEntity] })
   async findUserRequests(@Req() req): Promise<UsersItemRequestEntity[]> {

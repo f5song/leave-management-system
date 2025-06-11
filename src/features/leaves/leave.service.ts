@@ -13,7 +13,7 @@ import {
   } from './dto/create.leaves.dto';
 import { ELeaveType } from '@common/constants/leave-type.enum';
 import { ELeaveStatus } from '@common/constants/leave-status.enum';
-import { LeaveResponseDto } from './dto/leaves.respones.dto';
+import { LeaveResponseDto } from './respones/leaves.respones.dto';
 import { UpdateLeaveDto } from './dto/update.leaves.dto';
 import { ERole } from '@src/common/constants/roles.enum';
   

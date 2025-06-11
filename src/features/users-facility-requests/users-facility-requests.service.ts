@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { UsersFacilityRequestEntity } from '../../database/entity/users-facility-requests.entity';
 import { CreateFacilityRequestDto } from './dto/create.users-facility-requests.dto';
 import { UpdateFacilityRequestDto } from './dto/update.users-facility-requests.dto';
-import { FacilityRequestResponseDto } from './dto/users-facility-requests.repones.dto';
+import { FacilityRequestResponseDto } from './respones/users-facility-requests.repones.dto';
 
 @Injectable()
 

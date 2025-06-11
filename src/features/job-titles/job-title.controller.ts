@@ -1,57 +1,248 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseInterceptors, ClassSerializerInterceptor, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseInterceptors, ClassSerializerInterceptor, UseGuards, ValidationPipe, UsePipes, HttpStatus } from '@nestjs/common';
 import { JobTitleService } from './job-title.service';
 import { CreateJobTitleDto } from './dto/create.job-titles.dto';
 import { UpdateJobTitleDto } from './dto/update.job-titles.dto';
-import { JobTitleResponseDto } from './dto/job-titles.respones.dto';
+import { JobTitleResponseDto } from './respones/job-titles.respones.dto';
 import { EJobTitleId } from '@common/constants/jobtitle.enum';
 import { JobTitleEntity } from '../../database/entity/job-titles.entity';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles-permission.decorator';
+import { RolesPermission } from '@src/common/decorators/roles-permission.decorator';
+import { EPermission } from '@common/constants/permission.enum';
+import { ERole } from '@common/constants/roles.enum';
+import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
+import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
+import { errorMessage } from '@src/common/constants/error-message';
+import { ResponseObject } from '@src/common/dto/common-response.dto';
 
 @ApiTags('Job Titles')
-@ApiBearerAuth('access-token')
 @Controller('job-titles')
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@UseInterceptors(ClassSerializerInterceptor)
+
 export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) {}
 
   @Get()
-  @ApiOkResponse({ type: [JobTitleEntity] })
-  async findAll(): Promise<JobTitleEntity[]> {
-    return this.jobTitleService.findAll();
+  @ApiResponseSuccess({ type: [JobTitleResponseDto] })
+  @ApiResponseError([
+    {
+      code: '0101',
+      message: errorMessage['0101'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0102',
+      message: errorMessage['0102'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0103',
+      message: errorMessage['0103'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0104',
+      message: errorMessage['0104'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0105',
+      message: errorMessage['0105'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  async findAll(): Promise<ResponseObject<JobTitleEntity[]>> {
+    const jobTitles = await this.jobTitleService.findAll();
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: jobTitles,
+    };
   }
 
   @Get(':id')
-  @Roles('admin', 'employee')
   @ApiOkResponse({ type: JobTitleEntity })
-  async findOne(@Param('id') id: EJobTitleId): Promise<JobTitleEntity> {
-    return this.jobTitleService.findOne(id);
+  @ApiResponseError([
+    {
+      code: '0101',
+      message: errorMessage['0101'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0102',
+      message: errorMessage['0102'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0103',
+      message: errorMessage['0103'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0104',
+      message: errorMessage['0104'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0105',
+      message: errorMessage['0105'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_JOB_TITLE] })
+  @ApiOkResponse({ type: JobTitleEntity })
+  async findOne(@Param('id') id: EJobTitleId): Promise<ResponseObject<JobTitleEntity>> {
+    const jobTitle = await this.jobTitleService.findOne(id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: jobTitle,
+    };
   }
 
   @Post()
-  @Roles('admin')
+  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiResponseError([
+    {
+      code: '0101',
+      message: errorMessage['0101'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0102',
+      message: errorMessage['0102'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0103',
+      message: errorMessage['0103'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0104',
+      message: errorMessage['0104'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0105',
+      message: errorMessage['0105'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_JOB_TITLE] })
   @ApiCreatedResponse({ type: JobTitleEntity })
-  async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<JobTitleEntity> {
-    return this.jobTitleService.create(createJobTitleDto);
+  async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<ResponseObject<JobTitleEntity>> {
+    const jobTitle = await this.jobTitleService.create(createJobTitleDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: jobTitle,
+    };
   }
 
   @Put(':id')
-  @Roles('admin')
+  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiResponseError([
+    {
+      code: '0101',
+      message: errorMessage['0101'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0102',
+      message: errorMessage['0102'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0103',
+      message: errorMessage['0103'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0104',
+      message: errorMessage['0104'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0105',
+      message: errorMessage['0105'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_JOB_TITLE] })
   @ApiOkResponse({ type: JobTitleEntity })
   async update(
     @Param('id') id: EJobTitleId,
     @Body() updateJobTitleDto: UpdateJobTitleDto,
-  ): Promise<JobTitleEntity> {
-    return this.jobTitleService.update(id, updateJobTitleDto);
+  ): Promise<ResponseObject<JobTitleEntity>> {
+    const jobTitle = await this.jobTitleService.update(id, updateJobTitleDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: jobTitle,
+    };
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiResponseError([
+    {
+      code: '0101',
+      message: errorMessage['0101'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0102',
+      message: errorMessage['0102'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0103',
+      message: errorMessage['0103'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0104',
+      message: errorMessage['0104'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0105',
+      message: errorMessage['0105'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_JOB_TITLE] })
   @ApiOkResponse({ type: JobTitleEntity })
   async remove(@Param('id') id: EJobTitleId): Promise<void> {
-    await this.jobTitleService.remove(id);
+    await this.jobTitleService.softDelete(id);
   }
 }

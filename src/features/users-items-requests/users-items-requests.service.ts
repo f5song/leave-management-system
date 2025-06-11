@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersItemRequestEntity } from '../../database/entity/users-items-requests.entity';
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
-import { ItemRequestResponseDto } from './dto/users-items-requests.respones.dto';
+import { ItemRequestResponseDto } from './respones/users-items-requests.respones.dto';
 import { CreateItemRequestDto } from './dto/create.users-items-requests.dto';
 import { UpdateItemRequestDto } from './dto/update.users-items-requests.dto';
 import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
