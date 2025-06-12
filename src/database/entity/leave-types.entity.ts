@@ -18,7 +18,7 @@ export class LeaveTypeEntity {
   leaves: LeaveEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt?: Date;
 
   @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt?: Date;

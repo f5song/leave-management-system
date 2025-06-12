@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   UseGuards,
-  Req,
+  UsePipes,
+  ValidationPipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import {
@@ -21,79 +23,290 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
 import { EPermission } from '@common/constants/permission.enum';
 import { ERole } from '@common/constants/roles.enum';
-import { ELeaveType } from '@common/constants/leave-type.enum';
-interface AuthenticatedRequest extends Request {
-  user: { id: string };
-}
+import { ValidateParamLeaveId } from './dto/leaves.validate';
+import { ResponseObject } from '@src/common/dto/common-response.dto';
+import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
+import { errorMessage } from '@src/common/constants/error-message';
 
 @ApiTags('Leaves')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('leaves')
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth('access-token')
+
 export class LeaveController {
   constructor(private readonly leaveService: LeaveService) { }
 
-  @Post()
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_LEAVE] })
-  @ApiBearerAuth('access-token')
-  @ApiCreatedResponse({ type: LeaveResponseDto })
-  async create(
-    @Body() dto: CreateLeaveDto,
-    @Req() req: AuthenticatedRequest,
-  ): Promise<LeaveResponseDto> {
-    const leave = await this.leaveService.createLeave(dto, req.user.id);
-    return this.leaveService.toLeaveResponseDto(leave);
-  }
-
   @Get('me')
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [LeaveResponseDto] })
-  async getMyLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
-    const leaves = await this.leaveService.getMyLeaves(req.user.id);
-    return leaves.map(leave => this.leaveService.toLeaveResponseDto(leave));
+@ApiResponseError([
+  {
+    code: '0401',
+    message: errorMessage['0401'],
+    statusCode: HttpStatus.BAD_REQUEST,
+  }, 
+  {
+    code: '0402',
+    message: errorMessage['0402'],
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  {
+    code: '0403',
+    message: errorMessage['0403'],
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  {
+    code: '0404',
+    message: errorMessage['0404'],
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  {
+    code: '0405',
+    message: errorMessage['0405'],
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  {
+    code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+    message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  }
+])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
+  async getMyLeaves(@Param() param: ValidateParamLeaveId): Promise<ResponseObject<LeaveResponseDto[]>> {
+    const leaves = await this.leaveService.getMyLeaves(param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: leaves.map(leave => this.leaveService.toLeaveResponseDto(leave)),
+    };
   }
 
   @Get()
+  @ApiResponseError([
+    {
+      code: '0401',
+      message: errorMessage['0401'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0402',
+      message: errorMessage['0402'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0403',
+      message: errorMessage['0403'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0404',
+      message: errorMessage['0404'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0405',
+      message: errorMessage['0405'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: [LeaveResponseDto] })
-  async getAllLeaves(@Req() req: AuthenticatedRequest): Promise<LeaveResponseDto[]> {
-    const leaves = await this.leaveService.getAllLeaves(req.user.id);
-    return leaves.map(leave => this.leaveService.toLeaveResponseDto(leave));
+  async getAllLeaves(@Param() param: ValidateParamLeaveId): Promise<ResponseObject<LeaveResponseDto[]>> {
+    const leaves = await this.leaveService.getAllLeaves(param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: leaves.map(leave => this.leaveService.toLeaveResponseDto(leave)),
+    };
   }
 
+  @Post()
+  @ApiOkResponse({ type: [LeaveResponseDto] })
+  @ApiResponseError([
+    {
+      code: '0401',
+      message: errorMessage['0401'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0402',
+      message: errorMessage['0402'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0403',
+      message: errorMessage['0403'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0404',
+      message: errorMessage['0404'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0405',
+      message: errorMessage['0405'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_LEAVE] })
+  @ApiCreatedResponse({ type: LeaveResponseDto })
+  async create(
+    @Body() dto: CreateLeaveDto,
+    @Param() param: ValidateParamLeaveId,
+  ): Promise<ResponseObject<LeaveResponseDto>> {
+    const leave = await this.leaveService.createLeave(dto, param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.leaveService.toLeaveResponseDto(leave),
+    };
+  }
+
+
   @Patch(':id/details')
+  @ApiOkResponse({ type: [LeaveResponseDto] })
+  @ApiResponseError([
+    {
+      code: '0401',
+      message: errorMessage['0401'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0402',
+      message: errorMessage['0402'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0403',
+      message: errorMessage['0403'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0404',
+      message: errorMessage['0404'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0405',
+      message: errorMessage['0405'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_LEAVE] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateDetails(
-    @Param('id') id: string,
+    @Param() param: ValidateParamLeaveId,
     @Body() dto: UpdateLeaveDto,
-    @Req() req: AuthenticatedRequest,
-  ): Promise<LeaveResponseDto> {
-    const updatedLeave = await this.leaveService.updateLeaveDetails(id, dto, req.user.id);
-    return this.leaveService.toLeaveResponseDto(updatedLeave);
+  ): Promise<ResponseObject<LeaveResponseDto>> {
+    const updatedLeave = await this.leaveService.updateLeaveDetails(param.id, dto, param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.leaveService.toLeaveResponseDto(updatedLeave),
+    };
   }
 
   @Patch(':id/status')
+  @ApiOkResponse({ type: [LeaveResponseDto] })
+  @ApiResponseError([
+    {
+      code: '0401',
+      message: errorMessage['0401'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0402',
+      message: errorMessage['0402'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0403',
+      message: errorMessage['0403'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0404',
+      message: errorMessage['0404'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0405',
+      message: errorMessage['0405'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_LEAVE] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
   async updateStatus(
-    @Param('id') id: string,
+    @Param() param: ValidateParamLeaveId,
     @Body() dto: UpdateLeaveDto,
-    @Req() req: AuthenticatedRequest,
-  ): Promise<LeaveResponseDto> {
-    const updatedLeave = await this.leaveService.updateLeaveStatus(id, dto, req.user.id);
-    return this.leaveService.toLeaveResponseDto(updatedLeave);
+  ): Promise<ResponseObject<LeaveResponseDto>> {
+    const updatedLeave = await this.leaveService.updateLeaveStatus(param.id, dto, param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.leaveService.toLeaveResponseDto(updatedLeave),
+    };
   }
 
   @Delete(':id')
+  @ApiOkResponse({ type: [LeaveResponseDto] })
+  @ApiResponseError([
+    {
+      code: '0401',
+      message: errorMessage['0401'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0402',
+      message: errorMessage['0402'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0403',
+      message: errorMessage['0403'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0404',
+      message: errorMessage['0404'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0405',
+      message: errorMessage['0405'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_LEAVE] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: LeaveResponseDto })
-  async delete(@Param('id') id: string): Promise<void> {
-    await this.leaveService.deleteLeave(id);
+  async delete(@Param() param: ValidateParamLeaveId): Promise<void> {
+    await this.leaveService.deleteLeave(param.id);
     return;
   }
 }

@@ -48,6 +48,7 @@ export class UsersItemsRequestsService {
   // ดึง Entity จริงสำหรับแก้ไข (return Entity)
   async findOneEntity(id: string): Promise<UsersItemRequestEntity> {
     const entity = await this.itemRequestRepository.findOne({
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
       where: { id, deletedAt: null },
       relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionBy'],
     });
@@ -98,6 +99,7 @@ export class UsersItemsRequestsService {
 
   async findAllByUser(userId: string): Promise<ItemRequestResponseDto[]> {
     const itemRequests = await this.itemRequestRepository.find({
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
       where: { requestedBy: { id: userId }, deletedAt: null },
       relations: ['item', 'requestedBy', 'approvedBy'],
       order: { createdAt: 'DESC' },
@@ -107,7 +109,6 @@ export class UsersItemsRequestsService {
 
   async softDelete(id: string): Promise<ItemRequestResponseDto> {
     const itemRequest = await this.findOneEntity(id);
-    const oldStatus = itemRequest.status;
     itemRequest.deletedAt = new Date();
 
     // Create history record
@@ -126,6 +127,7 @@ export class UsersItemsRequestsService {
 
   async findAllPending(): Promise<ItemRequestResponseDto[]> {
     const itemRequests = await this.itemRequestRepository.find({
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
       where: { status: EItemRequestStatus.PENDING, deletedAt: null },
       relations: ['item', 'requestedBy', 'actionBy'],
       order: { createdAt: 'DESC' },

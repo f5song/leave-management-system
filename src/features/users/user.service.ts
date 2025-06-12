@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, HttpStatus, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../database/entity/users.entity';
@@ -11,6 +11,7 @@ import { EDepartmentId } from '@common/constants/department.enum';
 import { UpdateUserDto } from './dto/update.users.dto';
 import { UserResponseDto } from './respones/users.respones.dto';
 import { ERole } from '@src/common/constants/roles.enum';
+import { errorMessage } from '@src/common/constants/error-message';
 
 @Injectable()
 export class UserService {
@@ -50,14 +51,19 @@ export class UserService {
     };
   }
 
-  async patchUser(id: string, updateData: UpdateUserDto): Promise<UserEntity> {
+  async patchUser(id: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
     const user = await this.userInfoRepository.findOne({
+      select: ['id', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id },
       relations: ['jobTitle', 'department', 'role']
     });
 
     if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     // Update only the provided fields
@@ -71,80 +77,121 @@ export class UserService {
     if (updateData.departmentId) user.departmentId = updateData.departmentId;
     if (updateData.roleId) user.roleId = updateData.roleId;
     if (updateData.salary) user.salary = updateData.salary;
-    return await this.userInfoRepository.save(user);
+    return this.toUserResponseDto(await this.userInfoRepository.save(user));
   }
 
-  private async validateUserId(id: string): Promise<void> {
+  async validateUserId(id: string): Promise<void> {
 
     const user = await this.userInfoRepository.findOne({
+      select: ['id'],
       where: { id },
     });
 
     if (!user || user.deletedAt) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
-  private async validateEmail(email: string): Promise<void> {
+  async validateEmail(email: string): Promise<void> {
     if (!email || typeof email !== 'string' || email.trim().length === 0) {
-      throw new BadRequestException('Email is required and cannot be empty');
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     if (!email.includes('@')) {
-      throw new BadRequestException('Invalid email format');
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     const existingUser = await this.userInfoRepository.findOne({
+      select: ['id'],
       where: { email },
     });
 
     if (existingUser && !existingUser.deletedAt) {
-      throw new BadRequestException('Email already exists');
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
-  private async validateRole(roleId: ERole): Promise<void> {
+  async validateRole(roleId: ERole): Promise<void> {
 
     const role = await this.roleRepository.findOne({
+      select: ['id'],
       where: { id: roleId },
     });
 
     if (!role || role.deletedAt) {
-      throw new NotFoundException(`Role with ID ${roleId} not found`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
-  private async validateJobTitle(jobTitleId: EJobTitleId): Promise<void> {
+  async validateJobTitle(jobTitleId: EJobTitleId): Promise<void> {
     const jobTitle = await this.jobTitleRepository.findOne({
+      select: ['id'],
       where: { id: jobTitleId },
     });
 
     if (!jobTitle || jobTitle.deletedAt) {
-      throw new NotFoundException(`Job title with ID ${jobTitleId} not found`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
-  private async validateDepartment(departmentId: EDepartmentId): Promise<void> {
+  async validateDepartment(departmentId: EDepartmentId): Promise<void> {
     const department = await this.departmentRepository.findOne({
+      select: ['id'],
       where: { id: departmentId },
     });
 
     if (!department || department.deletedAt) {
-      throw new NotFoundException(`Department with ID ${departmentId} not found`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
-  private async validateNames(firstName: string, lastName: string): Promise<void> {
+  async validateNames(firstName: string, lastName: string): Promise<void> {
     if (!firstName || typeof firstName !== 'string' || firstName.trim().length === 0) {
-      throw new BadRequestException('First name is required and cannot be empty');
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     if (!lastName || typeof lastName !== 'string' || lastName.trim().length === 0) {
-      throw new BadRequestException('Last name is required and cannot be empty');
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
-  private async validateBirthDate(birthDate: string | Date): Promise<void> {
+  async validateBirthDate(birthDate: string | Date): Promise<void> {
     if (!birthDate) {
       throw new BadRequestException('Birth date is required');
     }
@@ -153,7 +200,11 @@ export class UserService {
     const date = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
     
     if (isNaN(date.getTime())) {
-      throw new BadRequestException('Invalid birth date format');
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     const today = new Date();
@@ -162,7 +213,11 @@ export class UserService {
 
     const age = today.getFullYear() - date.getFullYear();
     if (age < minAge || age > maxAge) {
-      throw new BadRequestException(`Age must be between ${minAge} and ${maxAge} years`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -176,6 +231,7 @@ export class UserService {
 
     let nextNumber = 1;
     const last_user = await this.userInfoRepository.findOne({
+      select: ['id', 'employeeCode'],
       order: {
         createdAt: 'DESC'
       }
@@ -199,23 +255,23 @@ export class UserService {
     return user;
   }
 
-  async getUserById(id: string): Promise<UserEntity> {
+  async getUserById(id: string): Promise<UserResponseDto> {
     await this.validateUserId(id);
 
     const user = await this.userInfoRepository.findOne({
       where: { id }
     });
-    return user;
+    return this.toUserResponseDto(user);
   }
 
-  async getAllUsers(): Promise<UserEntity[]> {
+  async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userInfoRepository.find({
       where: { deletedAt: null }
     });
-    return users;
+    return users.map(user => this.toUserResponseDto(user));
   }
 
-  async updateUser(userId: string, data: UpdateUserDto): Promise<UserEntity> {
+  async updateUser(userId: string, data: UpdateUserDto): Promise<UserResponseDto> {
     await this.validateUserId(userId);
 
     const updateData: Partial<UserEntity> = {};
@@ -245,11 +301,16 @@ export class UserService {
 
 
     const user = await this.userInfoRepository.findOne({
+      select: ['id', 'employeeCode', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id: userId },
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     Object.assign(user, {
@@ -257,21 +318,26 @@ export class UserService {
       updatedAt: new Date(),
     });
 
-    return await this.userInfoRepository.save(user);
+    return this.toUserResponseDto(await this.userInfoRepository.save(user));
   }
 
-  async deleteUser(id: string): Promise<UserEntity> {
+  async deleteUser(id: string): Promise<UserResponseDto> {
     await this.validateUserId(id);
 
     const user = await this.userInfoRepository.findOne({
+      select: ['id', 'employeeCode', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id },
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     user.deletedAt = new Date();
-    return await this.userInfoRepository.save(user);
+    return this.toUserResponseDto(await this.userInfoRepository.save(user));
   }
 }

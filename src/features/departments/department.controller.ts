@@ -12,7 +12,7 @@ import { DepartmentService } from './department.service';
 import {
   UpdateDepartmentDto
 } from './dto/update.department.dto';
-import { ApiTags, ApiOkResponse, ApiBearerAuth, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';

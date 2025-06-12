@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
@@ -6,6 +6,7 @@ import { CreateItemsRequestsHistoryDto } from './dto/create.users-items-requests
 import { UpdateItemsRequestsHistoryDto } from './dto/update.users-items-requests-histories.dto';
 import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
 import { ItemsRequestsHistoryResponseDto } from './respones/users-items-requests-histories.respones.dto';
+import { errorMessage } from '@src/common/constants/error-message';
 
 
 
@@ -31,11 +32,14 @@ export class UsersItemsRequestsHistoriesService {
   }
 
   async findAll() {
-    return this.usersItemsRequestsHistoriesRepository.find();
+    return this.usersItemsRequestsHistoriesRepository.find({
+      select: ['id', 'requestId', 'actionBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
+    });
   }
 
   async findOne(id: string) {
     return this.usersItemsRequestsHistoriesRepository.findOne({
+      select: ['id', 'requestId', 'actionBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
       where: { id },
       relations: ['user', 'request']
     });
@@ -52,7 +56,11 @@ export class UsersItemsRequestsHistoriesService {
   async update(id: string, updateDto: UpdateItemsRequestsHistoryDto) {
     const history = await this.findOne(id);
     if (!history) {
-      throw new NotFoundException(`History with ID ${id} not found`);
+      throw new HttpException({
+        code: '1101',
+        message: errorMessage['1101'],
+        statusCode: HttpStatus.NOT_FOUND,
+      }, HttpStatus.NOT_FOUND);
     }
 
     const updatedHistory = {
@@ -66,7 +74,11 @@ export class UsersItemsRequestsHistoriesService {
   async delete(id: string) {
     const history = await this.findOne(id);
     if (!history) {
-      throw new NotFoundException(`History with ID ${id} not found`);
+      throw new HttpException({
+        code: '1101',
+        message: errorMessage['1101'],
+        statusCode: HttpStatus.NOT_FOUND,
+      }, HttpStatus.NOT_FOUND);
     }
     return this.usersItemsRequestsHistoriesRepository.remove(history);
   }

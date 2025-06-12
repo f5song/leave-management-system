@@ -8,16 +8,17 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { EPermission } from '@src/common/constants/permission.enum';
 import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
 import { ERole } from '@src/common/constants/roles.enum';
+import { ValidateParamPermissionId } from './dto/permission.validate';
 
 @ApiTags('Permissions')
 @Controller('permissions')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('access-token')
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_PERMISSION] })
-  @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: PermissionResponseDto })
   async create(@Body() dto: CreatePermissionDto): Promise<PermissionResponseDto> {
     const permission = await this.permissionService.create(dto);
@@ -26,7 +27,6 @@ export class PermissionController {
 
   @Get()
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_PERMISSION] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [PermissionResponseDto] })
   async findAll(): Promise<PermissionResponseDto[]> {
     const permissions = await this.permissionService.findAll();
@@ -35,27 +35,24 @@ export class PermissionController {
 
   @Get(':id')
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_PERMISSION] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
-  async findOne(@Param('id') id: EPermission): Promise<PermissionResponseDto> {
-    const permission = await this.permissionService.findOne(id);
+  async findOne(@Param() param: ValidateParamPermissionId): Promise<PermissionResponseDto> {
+    const permission = await this.permissionService.findOne(param.id);
     return this.permissionService.toPermissionResponseDto(permission);
   }
 
   @Patch(':id' )
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_PERMISSION] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
-  async update(@Param('id') id: EPermission, @Body() dto: UpdatePermissionDto): Promise<PermissionResponseDto> {
-    const updatedPermission = await this.permissionService.update(id, dto);
+  async update(@Param() param: ValidateParamPermissionId, @Body() dto: UpdatePermissionDto): Promise<PermissionResponseDto> {
+    const updatedPermission = await this.permissionService.update(param.id, dto);
     return this.permissionService.toPermissionResponseDto(updatedPermission);
   }
 
   @Delete(':id')
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_PERMISSION] })
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: PermissionResponseDto })
-  async remove(@Param('id') id: EPermission): Promise<PermissionResponseDto> {
-    return this.permissionService.softDelete(id);
+  async remove(@Param() param: ValidateParamPermissionId): Promise<PermissionResponseDto> {
+    return this.permissionService.softDelete(param.id);
   }
 }

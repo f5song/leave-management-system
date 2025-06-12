@@ -17,9 +17,9 @@ export class AuthService {
     private jwtService: JwtService
   ) { }
 
-  validateToken(authToken: any) {
-    throw new Error('Method not implemented.');
-  }
+  // validateToken(authToken: any) {
+  //   throw new Error('Method not implemented.');
+  // }
 
   generateJwtToken(payload: { email: string; sub: string | number }) {
     return this.jwtService.sign(payload);

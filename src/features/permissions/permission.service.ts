@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PermissionEntity } from '../../database/entity/permissions.entity';
@@ -8,6 +8,7 @@ import { UserEntity } from '../../database/entity/users.entity';
 import { UpdatePermissionDto } from './dto/update.permissions.dto';
 import { EPermission } from '@src/common/constants/permission.enum';
 import { ERole } from '@src/common/constants/roles.enum';
+import { errorMessage } from '@src/common/constants/error-message';
 
 @Injectable()
 export class PermissionService {
@@ -39,7 +40,11 @@ export class PermissionService {
     });
 
     if (!permission || permission.deletedAt) {
-      throw new NotFoundException(`Permission with ID ${id} not found`);
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -52,7 +57,11 @@ export class PermissionService {
     });
 
     if (existingPermission) {
-      throw new BadRequestException(`Permission with name ${name} already exists`);
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -63,7 +72,11 @@ export class PermissionService {
     });
 
     if (!user || user.deletedAt) {
-      throw new NotFoundException(`User with ID ${creatorId} not found`);
+      throw new  HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -90,6 +103,7 @@ export class PermissionService {
 
   async findAll() {
     return this.permissionRepository.find({
+      select: ['id', 'name', 'permissionRoles', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { deletedAt: null },
       order: { name: 'ASC' }
     });
@@ -98,7 +112,8 @@ export class PermissionService {
   async findOne(id: EPermission) {
     await this.validatePermissionId(id);
     return this.permissionRepository.findOne({
-      where: { id, deletedAt: null },
+      select: ['id', 'name', 'permissionRoles', 'createdAt', 'updatedAt', 'deletedAt'],
+      where: { id },
       relations: ['createdBy']
     });
   }
@@ -111,11 +126,16 @@ export class PermissionService {
     }
 
     const permission = await this.permissionRepository.findOne({
+      select: ['id'],
       where: { id }
     });
 
     if (!permission || permission.deletedAt) {
-      throw new NotFoundException(`Permission with ID ${id} not found`);
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     Object.assign(permission, dto);
@@ -128,11 +148,16 @@ export class PermissionService {
     await this.validatePermissionId(id);
 
     const permission = await this.permissionRepository.findOne({
+      select: ['id', 'deletedAt'],
       where: { id }
     });
 
     if (!permission || permission.deletedAt) {
-      throw new NotFoundException(`Permission with ID ${id} not found`);
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     permission.deletedAt = new Date();
@@ -142,6 +167,7 @@ export class PermissionService {
   async getPermissionById(id: EPermission) {
     await this.validatePermissionId(id);
     return this.permissionRepository.findOne({
+      select: ['id'],
       where: { id },
       relations: ['createdBy']
     });

@@ -7,7 +7,7 @@ import { EDepartmentId } from "@src/common/constants/department.enum";
 @Entity('job_titles')
 export class JobTitleEntity {
   @PrimaryColumn({ type: 'varchar', length: 50 })
-  id: EJobTitleId;
+  id: string;
 
   @Column({ unique: true })
   name: string;

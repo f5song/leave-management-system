@@ -14,8 +14,9 @@ export class DepartmentService {
     private departmentRepository: Repository<DepartmentEntity>
   ) { }
 
-  async validateUniqueName(name: string) {
+  private async validateUniqueName(name: string) {
     const existingDepartment = await this.departmentRepository.findOne({
+      select: ['id', 'name', 'color'],
       where: { name },
     });
     if (existingDepartment) {

@@ -3,7 +3,6 @@ import { HolidayService } from './holiday.service';
 import { CreateHolidayDto} from './dto/create.holidays.dto';
 import { UpdateHolidayDto } from './dto/update.holidays.dto';
 import { HolidayResponseDto } from './response/holidays.respones.dto';
-import { HolidayEntity } from '../../database/entity/holidays.entity';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
@@ -15,6 +14,7 @@ import { ResponseObject } from '@common/dto/common-response.dto';
 import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
 import { errorMessage } from '@src/common/constants/error-message';
 import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
+import { ValidateParamHolidayId } from '../holidays/dto/holidays.validate';
 
 @ApiTags('Holidays')
 @Controller('holidays')
@@ -105,8 +105,8 @@ export class HolidayController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_HOLIDAY] })
-  async findOne(@Param('id') id: string): Promise<ResponseObject<HolidayResponseDto>> {
-    const holiday = await this.holidayService.findOne(id);
+  async findOne(@Param() param: ValidateParamHolidayId): Promise<ResponseObject<HolidayResponseDto>> {
+    const holiday = await this.holidayService.findOne(param.id);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -196,10 +196,10 @@ export class HolidayController {
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_HOLIDAY] })
   @ApiOkResponse({ type: HolidayResponseDto })
   async update(
-    @Param('id') id: string,
+    @Param() param: ValidateParamHolidayId,
     @Body() updateHolidayDto: UpdateHolidayDto,
   ): Promise<ResponseObject<HolidayResponseDto>> {
-    const holiday = await this.holidayService.update(id, updateHolidayDto);
+    const holiday = await this.holidayService.update(param.id, updateHolidayDto);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -244,7 +244,7 @@ export class HolidayController {
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_HOLIDAY] })
   @ApiOkResponse({ type: HolidayResponseDto })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async softDelete(@Param('id') id: string): Promise<void> {
-    await this.holidayService.softDelete(id);
+  async softDelete(@Param() param: ValidateParamHolidayId): Promise<void> {
+    await this.holidayService.softDelete(param.id);
   }
 }

@@ -5,8 +5,8 @@ export class LeaveTypeResponseDto {
   id: ELeaveType;
   name: string;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   deletedAt?: Date;
   leaves: LeaveEntity[];
 }

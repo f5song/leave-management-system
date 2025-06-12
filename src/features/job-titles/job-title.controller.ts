@@ -15,6 +15,7 @@ import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.
 import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
 import { errorMessage } from '@src/common/constants/error-message';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
+import { ValidateParamJobTitleId } from '../job-titles/dto/job-titles.validate';
 
 @ApiTags('Job Titles')
 @Controller('job-titles')
@@ -59,7 +60,7 @@ export class JobTitleController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
-  async findAll(): Promise<ResponseObject<JobTitleEntity[]>> {
+  async findAll(): Promise<ResponseObject<JobTitleResponseDto[]>> {
     const jobTitles = await this.jobTitleService.findAll();
     return {
       code: HttpStatus.OK,
@@ -69,7 +70,7 @@ export class JobTitleController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiOkResponse({ type: JobTitleResponseDto })
   @ApiResponseError([
     {
       code: '0101',
@@ -103,9 +104,9 @@ export class JobTitleController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_JOB_TITLE] })
-  @ApiOkResponse({ type: JobTitleEntity })
-  async findOne(@Param('id') id: EJobTitleId): Promise<ResponseObject<JobTitleEntity>> {
-    const jobTitle = await this.jobTitleService.findOne(id);
+  @ApiOkResponse({ type: JobTitleResponseDto })
+  async findOne(@Param() param: ValidateParamJobTitleId): Promise<ResponseObject<JobTitleResponseDto>> {
+    const jobTitle = await this.jobTitleService.findOne(param.id);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -114,7 +115,7 @@ export class JobTitleController {
   }
 
   @Post()
-  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiOkResponse({ type: JobTitleResponseDto })
   @ApiResponseError([
     {
       code: '0101',
@@ -148,8 +149,8 @@ export class JobTitleController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_JOB_TITLE] })
-  @ApiCreatedResponse({ type: JobTitleEntity })
-  async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<ResponseObject<JobTitleEntity>> {
+  @ApiCreatedResponse({ type: JobTitleResponseDto })
+  async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<ResponseObject<JobTitleResponseDto>> {
     const jobTitle = await this.jobTitleService.create(createJobTitleDto);
     return {
       code: HttpStatus.OK,
@@ -159,7 +160,7 @@ export class JobTitleController {
   }
 
   @Put(':id')
-  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiOkResponse({ type: JobTitleResponseDto })
   @ApiResponseError([
     {
       code: '0101',
@@ -193,12 +194,12 @@ export class JobTitleController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_JOB_TITLE] })
-  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiOkResponse({ type: JobTitleResponseDto })
   async update(
-    @Param('id') id: EJobTitleId,
+    @Param() param: ValidateParamJobTitleId,
     @Body() updateJobTitleDto: UpdateJobTitleDto,
-  ): Promise<ResponseObject<JobTitleEntity>> {
-    const jobTitle = await this.jobTitleService.update(id, updateJobTitleDto);
+  ): Promise<ResponseObject<JobTitleResponseDto>> {
+    const jobTitle = await this.jobTitleService.update(param.id, updateJobTitleDto);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -207,7 +208,7 @@ export class JobTitleController {
   }
 
   @Delete(':id')
-  @ApiOkResponse({ type: JobTitleEntity })
+  @ApiOkResponse({ type: JobTitleResponseDto })
   @ApiResponseError([
     {
       code: '0101',
@@ -241,8 +242,8 @@ export class JobTitleController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_JOB_TITLE] })
-  @ApiOkResponse({ type: JobTitleEntity })
-  async remove(@Param('id') id: EJobTitleId): Promise<void> {
-    await this.jobTitleService.softDelete(id);
+  @ApiOkResponse({ type: JobTitleResponseDto })
+  async remove(@Param() param: ValidateParamJobTitleId): Promise<void> {
+    await this.jobTitleService.softDelete(param.id);
   }
 }

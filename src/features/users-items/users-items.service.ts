@@ -54,6 +54,8 @@ export class UsersItemsService {
   // Get all item requests
   async findAllRequests(): Promise<UsersItemRequestEntity[]> {
     return this.itemRequestRepository.find({
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
+      where: { deletedAt: null },
       relations: ['item', 'requestedBy', 'approvedBy'],
     });
   }
@@ -61,6 +63,8 @@ export class UsersItemsService {
   // ฟังก์ชันสำหรับรับรายการอุปกรณ์
   async findAll(): Promise<UsersItemEntity[]> {
     return this.itemRepository.find({
+      select: ['id', 'name', 'description', 'quantity', 'status', 'createdBy', 'createdById', 'createdAt', 'updatedAt', 'deletedAt'],
+      where: { deletedAt: null },
       relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy'],
     });
   }
@@ -69,6 +73,7 @@ export class UsersItemsService {
   async findOne(id: string): Promise<UsersItemEntity> {
     const item = await this.itemRepository.findOne({
       where: { id },
+      select: ['id', 'name', 'description', 'quantity', 'status', 'createdBy', 'createdById', 'createdAt', 'updatedAt', 'deletedAt'],
       relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy'],
     });
     if (!item) {
@@ -108,6 +113,7 @@ export class UsersItemsService {
   ): Promise<ItemRequestResponseDto> {
     const request = await this.itemRequestRepository.findOne({
       where: { id: requestId },
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
       relations: ['item', 'requestedBy'],
     });
 

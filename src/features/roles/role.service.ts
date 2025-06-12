@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleEntity } from '../../database/entity/roles.entity';
@@ -7,6 +7,7 @@ import { CreateRoleDto } from './dto/create.roles.dto';
 import { UpdateRoleDto } from './dto/update.roles.dto';
 import { RoleResponseDto } from './respones/roles.respones.dto';
 import { ERole } from '@src/common/constants/roles.enum';
+import { errorMessage } from '@src/common/constants/error-message';
 
 @Injectable()
 export class RoleService {
@@ -35,20 +36,30 @@ export class RoleService {
 
   private async validateRoleId(id: ERole): Promise<void> {
     const role = await this.roleRepository.findOne({
+      select: ['id'],
       where: { id },
     });
 
     if (!role || role.deletedAt) {
-      throw new NotFoundException(`Role with ID ${id} not found`);
+      throw new HttpException({
+        code: '0601',
+        message: errorMessage['0601'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
   private async validateRoleName(name: string): Promise<void> {
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      throw new BadRequestException('Role name is required and cannot be empty');
+      throw new HttpException({
+        code: '0606',
+        message: errorMessage['0606'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     const existingRole = await this.roleRepository.findOne({
+      select: ['id'],
       where: {
         name: name.trim(),
         deletedAt: null,
@@ -56,17 +67,26 @@ export class RoleService {
     });
 
     if (existingRole) {
-      throw new BadRequestException(`Role with name ${name} already exists`);
+      throw new HttpException({
+        code: '0601',
+        message: errorMessage['0601'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
   private async validateRoleCreator(creatorId: string): Promise<void> {
     const user = await this.userInfoRepository.findOne({
+      select: ['id'],
       where: { id: creatorId },
     });
 
     if (!user || user.deletedAt) {
-      throw new NotFoundException(`User with ID ${creatorId} not found`);
+      throw new HttpException({
+        code: '0605',
+        message: errorMessage['0605'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -74,18 +94,23 @@ export class RoleService {
     return this.roleRepository.find({
       where: { deletedAt: null },
       order: { name: 'ASC' },
-      relations: ['createdBy', 'user', 'permissions']
+      relations: ['createdBy', 'user']
     });
   }
 
   async findOne(id: ERole): Promise<RoleEntity> {
     await this.validateRoleId(id);
     const role = await this.roleRepository.findOne({
+      select: ['id', 'name', 'createdById', 'createdBy', 'user', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id, deletedAt: null },
-      relations: ['createdBy', 'user', 'permissions']
+      relations: ['createdBy', 'user']
     });
     if (!role) {
-      throw new NotFoundException(`Role with ID ${id} not found`);
+      throw new HttpException({
+        code: '0601',
+        message: errorMessage['0601'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
     return role;
   }
@@ -95,12 +120,16 @@ export class RoleService {
     await this.validateRoleCreator(data.createdBy);
 
     const user = await this.userInfoRepository.findOne({
+      select: ['id'],
       where: { id: data.createdBy },
-      relations: ['createdRoles']
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${data.createdBy} not found`);
+      throw new HttpException({
+        code: '0605',
+        message: errorMessage['0605'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     return this.roleRepository.save({
@@ -118,12 +147,17 @@ export class RoleService {
     }
     
     const role = await this.roleRepository.findOne({
+      select: ['id', 'name', 'createdById', 'createdBy', 'user', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id },
-      relations: ['createdBy', 'user', 'permissions']
+      relations: ['createdBy', 'user']
     });
     
     if (!role || role.deletedAt) {
-      throw new NotFoundException(`Role with ID ${id} not found`);
+      throw new HttpException({
+        code: '0605',
+        message: errorMessage['0605'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     Object.assign(role, {
@@ -138,12 +172,17 @@ export class RoleService {
     await this.validateRoleId(id);
     
     const role = await this.roleRepository.findOne({
+      select: ['id', 'name', 'createdById', 'createdBy', 'user', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id },
-      relations: ['createdBy', 'user', 'permissions']
+      relations: ['createdBy', 'user']
     });
     
     if (!role || role.deletedAt) {
-      throw new NotFoundException(`Role with ID ${id} not found`);
+      throw new HttpException({
+        code: '0605',
+        message: errorMessage['0605'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
     }
 
     role.deletedAt = new Date();
