@@ -1,8 +1,10 @@
 import { UserEntity } from "@src/database/entity/users.entity";
 import { PermissionEntity } from "@src/database/entity/permissions.entity";
+import { PermissionRoleEntity } from "@src/database/entity/permission-role";
+import { ERole } from "@src/common/constants/roles.enum";
 
 export class RoleResponseDto {
-  id: string;
+  id: ERole;
 
   name: string;
 
@@ -19,4 +21,6 @@ export class RoleResponseDto {
   updatedAt?: Date;
 
   deletedAt?: Date;
+
+  permissionRoles?: PermissionRoleEntity[];
 }

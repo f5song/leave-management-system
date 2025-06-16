@@ -47,16 +47,16 @@ export class SeedService {
         private readonly permissionRepository: Repository<PermissionEntity>,
         @InjectRepository(RoleEntity)
         private readonly roleRepository: Repository<RoleEntity>,
-        @InjectRepository(UsersFacilityRequestEntity)
-        private readonly facilityRequestRepository: Repository<UsersFacilityRequestEntity>,
-        @InjectRepository(UsersItemsRequestsHistoryEntity)
-        private readonly itemRequestHistoryRepository: Repository<UsersItemsRequestsHistoryEntity>,
-        @InjectRepository(UsersItemRequestEntity)
-        private readonly itemRequestRepository: Repository<UsersItemRequestEntity>,
-        @InjectRepository(UsersItemEntity)
-        private readonly itemRepository: Repository<UsersItemEntity>,
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
+        @InjectRepository(UsersFacilityRequestEntity)
+        private readonly facilityRequestRepository: Repository<UsersFacilityRequestEntity>,
+        @InjectRepository(UsersItemEntity)
+        private readonly itemRepository: Repository<UsersItemEntity>,
+        @InjectRepository(UsersItemRequestEntity)
+        private readonly itemRequestRepository: Repository<UsersItemRequestEntity>,
+        @InjectRepository(UsersItemsRequestsHistoryEntity)
+        private readonly itemRequestHistoryRepository: Repository<UsersItemsRequestsHistoryEntity>,
         @InjectRepository(PermissionRoleEntity)
         private readonly permissionRoleRepository: Repository<PermissionRoleEntity>,
     ) { }
@@ -86,7 +86,6 @@ export class SeedService {
             const user = await this.userRepository.create(usersSeedData)
             await this.userRepository.save(user)
 
-
             const holiday = await this.holidayRepository.create(holidaysSeedData)
             await this.holidayRepository.save(holiday)
 
@@ -96,17 +95,18 @@ export class SeedService {
             const leave = await this.leaveRepository.create(leavesSeedData)
             await this.leaveRepository.save(leave)
 
-            const facilityRequest = await this.facilityRequestRepository.create(usersFacilityRequestsSeedData)
-            await this.facilityRequestRepository.save(facilityRequest)
-
-            const itemRequestHistory = await this.itemRequestHistoryRepository.create(usersItemsRequestsHistorySeedData)
-            await this.itemRequestHistoryRepository.save(itemRequestHistory)
-
             const item = await this.itemRepository.create(usersItemsSeedData)
             await this.itemRepository.save(item)
 
             const itemRequest = await this.itemRequestRepository.create(usersItemRequestsSeedData)
             await this.itemRequestRepository.save(itemRequest)
+            
+            const itemRequestHistory = await this.itemRequestHistoryRepository.create(usersItemsRequestsHistorySeedData)
+            await this.itemRequestHistoryRepository.save(itemRequestHistory)
+            
+            const facilityRequest = await this.facilityRequestRepository.create(usersFacilityRequestsSeedData)
+            await this.facilityRequestRepository.save(facilityRequest)
+
         }
         this.logger.log('Seeding database completed');
 

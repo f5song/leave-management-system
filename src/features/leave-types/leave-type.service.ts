@@ -29,32 +29,32 @@ export class LeaveTypeService {
       };
     }
 
-  async create(createLeaveTypeDto: CreateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
-    const existing = await this.leaveTypeRepository.findOne({
-      select: ['id'],
-      where: { id: createLeaveTypeDto.id },
-      withDeleted: true,
-    });
+  // async create(createLeaveTypeDto: CreateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
+  //   const existing = await this.leaveTypeRepository.findOne({
+  //     select: ['id'],
+  //     where: { id: createLeaveTypeDto.id },
+  //     withDeleted: true,
+  //   });
 
-    if (existing) {
-      if (!existing.deletedAt) {
-        throw new HttpException({
-          code: '0302',
-          message: errorMessage['0302'],
-          statusCode: HttpStatus.BAD_REQUEST,
-        }, HttpStatus.BAD_REQUEST);
-      }
-      throw new HttpException({
-        code: '0303',
-        message: errorMessage['0303'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
+  //   if (existing) {
+  //     if (!existing.deletedAt) {
+  //       throw new HttpException({
+  //         code: '0302',
+  //         message: errorMessage['0302'],
+  //         statusCode: HttpStatus.BAD_REQUEST,
+  //       }, HttpStatus.BAD_REQUEST);
+  //     }
+  //     throw new HttpException({
+  //       code: '0303',
+  //       message: errorMessage['0303'],
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //     }, HttpStatus.BAD_REQUEST);
+  //   }
 
-    const leaveType = this.leaveTypeRepository.create(createLeaveTypeDto);
-    await this.leaveTypeRepository.save(leaveType);
-    return this.toLeaveTypeResponseDto(leaveType);
-  }
+  //   const leaveType = this.leaveTypeRepository.create(createLeaveTypeDto);
+  //   await this.leaveTypeRepository.save(leaveType);
+  //   return this.toLeaveTypeResponseDto(leaveType);
+  // }
 
   async findAll(): Promise<LeaveTypeResponseDto[]> {
     const leaveTypes = await this.leaveTypeRepository.find({
@@ -97,52 +97,52 @@ export class LeaveTypeService {
     return this.toLeaveTypeResponseDto(leaveType);
   }
 
-  async partialUpdate(id: ELeaveType, partialData: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
-    const leaveType = await this.findOne(id);
-    if (!leaveType) {
-      throw new HttpException({
-        code: '0301',
-        message: errorMessage['0301'],
-        statusCode: HttpStatus.NOT_FOUND,
-      }, HttpStatus.NOT_FOUND);
-    }
+  // async partialUpdate(id: ELeaveType, partialData: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
+  //   const leaveType = await this.findOne(id);
+  //   if (!leaveType) {
+  //     throw new HttpException({
+  //       code: '0301',
+  //       message: errorMessage['0301'],
+  //       statusCode: HttpStatus.NOT_FOUND,
+  //     }, HttpStatus.NOT_FOUND);
+  //   }
     
-    // Update only the provided fields
-    Object.keys(partialData).forEach(key => {
-      if (partialData[key] !== undefined) {
-        (leaveType as any)[key] = partialData[key];
-      }
-    });
+  //   // Update only the provided fields
+  //   Object.keys(partialData).forEach(key => {
+  //     if (partialData[key] !== undefined) {
+  //       (leaveType as any)[key] = partialData[key];
+  //     }
+  //   });
     
-    leaveType.updatedAt = new Date();
-    await this.leaveTypeRepository.save(leaveType);
-    return this.toLeaveTypeResponseDto(leaveType);
-  }
+  //   leaveType.updatedAt = new Date();
+  //   await this.leaveTypeRepository.save(leaveType);
+  //   return this.toLeaveTypeResponseDto(leaveType);
+  // }
 
-  async delete(id: ELeaveType): Promise<void> {
-    const leaveType = await this.findOne(id);
-    leaveType.deletedAt = new Date();
-    await this.leaveTypeRepository.save(leaveType);
-  }
+  // async delete(id: ELeaveType): Promise<void> {
+  //   const leaveType = await this.findOne(id);
+  //   leaveType.deletedAt = new Date();
+  //   await this.leaveTypeRepository.save(leaveType);
+  // }
 
-  async restore(id: ELeaveType): Promise<LeaveTypeResponseDto> {
-    const leaveType = await this.leaveTypeRepository.findOne({
-      select: ['id', 'name', 'leaves', 'description', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { id, deletedAt: null },
-    });
+  // async restore(id: ELeaveType): Promise<LeaveTypeResponseDto> {
+  //   const leaveType = await this.leaveTypeRepository.findOne({
+  //     select: ['id', 'name', 'leaves', 'description', 'createdAt', 'updatedAt', 'deletedAt'],
+  //     where: { id, deletedAt: null },
+  //   });
 
-    if (!leaveType) {
-      throw new HttpException({
-        code: '0301',
-        message: errorMessage['0301'],
-        statusCode: HttpStatus.NOT_FOUND,
-      }, HttpStatus.NOT_FOUND);
-    }
+  //   if (!leaveType) {
+  //     throw new HttpException({
+  //       code: '0301',
+  //       message: errorMessage['0301'],
+  //       statusCode: HttpStatus.NOT_FOUND,
+  //     }, HttpStatus.NOT_FOUND);
+  //   }
 
-    leaveType.deletedAt = null;
-    await this.leaveTypeRepository.save(leaveType);
-    return this.toLeaveTypeResponseDto(leaveType);
-  }
+  //   leaveType.deletedAt = null;
+  //   await this.leaveTypeRepository.save(leaveType);
+  //   return this.toLeaveTypeResponseDto(leaveType);
+  // }
 
   private async validateLeaveTypeExists(id: ELeaveType): Promise<void> {
     const leaveType = await this.leaveTypeRepository.findOne({
@@ -160,13 +160,13 @@ export class LeaveTypeService {
     }
   }
 
-  async softDelete(id: ELeaveType): Promise<void> {
-    await this.validateLeaveTypeExists(id);
+  // async softDelete(id: ELeaveType): Promise<void> {
+  //   await this.validateLeaveTypeExists(id);
 
-    await this.leaveTypeRepository.update(id, {
-      deletedAt: new Date()
-    });
-  }
+  //   await this.leaveTypeRepository.update(id, {
+  //     deletedAt: new Date()
+  //   });
+  // }
 
   // async partialUpdate(id: LeaveType, data: Partial<{ name: string; description: string; is_active: boolean }>): Promise<LeaveTypeResponseDto> {
   //   const leaveType = await this.findOne(id);

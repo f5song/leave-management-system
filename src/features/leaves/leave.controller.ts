@@ -10,6 +10,8 @@ import {
   UsePipes,
   ValidationPipe,
   HttpStatus,
+  Req,
+  Logger,
 } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import {
@@ -27,6 +29,9 @@ import { ValidateParamLeaveId } from './dto/leaves.validate';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
 import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
 import { errorMessage } from '@src/common/constants/error-message';
+import { ValidateParamUserId } from '../users/dto/users.validate';
+import { RequestWithUser } from '@src/common/interfaces/request-with-user';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Leaves')
 @Controller('leaves')
@@ -35,9 +40,10 @@ import { errorMessage } from '@src/common/constants/error-message';
 @ApiBearerAuth('access-token')
 
 export class LeaveController {
+  private readonly logger = new Logger(LeaveController.name, { timestamp: true });
   constructor(private readonly leaveService: LeaveService) { }
 
-  @Get('me')
+  @Get(':userId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
 @ApiResponseError([
   {
@@ -72,8 +78,8 @@ export class LeaveController {
   }
 ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  async getMyLeaves(@Param() param: ValidateParamLeaveId): Promise<ResponseObject<LeaveResponseDto[]>> {
-    const leaves = await this.leaveService.getMyLeaves(param.id);
+  async getMyLeaves(@Param() param: ValidateParamUserId): Promise<ResponseObject<LeaveResponseDto[]>> {
+    const leaves = await this.leaveService.getMyLeaves(param.userId);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -115,8 +121,8 @@ export class LeaveController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  async getAllLeaves(@Param() param: ValidateParamLeaveId): Promise<ResponseObject<LeaveResponseDto[]>> {
-    const leaves = await this.leaveService.getAllLeaves(param.id);
+  async getAllLeaves(): Promise<ResponseObject<LeaveResponseDto[]>> {
+    const leaves = await this.leaveService.getAllLeaves();
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -124,7 +130,7 @@ export class LeaveController {
     };
   }
 
-  @Post()
+  @Post(':userId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -153,6 +159,16 @@ export class LeaveController {
       statusCode: HttpStatus.BAD_REQUEST,
     },
     {
+      code: '0406',
+      message: errorMessage['0406'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0407',
+      message: errorMessage['0407'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
       code: HttpStatus.INTERNAL_SERVER_ERROR + '',
       message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -161,10 +177,11 @@ export class LeaveController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_LEAVE] })
   @ApiCreatedResponse({ type: LeaveResponseDto })
   async create(
+    @Req() req: RequestWithUser,
     @Body() dto: CreateLeaveDto,
-    @Param() param: ValidateParamLeaveId,
+    @Param() param: ValidateParamUserId,
   ): Promise<ResponseObject<LeaveResponseDto>> {
-    const leave = await this.leaveService.createLeave(dto, param.id);
+    const leave = await this.leaveService.createLeave(req.user.id, dto, param.userId);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -173,7 +190,7 @@ export class LeaveController {
   }
 
 
-  @Patch(':id/details')
+  @Patch(':leaveId/details')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -212,8 +229,13 @@ export class LeaveController {
   async updateDetails(
     @Param() param: ValidateParamLeaveId,
     @Body() dto: UpdateLeaveDto,
+    @Req() req: RequestWithUser,
   ): Promise<ResponseObject<LeaveResponseDto>> {
-    const updatedLeave = await this.leaveService.updateLeaveDetails(param.id, dto, param.id);
+    const userId = req.user.id;
+    // this.logger.log('User in req:', req.user);  
+    // this.logger.log('User ID:', userId);
+    console.log(req.user);
+    const updatedLeave = await this.leaveService.updateLeaveDetails(param.leaveId, dto, userId);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -221,7 +243,7 @@ export class LeaveController {
     };
   }
 
-  @Patch(':id/status')
+  @Patch(':leaveId/status')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -260,8 +282,10 @@ export class LeaveController {
   async updateStatus(
     @Param() param: ValidateParamLeaveId,
     @Body() dto: UpdateLeaveDto,
+    @Req() req: RequestWithUser,
   ): Promise<ResponseObject<LeaveResponseDto>> {
-    const updatedLeave = await this.leaveService.updateLeaveStatus(param.id, dto, param.id);
+    const userId = req.user.id;
+    const updatedLeave = await this.leaveService.updateLeaveStatus(param.leaveId, dto, userId);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -269,7 +293,7 @@ export class LeaveController {
     };
   }
 
-  @Delete(':id')
+  @Delete(':leaveId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -306,7 +330,7 @@ export class LeaveController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_LEAVE] })
   @ApiOkResponse({ type: LeaveResponseDto })
   async delete(@Param() param: ValidateParamLeaveId): Promise<void> {
-    await this.leaveService.deleteLeave(param.id);
+    await this.leaveService.deleteLeave(param.leaveId);
     return;
   }
 }

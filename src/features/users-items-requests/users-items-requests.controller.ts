@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Request, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Request, HttpStatus, Req } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersItemsRequestsService } from './users-items-requests.service';
 import { ItemRequestResponseDto } from './respones/users-items-requests.respones.dto';
@@ -12,58 +12,17 @@ import { ERole } from '@src/common/constants/roles.enum';
 import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
 import { errorMessage } from '@src/common/constants/error-message';
 import { ValidateParamUsersItemRequestId } from './dto/users-items-requests.validate';
+import { RequestWithUser } from '@src/common/interfaces/request-with-user';
+import { ResponseObject } from '@src/common/dto/common-response.dto';
+import { ValidateParamUserId } from '../users/dto/users.validate';
 
 @ApiTags('Users Items Requests')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users-items-requests')
 @ApiBearerAuth('access-token')
 export class UsersItemsRequestsController {
-  constructor(private readonly usersItemsRequestsService: UsersItemsRequestsService) {}
+  constructor(private readonly usersItemsRequestsService: UsersItemsRequestsService) { }
 
-  @Post()
-   @ApiResponseError([
-      {
-        code: '0901',
-        message: errorMessage['0901'],
-        statusCode: HttpStatus.NOT_FOUND,
-      },
-      {
-        code: '0902',
-        message: errorMessage['0902'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0903',
-        message: errorMessage['0903'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0904',
-        message: errorMessage['0904'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0905',
-        message: errorMessage['0905'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0906',
-        message: errorMessage['0906'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-        message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      }
-    ])
-  
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
-  @ApiCreatedResponse({ type: ItemRequestResponseDto })
-  async create(@Body() dto: CreateItemRequestDto): Promise<ItemRequestResponseDto> {
-    return this.usersItemsRequestsService.create(dto);
-  }
 
   @Get()
   @ApiResponseError([
@@ -105,8 +64,62 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
-  async findAllPending(): Promise<ItemRequestResponseDto[]> {
-    return this.usersItemsRequestsService.findAllPending();
+  async findAll(): Promise<ResponseObject<ItemRequestResponseDto[]>> {
+    const itemRequests = await this.usersItemsRequestsService.findAll();
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: itemRequests,
+    };
+  }
+
+  @Get('pending')
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0902',
+      message: errorMessage['0902'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: errorMessage['0903'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: errorMessage['0904'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: errorMessage['0905'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0906',
+      message: errorMessage['0906'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
+  @ApiOkResponse({ type: [ItemRequestResponseDto] })
+  async findAllPending(): Promise<ResponseObject<ItemRequestResponseDto[]>> {
+    const itemRequests = await this.usersItemsRequestsService.findAllPending();
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: itemRequests,
+    };
   }
 
   @Get(':id')
@@ -149,8 +162,13 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemRequestResponseDto })
-  async findOne(@Param() param: ValidateParamUsersItemRequestId): Promise<ItemRequestResponseDto> {
-    return this.usersItemsRequestsService.findOneDto(param.id);
+  async findOne(@Param() param: ValidateParamUsersItemRequestId): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.findOneDto(param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: itemRequest,
+    };
   }
 
   @Get('user/:userId')
@@ -193,9 +211,72 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
-  async findAllByUser(@Param() param: ValidateParamUsersItemRequestId): Promise<ItemRequestResponseDto[]> {
-    return this.usersItemsRequestsService.findAllByUser(param.id);
+  async findAllByUser(
+    @Req() req: RequestWithUser,
+    @Param() param: ValidateParamUserId): Promise<ResponseObject<ItemRequestResponseDto[]>> {
+    const itemRequests = await this.usersItemsRequestsService.findAllByUser(req.user.id);
+    console.log(param)
+    console.log(req.user)
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: itemRequests,
+    };
   }
+
+
+  @Post()
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0902',
+      message: errorMessage['0902'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: errorMessage['0903'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: errorMessage['0904'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: errorMessage['0905'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0906',
+      message: errorMessage['0906'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
+  @ApiCreatedResponse({ type: ItemRequestResponseDto })
+  async create(
+    @Req() req: RequestWithUser,
+    @Body() dto: CreateItemRequestDto): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.create(dto, req.user.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
+    };
+  }
+
 
   @Patch(':id/approve')
   @ApiResponseError([
@@ -237,8 +318,14 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemRequestResponseDto })
-  async approve(@Param() param: ValidateParamUsersItemRequestId, @Request() req): Promise<ItemRequestResponseDto> {
-    return this.usersItemsRequestsService.approve(param.id, req.user.id);
+  async approve(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.approve(param.id, req.user.id);
+    console.log('itemRequest >>>', itemRequest);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
+    };
   }
 
   @Patch(':id/reject')
@@ -281,8 +368,13 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemRequestResponseDto })
-  async reject(@Param() param: ValidateParamUsersItemRequestId, @Request() req): Promise<ItemRequestResponseDto> {
-    return this.usersItemsRequestsService.reject(param.id, req.user.id);
+  async reject(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.reject(param.id, req.user.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
+    };
   }
 
   @Delete(':id')
@@ -325,7 +417,12 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemRequestResponseDto })
-  async remove(@Param() param: ValidateParamUsersItemRequestId): Promise<ItemRequestResponseDto> {
-    return this.usersItemsRequestsService.softDelete(param.id);
+  async remove(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.softDelete(param.id, req.user.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
+    };
   }
 }

@@ -39,10 +39,6 @@ export class UpdateUserDto {
   birthDate?: Date;
 
   @IsOptional()
-  @IsUUID()
-  googleId?: string;
-
-  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   approvedUsers?: string[];
@@ -50,5 +46,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsNumber()
   salary?: number;
+
+  
 }
 

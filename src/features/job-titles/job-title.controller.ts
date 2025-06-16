@@ -98,6 +98,11 @@ export class JobTitleController {
       statusCode: HttpStatus.BAD_REQUEST,
     },
     {
+      code: '0106',
+      message: errorMessage['0106'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
       code: HttpStatus.INTERNAL_SERVER_ERROR + '',
       message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -114,50 +119,50 @@ export class JobTitleController {
     };
   }
 
-  @Post()
-  @ApiOkResponse({ type: JobTitleResponseDto })
-  @ApiResponseError([
-    {
-      code: '0101',
-      message: errorMessage['0101'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '0102',
-      message: errorMessage['0102'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0103',
-      message: errorMessage['0103'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0104',
-      message: errorMessage['0104'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0105',
-      message: errorMessage['0105'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_JOB_TITLE] })
-  @ApiCreatedResponse({ type: JobTitleResponseDto })
-  async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<ResponseObject<JobTitleResponseDto>> {
-    const jobTitle = await this.jobTitleService.create(createJobTitleDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: jobTitle,
-    };
-  }
+  // @Post()
+  // @ApiOkResponse({ type: JobTitleResponseDto })
+  // @ApiResponseError([
+  //   {
+  //     code: '0101',
+  //     message: errorMessage['0101'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '0102',
+  //     message: errorMessage['0102'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0103',
+  //     message: errorMessage['0103'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0104',
+  //     message: errorMessage['0104'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0105',
+  //     message: errorMessage['0105'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_JOB_TITLE] })
+  // @ApiCreatedResponse({ type: JobTitleResponseDto })
+  // async create(@Body() createJobTitleDto: CreateJobTitleDto): Promise<ResponseObject<JobTitleResponseDto>> {
+  //   const jobTitle = await this.jobTitleService.create(createJobTitleDto);
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: jobTitle,
+  //   };
+  // }
 
   @Put(':id')
   @ApiOkResponse({ type: JobTitleResponseDto })
@@ -188,6 +193,11 @@ export class JobTitleController {
       statusCode: HttpStatus.BAD_REQUEST,
     },
     {
+      code: '0106',
+      message: errorMessage['0106'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
       code: HttpStatus.INTERNAL_SERVER_ERROR + '',
       message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -207,43 +217,43 @@ export class JobTitleController {
     };
   }
 
-  @Delete(':id')
-  @ApiOkResponse({ type: JobTitleResponseDto })
-  @ApiResponseError([
-    {
-      code: '0101',
-      message: errorMessage['0101'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '0102',
-      message: errorMessage['0102'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0103',
-      message: errorMessage['0103'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0104',
-      message: errorMessage['0104'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0105',
-      message: errorMessage['0105'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_JOB_TITLE] })
-  @ApiOkResponse({ type: JobTitleResponseDto })
-  async remove(@Param() param: ValidateParamJobTitleId): Promise<void> {
-    await this.jobTitleService.softDelete(param.id);
-  }
+  // @Delete(':id')
+  // @ApiOkResponse({ type: JobTitleResponseDto })
+  // @ApiResponseError([
+  //   {
+  //     code: '0101',
+  //     message: errorMessage['0101'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '0102',
+  //     message: errorMessage['0102'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0103',
+  //     message: errorMessage['0103'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0104',
+  //     message: errorMessage['0104'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0105',
+  //     message: errorMessage['0105'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_JOB_TITLE] })
+  // @ApiOkResponse({ type: JobTitleResponseDto })
+  // async remove(@Param() param: ValidateParamJobTitleId): Promise<void> {
+  //   await this.jobTitleService.softDelete(param.id);
+  // }
 }

@@ -1,6 +1,6 @@
 import { EJobTitleId } from "@common/constants/jobtitle.enum";
 import { EDepartmentId } from "@common/constants/department.enum";
-import { IsOptional, IsString, IsNotEmpty, IsEmail, IsDateString } from "class-validator";
+import { IsOptional, IsString, IsNotEmpty, IsEmail, IsDateString, IsNumber } from "class-validator";
 import { ERole } from "@common/constants/roles.enum";
 
 export class CreateUserDto {
@@ -37,4 +37,12 @@ export class CreateUserDto {
   @IsOptional()
   @IsDateString()
   birthDate?: Date;
+
+  @IsOptional()
+  @IsNumber()
+  salary?: number;
+
+  @IsOptional()
+  @IsString()
+  googleId?: string;
 }

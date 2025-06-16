@@ -5,5 +5,5 @@ export class ValidateParamLeaveId{
 
     @IsNotEmpty()
     @ApiProperty()
-    id: string;
+    leaveId: string;
 }

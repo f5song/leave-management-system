@@ -16,9 +16,6 @@ import {
     @IsUUID()
     id: string;
   
-    @IsUUID()
-    itemId: string;
-  
     @IsNumber()
     quantity: number;
   
@@ -26,7 +23,7 @@ import {
     status: EItemRequestStatus;
   
     @IsOptional()
-    requestedBy?: string;
+    requestedBy?: UserEntity;
   
 
     @IsOptional()
@@ -41,5 +38,30 @@ import {
     @IsOptional()
     @IsDate()
     deletedAt?: Date;
+
+    @IsOptional()
+    @IsUUID()
+    requestedById?: string;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => ItemsRequestsHistoryResponseDto)
+    history?: ItemsRequestsHistoryResponseDto[];
+
+    @IsOptional()
+    @IsUUID()
+    approvedById?: string;
+
+    @IsOptional()
+    @IsUUID()
+    itemId: string;
+
+    @IsOptional()
+    @IsUUID()
+    item?: UsersItemEntity;
+
+    @IsOptional()
+    @IsUUID()
+    approvedBy?: UserEntity;
   }
   

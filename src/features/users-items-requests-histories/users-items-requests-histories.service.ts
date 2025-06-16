@@ -22,27 +22,35 @@ export class UsersItemsRequestsHistoriesService {
   ): ItemsRequestsHistoryResponseDto {
     return {
       id: entity.id,
-      requestId: entity.requestId,
-      actionBy: entity.actionBy,
+      actionById: entity.actionedBy?.id ?? entity.actionById ?? null,
       actionType: entity.actionType,
       actionAt: entity.actionAt,
       borrow_start_date: entity.borrow_start_date,
       borrow_end_date: entity.borrow_end_date,
+      request: entity.request,
     };
   }
 
   async findAll() {
     return this.usersItemsRequestsHistoriesRepository.find({
-      select: ['id', 'requestId', 'actionBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
+      select: ['id', 'requestId', 'actionedBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
     });
   }
 
-  async findOne(id: string) {
-    return this.usersItemsRequestsHistoriesRepository.findOne({
-      select: ['id', 'requestId', 'actionBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
+  async findOne(id: string): Promise<ItemsRequestsHistoryResponseDto>{
+    const history = await this.usersItemsRequestsHistoriesRepository.findOne({
+      select: ['id', 'requestId', 'actionedBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
       where: { id },
-      relations: ['user', 'request']
+      relations: ['request', 'actionedBy']
     });
+    if (!history) {
+      throw new HttpException({
+        code: '1101',
+        message: errorMessage['1101'],
+        statusCode: HttpStatus.NOT_FOUND,
+      }, HttpStatus.NOT_FOUND);
+    }
+    return this.toUserItemRequestHistoryResponseDto(history);
   }
 
   async create(createDto: CreateItemsRequestsHistoryDto) {

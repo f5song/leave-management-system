@@ -13,10 +13,13 @@ export class CreateLeaveDto {
 
   @IsString()
   @Length(10, 500)
-  description: string;
+  description?: string;
 
   @IsOptional()
   @IsInt()
   @Min(1)
   totalDays?: number;
+
+  @IsString()
+  title?: string;
 }

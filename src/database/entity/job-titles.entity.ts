@@ -15,9 +15,13 @@ export class JobTitleEntity {
   @Column()
   color: string;
 
-  @ManyToOne(() => DepartmentEntity, (department) => department.id)
+
+  @ManyToOne(() => DepartmentEntity, (department) => department.jobTitles)
   @JoinColumn({ name: 'department_id' })
-  departmentId: EDepartmentId;
+  department?: DepartmentEntity;
+  
+  @Column({ name: 'department_id' })
+  departmentId?: string; 
 
   @Column({ type: 'timestamp', nullable: true, name: 'deleted_at' })
   deletedAt: Date | null;

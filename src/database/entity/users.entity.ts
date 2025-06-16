@@ -33,7 +33,7 @@ export class UserEntity {
   employeeCode: string | null;
 
 
-  @Column({ unique: true, name: 'google_id' })
+  @Column({ unique: true, name: 'google_id' , nullable: true})
   googleId: string;
 
   @Column({ unique: true })

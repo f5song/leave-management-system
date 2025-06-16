@@ -6,14 +6,10 @@ export class CreateItemsRequestsHistoryDto {
   userId: string;
 
   @IsUUID()
-  requestId: string;
+  requestId?: string;
 
   @IsEnum(EItemRequestStatus)
   status: EItemRequestStatus;
-  
-  @IsString()
-  @IsOptional()
-  reason?: string;
   
   @IsDate()
   @IsOptional()

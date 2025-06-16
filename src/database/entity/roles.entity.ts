@@ -25,14 +25,14 @@ export class RoleEntity {
   createdById: string;
 
   @OneToMany(() => UserEntity, (user) => user.role)
-  user: UserEntity[];
+  user?: UserEntity[];
 
   @OneToMany(() => PermissionRoleEntity, (pr) => pr.role)
-  permissionRoles: PermissionRoleEntity[];
+  permissionRoles?: PermissionRoleEntity[];
 
   @ManyToOne(() => UserEntity, (user) => user.createdRoles)
   @JoinColumn({ name: 'created_by' })
-  createdBy: UserEntity;
+  createdBy?: UserEntity;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

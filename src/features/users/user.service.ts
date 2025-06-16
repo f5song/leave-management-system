@@ -198,7 +198,7 @@ export class UserService {
 
     // Convert to Date if string
     const date = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
-    
+
     if (isNaN(date.getTime())) {
       throw new HttpException({
         code: '0701',
@@ -221,7 +221,7 @@ export class UserService {
     }
   }
 
-  async createUser(data: CreateUserDto): Promise<UserEntity> {
+  async create(data: CreateUserDto): Promise<UserEntity> {
     await this.validateEmail(data.email);
     await this.validateRole(data.roleId);
     await this.validateJobTitle(data.jobTitleId);
@@ -232,6 +232,7 @@ export class UserService {
     let nextNumber = 1;
     const last_user = await this.userInfoRepository.findOne({
       select: ['id', 'employeeCode'],
+      where: { deletedAt: null },
       order: {
         createdAt: 'DESC'
       }
@@ -243,10 +244,12 @@ export class UserService {
 
     const user = await this.userInfoRepository.save({
       employeeCode: `fh-${paddedNumber}`,
+      googleId: data.googleId,
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
       birthDate: data.birthDate,
+      salary: data.salary,
       roleId: data.roleId,
       jobTitleId: data.jobTitleId,
       departmentId: data.departmentId,
@@ -271,7 +274,7 @@ export class UserService {
     return users.map(user => this.toUserResponseDto(user));
   }
 
-  async updateUser(userId: string, data: UpdateUserDto): Promise<UserResponseDto> {
+  async update(userId: string, data: UpdateUserDto): Promise<UserResponseDto> {
     await this.validateUserId(userId);
 
     const updateData: Partial<UserEntity> = {};
@@ -340,4 +343,12 @@ export class UserService {
     user.deletedAt = new Date();
     return this.toUserResponseDto(await this.userInfoRepository.save(user));
   }
+
+  async findByIdWithPermissions(id: string): Promise<UserEntity> {
+    return this.userInfoRepository.findOne({
+      where: { id: id },
+      relations: ['role', 'role.permissionRoles', 'role.permissionRoles.permission'],
+    });
+  }
+
 }

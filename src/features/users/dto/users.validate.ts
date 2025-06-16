@@ -5,5 +5,5 @@ export class ValidateParamUserId{
 
     @IsNotEmpty()
     @ApiProperty()
-    id: string;
+    userId: string;
 }

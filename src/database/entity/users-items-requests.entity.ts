@@ -1,5 +1,6 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany
+  Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany,
+  DeleteDateColumn
 } from 'typeorm';
 import { UsersItemEntity } from './users-items.entity';
 import { UserEntity } from './users.entity';
@@ -26,31 +27,31 @@ export class UsersItemRequestEntity {
 
 
   @CreateDateColumn({ name: 'action_at' })
-  actionAt: Date;
+  actionAt?: Date;
 
-  @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
+  @DeleteDateColumn({ type: 'datetime', nullable: true, name: 'deleted_at' })
   deletedAt?: Date;
 
   @CreateDateColumn({ type: 'datetime', name: 'created_at' })
   createdAt: Date;
 
   @Column({ name: 'requested_by' })
-  requestedById: string;
+  requestedById?: string;
 
 
   @OneToMany(() => UsersItemsRequestsHistoryEntity, history => history.request)
-  history: UsersItemsRequestsHistoryEntity[];
+  history?: UsersItemsRequestsHistoryEntity[];
 
   @ManyToOne(() => UsersItemEntity, item => item.itemRequests)
   @JoinColumn({ name: 'item_id' })
-  item: UsersItemEntity;
+  item?: UsersItemEntity;
 
   @ManyToOne(() => UserEntity, user => user.itemRequests)
   @JoinColumn({ name: 'requested_by' })
-  requestedBy: UserEntity;
+  requestedBy?: UserEntity;
 
   @ManyToOne(() => UserEntity, user => user.itemApprovals)
   @JoinColumn({ name: 'approved_by' })
-  approvedBy: UserEntity;
+  approvedBy?: UserEntity;
 
 }

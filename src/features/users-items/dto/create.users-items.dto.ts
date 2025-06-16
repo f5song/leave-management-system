@@ -21,7 +21,6 @@ export class CreateItemDto {
   @IsEnum(EItemStatus)
   status: EItemStatus;
 
-  @IsNotEmpty()
   @Type(() => UserEntity)
   @ValidateNested()
   createdBy: UserEntity;

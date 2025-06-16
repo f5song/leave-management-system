@@ -22,22 +22,24 @@ export class UsersItemsRequestsService {
   ): ItemRequestResponseDto {
     return {
       id: entity.id,
-      itemId: entity.item.id,
+      itemId: entity.item?.id ?? entity.itemId, // fallback ด้วย itemId ถ้า item null
       quantity: entity.quantity,
       status: entity.status,
-      requestedBy: entity.requestedBy?.id,
+      requestedById: entity.requestedBy?.id ?? entity.requestedById ?? null, // fallback
       createdAt: entity.createdAt,
       deletedAt: entity.deletedAt,
     };
   }
 
 
-  async create(createDto: CreateItemRequestDto): Promise<ItemRequestResponseDto> {
+
+  async create(createDto: CreateItemRequestDto, id: string): Promise<ItemRequestResponseDto> {
     const itemRequest = this.itemRequestRepository.create({
       itemId: createDto.itemId,
       quantity: createDto.quantity,
       status: EItemRequestStatus.PENDING,
-      requestedBy: createDto.requestedBy,
+      requestedById: id,
+      history: [],
     });
 
     const savedRequest = await this.itemRequestRepository.save(itemRequest);
@@ -48,9 +50,8 @@ export class UsersItemsRequestsService {
   // ดึง Entity จริงสำหรับแก้ไข (return Entity)
   async findOneEntity(id: string): Promise<UsersItemRequestEntity> {
     const entity = await this.itemRequestRepository.findOne({
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
       where: { id, deletedAt: null },
-      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionBy'],
+      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
     });
     if (!entity) throw new Error('Item request not found');
     return entity;
@@ -65,19 +66,25 @@ export class UsersItemsRequestsService {
 
   async approve(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
     const itemRequest = await this.findOneEntity(id);
+
     itemRequest.status = EItemRequestStatus.APPROVED;
 
-    // Create history record
     const history = this.historyRepository.create({
-      requestId: itemRequest.id,
-      actionBy: approvedBy,
+      request: itemRequest, // ใส่ object เลย
+      actionById: approvedBy,
       actionType: EItemRequestStatus.APPROVED,
     });
+    
+
     await this.historyRepository.save(history);
 
-    const updatedRequest = await this.itemRequestRepository.save(itemRequest);
+    await this.itemRequestRepository.save(itemRequest);
+
+    // ✅ ดึง entity ใหม่หลัง save เพื่อให้ได้ relation `item` กลับมาครบ
+    const updatedRequest = await this.findOneEntity(id);
     return this.toUserItemRequestResponseDto(updatedRequest);
   }
+
 
 
   async reject(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
@@ -86,8 +93,8 @@ export class UsersItemsRequestsService {
 
     // Create history record
     const history = this.historyRepository.create({
-      requestId: itemRequest.id,
-      actionBy: approvedBy,
+      request: itemRequest,
+      actionById: approvedBy,
       actionType: EItemRequestStatus.REJECTED,
     });
     await this.historyRepository.save(history);
@@ -99,22 +106,24 @@ export class UsersItemsRequestsService {
 
   async findAllByUser(userId: string): Promise<ItemRequestResponseDto[]> {
     const itemRequests = await this.itemRequestRepository.find({
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
-      where: { requestedBy: { id: userId }, deletedAt: null },
-      relations: ['item', 'requestedBy', 'approvedBy'],
+      where: { requestedById: userId, deletedAt: null },
+      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
       order: { createdAt: 'DESC' },
     });
+    console.log('userId >>>', userId);
+    console.log('itemRequests >>>', itemRequests);
+
     return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
   }
 
-  async softDelete(id: string): Promise<ItemRequestResponseDto> {
+  async softDelete(id: string, userId: string): Promise<ItemRequestResponseDto> {
     const itemRequest = await this.findOneEntity(id);
     itemRequest.deletedAt = new Date();
 
     // Create history record
     const history = this.historyRepository.create({
-      requestId: itemRequest.id,
-      actionBy:   itemRequest.requestedBy.id,
+      request: itemRequest,
+      actionById: userId,
       actionType: EItemRequestStatus.REJECTED,
     });
 
@@ -127,9 +136,19 @@ export class UsersItemsRequestsService {
 
   async findAllPending(): Promise<ItemRequestResponseDto[]> {
     const itemRequests = await this.itemRequestRepository.find({
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
       where: { status: EItemRequestStatus.PENDING, deletedAt: null },
-      relations: ['item', 'requestedBy', 'actionBy'],
+      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
+      order: { createdAt: 'DESC' },
+    });
+    return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+  }
+
+  async findAll(): Promise<ItemRequestResponseDto[]> {
+    const itemRequests = await this.itemRequestRepository.find({
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
+      where: { deletedAt: null },
+      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
       order: { createdAt: 'DESC' },
     });
     return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));

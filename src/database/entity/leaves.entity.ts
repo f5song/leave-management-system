@@ -21,15 +21,11 @@ export class LeaveEntity {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @ManyToOne(() => UserEntity, user => user.leaves)
-  @JoinColumn({ name: 'user_id' })
-  userInfo: UserEntity;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  title?: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  title: string;
-
-  @Column({ type: 'text' })
-  description: string;
+  @Column({ type: 'text', nullable: true })
+  description?: string;
 
   @Column({ name: 'start_date' })
   startDate: Date;
@@ -47,16 +43,12 @@ export class LeaveEntity {
   })
   leaveTypeId: ELeaveType;
 
-  @ManyToOne(() => LeaveTypeEntity, (type) => type.id)
-  @JoinColumn({ name: 'leave_type_id' })
-  leaveType: LeaveTypeEntity;
-
   @Column({
     type: 'enum',
     enum: ELeaveStatus,
     default: ELeaveStatus.PENDING,
   })
-  status: ELeaveStatus;
+  status?: ELeaveStatus;
 
   @Column({ name: 'action_by', type: 'uuid', nullable: true })
   actionBy?: string;
@@ -65,15 +57,23 @@ export class LeaveEntity {
   @JoinColumn({ name: 'action_by' })
   actionByUser?: UserEntity;
 
+  @ManyToOne(() => UserEntity, user => user.leaves)
+  @JoinColumn({ name: 'user_id' })
+  userInfo: UserEntity;
+
+  @ManyToOne(() => LeaveTypeEntity, (type) => type.id)
+  @JoinColumn({ name: 'leave_type_id' })
+  leaveType: LeaveTypeEntity;
+
   @CreateDateColumn({ name: 'action_at'})
   actionAt: Date;
 
-  @Column({ name: 'created_by', type: 'uuid' })
-  createdById: string;
+  @Column({ name: 'created_by', type: 'uuid', nullable: true })
+  createdById?: string;
 
   @ManyToOne(() => UserEntity, (user) => user.createdLeaves)
   @JoinColumn({ name: 'created_by' })
-  createdBy: UserEntity;
+  createdBy?: UserEntity;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

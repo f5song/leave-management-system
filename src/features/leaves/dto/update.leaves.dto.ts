@@ -25,6 +25,12 @@ export class UpdateLeaveDto {
   @Min(1)
   totalDays?: number;
 
+  @IsOptional()
   @IsEnum(ELeaveStatus)
-  status: ELeaveStatus;
+  status?: ELeaveStatus;
+
+  @IsOptional()
+  @IsString()
+  title?: string;
+  
 }

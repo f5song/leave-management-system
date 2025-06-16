@@ -101,8 +101,8 @@ export class JobTitleService {
 
     if (referenceCount > 0) {
       throw new HttpException({
-        message: errorMessage['0103'],
-        code: '0103',
+        message: errorMessage['0106'],
+        code: '0106',
       },
         HttpStatus.BAD_REQUEST);
     }
@@ -110,50 +110,50 @@ export class JobTitleService {
   }
 
 
-  async create(createJobTitleDto: CreateJobTitleDto) {
-    const { id, name, color, departmentId } = createJobTitleDto;
+  // async create(createJobTitleDto: CreateJobTitleDto) {
+  //   const { id, name, color, departmentId } = createJobTitleDto;
 
-    await this.validateJobTitleId(id);
-    await this.validateDepartmentExists(departmentId);
-    await this.validateUniqueName(name, departmentId);
+  //   await this.validateJobTitleId(id);
+  //   await this.validateDepartmentExists(departmentId);
+  //   await this.validateUniqueName(name, departmentId);
 
-    const existingById = await this.jobTitleRepository.findOne({
-      where: { id },
-      select: ['id']
-    });
-    if (existingById) {
-      throw new HttpException({
-        message: errorMessage['0101'],
-        code: '0101',
-      },
-        HttpStatus.BAD_REQUEST);
-    }
+  //   const existingById = await this.jobTitleRepository.findOne({
+  //     where: { id },
+  //     select: ['id']
+  //   });
+  //   if (existingById) {
+  //     throw new HttpException({
+  //       message: errorMessage['0101'],
+  //       code: '0101',
+  //     },
+  //       HttpStatus.BAD_REQUEST);
+  //   }
 
-    const existingByName = await this.jobTitleRepository.findOne({      
-      where: { name },
-      select: ['name']
-    });
-    if (existingByName) {
-      throw new HttpException({
-        message: errorMessage['0101'],
-        code: '0101',
-      },
-        HttpStatus.BAD_REQUEST);
-    }
+  //   const existingByName = await this.jobTitleRepository.findOne({      
+  //     where: { name },
+  //     select: ['name']
+  //   });
+  //   if (existingByName) {
+  //     throw new HttpException({
+  //       message: errorMessage['0101'],
+  //       code: '0101',
+  //     },
+  //       HttpStatus.BAD_REQUEST);
+  //   }
 
-    const jobTitle = this.jobTitleRepository.create({
-      id,
-      name,
-      color,
-      departmentId,
-    });
+  //   const jobTitle = this.jobTitleRepository.create({
+  //     id,
+  //     name,
+  //     color,
+  //     departmentId,
+  //   });
 
-    return await this.jobTitleRepository.save(jobTitle);
-  }
+  //   return await this.jobTitleRepository.save(jobTitle);
+  // }
 
   async findAll(): Promise<JobTitleResponseDto[]> {
     return this.jobTitleRepository.find({
-      select: ['id', 'name', 'color', 'departmentId', 'createdAt', 'updatedAt', 'deletedAt'],
+      select: ['id', 'name', 'color', 'department', 'createdAt', 'updatedAt', 'deletedAt'],
       relations: ['department'],
       where: { deletedAt: null },
     });
@@ -161,7 +161,7 @@ export class JobTitleService {
 
   async findOne(id: EJobTitleId): Promise<JobTitleResponseDto> {
     const jobTitle = await this.jobTitleRepository.findOne({
-      select: ['id', 'name', 'color', 'departmentId', 'createdAt', 'updatedAt', 'deletedAt'],
+      select: ['id', 'name', 'color', 'department', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id, deletedAt: null },
       relations: ['department'],
     });
@@ -182,7 +182,7 @@ export class JobTitleService {
       await this.validateJobTitleId(id);
       await this.validateDepartmentExists(updateJobTitleDto.departmentId);
       await this.validateUniqueName(updateJobTitleDto.name, updateJobTitleDto.departmentId, id);
-      await this.validateNoReferences(id);
+
 
       const jobTitle = await this.findOne(id);
       
@@ -208,27 +208,27 @@ export class JobTitleService {
     }
   }
 
-  async softDelete(id: EJobTitleId): Promise<JobTitleResponseDto> {
-    try {
-      await this.validateJobTitleId(id);
-      await this.validateNoReferences(id);
+  // async softDelete(id: EJobTitleId): Promise<JobTitleResponseDto> {
+  //   try {
+  //     await this.validateJobTitleId(id);
+  //     await this.validateNoReferences(id);
 
-      const jobTitle = await this.findOne(id);
-      jobTitle.deletedAt = new Date();
+  //     const jobTitle = await this.findOne(id);
+  //     jobTitle.deletedAt = new Date();
 
-      // Use transaction for atomic operation
-      return await this.jobTitleRepository.manager.transaction(async transactionalEntityManager => {
-        return await transactionalEntityManager.save(jobTitle);
-      });
-    } catch (error) {
-      this.logger.error('Failed to soft delete job title', error);
-      throw new HttpException({
-        message: errorMessage['0101'],
-        code: '0101',
-      },
-        HttpStatus.BAD_REQUEST);
-    }
-  }
+  //     // Use transaction for atomic operation
+  //     return await this.jobTitleRepository.manager.transaction(async transactionalEntityManager => {
+  //       return await transactionalEntityManager.save(jobTitle);
+  //     });
+  //   } catch (error) {
+  //     this.logger.error('Failed to soft delete job title', error);
+  //     throw new HttpException({
+  //       message: errorMessage['0101'],
+  //       code: '0101',
+  //     },
+  //       HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
   
   // async remove(id: JobTitleId): Promise<void> {

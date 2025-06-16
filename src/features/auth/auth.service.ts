@@ -152,4 +152,15 @@ export class AuthService {
 
     return account;
   }
+
+  async validateUserWithPermissions(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role', 'role.permissionRoles', 'role.permissionRoles.permission'],
+    });
+  
+    if (!user) return null;
+  
+    return user;
+  }
 }

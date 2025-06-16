@@ -12,6 +12,7 @@ import { ERole } from '@src/common/constants/roles.enum';
 import { ValidateParamUsersItemRequestId } from './dto/users-items-requests-histories.validate';
 import { errorMessage } from '@src/common/constants/error-message';
 import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
+import { ResponseObject } from '@src/common/dto/common-response.dto';
 
 @ApiTags('Users Items Requests Histories')
 @Controller('users-items-requests-histories')
@@ -102,11 +103,15 @@ export class UsersItemsRequestsHistoriesController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemsRequestsHistoryResponseDto })
-  @ApiNotFoundResponse({ description: 'History not found' })
-  findOne(@Param() param: ValidateParamUsersItemRequestId) {
-    return this.usersItemsRequestsHistoriesService.findOne(param.id);
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
+  async findOne(@Param() param: ValidateParamUsersItemRequestId): Promise<ResponseObject<ItemsRequestsHistoryResponseDto>> {
+    const history = await this.usersItemsRequestsHistoriesService.findOne(param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsHistoriesService.toUserItemRequestHistoryResponseDto(history),
+    };
   }
 
   @Post()
@@ -150,7 +155,12 @@ export class UsersItemsRequestsHistoriesController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
   @ApiCreatedResponse({ type: ItemsRequestsHistoryResponseDto })
   async create(@Body() createDto: CreateItemsRequestsHistoryDto) {
-    return this.usersItemsRequestsHistoriesService.create(createDto);
+    const history = await this.usersItemsRequestsHistoriesService.create(createDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsHistoriesService.toUserItemRequestHistoryResponseDto(history),
+    };
   }
 
   @Put(':id')
@@ -197,8 +207,13 @@ export class UsersItemsRequestsHistoriesController {
   async update(
     @Param() param: ValidateParamUsersItemRequestId,
     @Body() updateDto: UpdateItemsRequestsHistoryDto,
-  ) {
-    return this.usersItemsRequestsHistoriesService.update(param.id, updateDto);
+  ): Promise<ResponseObject<ItemsRequestsHistoryResponseDto>> {
+    const history = await this.usersItemsRequestsHistoriesService.update(param.id, updateDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsHistoriesService.toUserItemRequestHistoryResponseDto(history),
+    };
   }
 
   @Delete(':id')
@@ -241,8 +256,12 @@ export class UsersItemsRequestsHistoriesController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ description: 'Successfully deleted' })
-  @ApiNotFoundResponse({ description: 'History not found' })
-  async delete(@Param() param: ValidateParamUsersItemRequestId) {
-    return this.usersItemsRequestsHistoriesService.delete(param.id);
+  async delete(@Param() param: ValidateParamUsersItemRequestId): Promise<ResponseObject<void>> {
+    await this.usersItemsRequestsHistoriesService.delete(param.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: null,
+    };
   }
 }

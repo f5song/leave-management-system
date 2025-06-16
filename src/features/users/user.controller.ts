@@ -21,7 +21,7 @@ import { ResponseObject } from '@src/common/dto/common-response.dto';
 @ApiTags('Users')
 @Controller('users')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-@UseGuards(JwtAuthGuard, RolesGuard)
+
 
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -65,9 +65,8 @@ export class UserController {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       }
     ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_USER] })
   async createUser(@Body() userData: CreateUserDto): Promise<ResponseObject<UserResponseDto>> {
-    const userEntity = await this.userService.createUser(userData);
+    const userEntity = await this.userService.create(userData);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -119,9 +118,10 @@ export class UserController {
     }
   ])
   @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER] })
   async getUserById(@Param() param: ValidateParamUserId): Promise<ResponseObject<UserResponseDto>> {
-    const userEntity = await this.userService.getUserById(param.id);
+    const userEntity = await this.userService.getUserById(param.userId);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -130,7 +130,6 @@ export class UserController {
   }
 
   @Get()
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserResponseDto] })
   @ApiResponseError([
     {
@@ -169,6 +168,8 @@ export class UserController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER] })
   async getAllUsers(): Promise<ResponseObject<UserResponseDto[]>> {
     const userEntities = await this.userService.getAllUsers();
@@ -179,8 +180,7 @@ export class UserController {
     };
   }
 
-  @Put(':id')
-  @ApiBearerAuth('access-token')
+  @Put(':userId')
   @ApiOkResponse({ type: UserResponseDto })
   @ApiResponseError([
     {
@@ -219,9 +219,11 @@ export class UserController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER] })
   async updateUser(@Param() param: ValidateParamUserId, @Body() updateData: UpdateUserDto): Promise<ResponseObject<UserResponseDto>> {
-    const updatedUser = await this.userService.updateUser(param.id, updateData);
+    const updatedUser = await this.userService.update(param.userId, updateData);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -230,7 +232,6 @@ export class UserController {
   }
 
   // @Patch(':id')
-  // @ApiBearerAuth('access-token')
   // @ApiOkResponse({ type: UserResponseDto })
   // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_USER] })
   // async patchUser(
@@ -242,7 +243,6 @@ export class UserController {
   // }
 
   @Delete(':id')
-  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserResponseDto })
   @ApiResponseError([
     {
@@ -281,9 +281,11 @@ export class UserController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_USER] })
   async deleteUser(@Param() param: ValidateParamUserId): Promise<ResponseObject<UserResponseDto>> {
-    const deletedUser = await this.userService.deleteUser(param.id);
+    const deletedUser = await this.userService.deleteUser(param.userId);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',

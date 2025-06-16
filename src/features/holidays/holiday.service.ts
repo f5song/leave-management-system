@@ -6,6 +6,7 @@ import { CreateHolidayDto } from './dto/create.holidays.dto';
 import { UpdateHolidayDto } from './dto/update.holidays.dto';
 import { HolidayResponseDto } from './response/holidays.respones.dto';
 import { errorMessage } from '@src/common/constants/error-message';
+import * as moment from 'moment-timezone';
 
 @Injectable()
 export class HolidayService {
@@ -33,63 +34,70 @@ export class HolidayService {
     if (!data.startDate) {
       throw new BadRequestException('startDate is required');
     }
-    const startDate = new Date(data.startDate);
-    const endDate = data.endDate ? new Date(data.endDate) : null;
 
-    if (isNaN(startDate.getTime())) 
+    const startDate = moment.tz(data.startDate, 'Asia/Bangkok').startOf('day');
+    const endDate = data.endDate ? moment.tz(data.endDate, 'Asia/Bangkok').startOf('day') : null;
+
+    if (!startDate.isValid()) {
       throw new HttpException({
-        message: errorMessage['0207'],
-        code: '0207',
-      },
-        HttpStatus.BAD_REQUEST);
-    if (endDate && isNaN(endDate.getTime())) 
+        message: errorMessage['0212'],
+        code: '0212',
+      }, HttpStatus.BAD_REQUEST);
+    }
+
+    if (endDate && !endDate.isValid()) {
       throw new HttpException({
-        message: errorMessage['0208'],
-        code: '0208',
-      },
-        HttpStatus.BAD_REQUEST);
-    if (endDate && startDate > endDate) 
+        message: errorMessage['0213'],
+        code: '0213',
+      }, HttpStatus.BAD_REQUEST);
+    }
+
+    if (endDate && startDate.isAfter(endDate)) {
       throw new HttpException({
-        message: errorMessage['0207'],
-        code: '0207',
-      },
-        HttpStatus.BAD_REQUEST);
+        message: errorMessage['0214'],
+        code: '0214',
+      }, HttpStatus.BAD_REQUEST);
+    }
 
     if (endDate) {
-      const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      const daysDiff = endDate.diff(startDate, 'days') + 1;
+
       if (data.totalDays !== undefined && data.totalDays !== daysDiff) {
         throw new HttpException({
-          message: errorMessage['0209'],
-          code: '0209',
-        },
-          HttpStatus.BAD_REQUEST);
+          message: errorMessage['0215'],
+          code: '0215',
+        }, HttpStatus.BAD_REQUEST);
       }
     }
   }
 
-  async validateNoOverlap(data: CreateHolidayDto | UpdateHolidayDto | any, holidayId?: string): Promise<void> {
-    const startDate = new Date(data.startDate);
-    const endDate = data.endDate ? new Date(data.endDate) : startDate;
 
+  async validateNoOverlap(data: CreateHolidayDto | UpdateHolidayDto | any, holidayId?: string): Promise<void> {
+    const startDateMoment = moment.tz(data.startDate, 'Asia/Bangkok').startOf('day');
+    const endDateMoment = data.endDate ? moment.tz(data.endDate, 'Asia/Bangkok').startOf('day') : startDateMoment;
+  
+    const startDate = startDateMoment.toDate(); // แปลงเป็น Date
+    const endDate = endDateMoment.toDate();     // แปลงเป็น Date
+  
     const whereClause: any = {
       deletedAt: null,
       startDate: LessThanOrEqual(endDate),
       endDate: MoreThanOrEqual(startDate),
     };
-
+  
     if (holidayId) {
       whereClause.id = Not(holidayId);
     }
-
+  
     const overlapping = await this.holidayRepository.find({ where: whereClause });
     if (overlapping.length > 0) {
       throw new HttpException({
-        message: errorMessage['0206'],
-        code: '0206',
-      },
-        HttpStatus.BAD_REQUEST);
+        message: errorMessage['0211'],
+        code: '0211',
+      }, HttpStatus.BAD_REQUEST);
     }
   }
+  
 
   async findAll(): Promise<HolidayResponseDto[]> {
     const holidays = await this.holidayRepository.find({
@@ -114,40 +122,47 @@ export class HolidayService {
     return this.toHolidayResponseDto(holiday);
   }
 
-  async create(createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
+  async create(id: string, createHolidayDto: CreateHolidayDto): Promise<HolidayResponseDto> {
     await this.validateDateRange(createHolidayDto);
     await this.validateNoOverlap(createHolidayDto);
-
+  
     const holiday = this.holidayRepository.create({
       ...createHolidayDto,
-      startDate: new Date(createHolidayDto.startDate),
-      endDate: createHolidayDto.endDate ? new Date(createHolidayDto.endDate) : null,
+      startDate: moment.tz(createHolidayDto.startDate, 'Asia/Bangkok').startOf('day').toDate(),
+      endDate: createHolidayDto.endDate ? moment.tz(createHolidayDto.endDate, 'Asia/Bangkok').startOf('day').toDate() : null,
+      createdById: id,
     });
+  
     await this.holidayRepository.save(holiday);
     return this.toHolidayResponseDto(holiday);
   }
+  
 
   async update(id: string, updateHolidayDto: UpdateHolidayDto): Promise<HolidayResponseDto> {
     const holidayEntity = await this.holidayRepository.findOne({ where: { id, deletedAt: null } });
     if (!holidayEntity) throw new HttpException({
       message: errorMessage['0201'],
       code: '0201',
-    },
-      HttpStatus.BAD_REQUEST);
-
+    }, HttpStatus.BAD_REQUEST);
+  
     const updatedData = {
       ...holidayEntity,
       ...updateHolidayDto,
-      startDate: updateHolidayDto.startDate ? new Date(updateHolidayDto.startDate) : holidayEntity.startDate,
-      endDate: updateHolidayDto.endDate ? new Date(updateHolidayDto.endDate) : holidayEntity.endDate,
+      startDate: updateHolidayDto.startDate
+        ? moment.tz(updateHolidayDto.startDate, 'Asia/Bangkok').startOf('day').toDate()
+        : holidayEntity.startDate,
+      endDate: updateHolidayDto.endDate
+        ? moment.tz(updateHolidayDto.endDate, 'Asia/Bangkok').startOf('day').toDate()
+        : holidayEntity.endDate,
     };
-
+  
     await this.validateDateRange(updatedData);
     await this.validateNoOverlap(updatedData, id);
-
+  
     const updatedHoliday = await this.holidayRepository.save(updatedData);
     return this.toHolidayResponseDto(updatedHoliday);
   }
+  
 
   async softDelete(id: string): Promise<void> {
     const holiday = await this.holidayRepository.findOne({ where: { id, deletedAt: null } });

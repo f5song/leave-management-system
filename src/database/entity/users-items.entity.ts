@@ -1,10 +1,11 @@
 import {
   Entity, Column, CreateDateColumn,
-  PrimaryColumn,
   ManyToOne,
   JoinColumn,
   PrimaryGeneratedColumn,
-  OneToMany
+  OneToMany,
+  UpdateDateColumn,
+  DeleteDateColumn
 } from 'typeorm';
 import { EItemCategoryId } from '@common/constants/item-category.enum';
 import { UserEntity } from './users.entity';
@@ -40,10 +41,10 @@ export class UsersItemEntity {
   @CreateDateColumn({ type: 'datetime', name: 'created_at' })
   createdAt: Date;
 
-  @Column({ type: 'datetime', nullable: true, name: 'updated_at' })
+  @UpdateDateColumn({ type: 'datetime', nullable: true, name: 'updated_at' })
   updatedAt?: Date;
 
-  @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
+  @DeleteDateColumn({ type: 'datetime', nullable: true, name: 'deleted_at' })
   deletedAt?: Date;
 
   @OneToMany(() => UsersItemRequestEntity, request => request.item)

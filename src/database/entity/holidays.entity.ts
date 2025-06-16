@@ -1,5 +1,5 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
+  Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn
 } from 'typeorm';
 import { UserEntity } from './users.entity';
 
@@ -23,22 +23,22 @@ export class HolidayEntity {
   @Column()
   color: string;
 
-  @Column({ name: 'created_by' })
+  @Column({ name: 'created_by', nullable: true })
   createdById?: string;
 
   @CreateDateColumn({ type: 'datetime' , name: 'created_at'})
   createdAt: Date;
 
-  @Column({ type: 'datetime', nullable: true , name: 'updated_at'})
+  @UpdateDateColumn({ type: 'datetime', nullable: true , name: 'updated_at'})
   updatedAt?: Date;
 
-  @Column({ type: 'datetime', nullable: true , name: 'deleted_at'})
+  @DeleteDateColumn({ type: 'datetime', nullable: true , name: 'deleted_at'})
   deletedAt?: Date;
 
   @Column()
   description: string;
 
   @ManyToOne(() => UserEntity, user => user.createdHolidays)
-  @JoinColumn({ name: 'created_by' })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
   createdBy?: UserEntity;
 }

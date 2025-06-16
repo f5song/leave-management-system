@@ -45,7 +45,7 @@ export class UsersItemsService {
         itemId: entity.item.id,
         quantity: entity.quantity,
         status: entity.status,
-        requestedBy: entity.requestedBy?.id,
+        requestedById: entity.requestedBy.id,
         createdAt: entity.createdAt,
         deletedAt: entity.deletedAt,
       };
@@ -54,9 +54,9 @@ export class UsersItemsService {
   // Get all item requests
   async findAllRequests(): Promise<UsersItemRequestEntity[]> {
     return this.itemRequestRepository.find({
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
       where: { deletedAt: null },
-      relations: ['item', 'requestedBy', 'approvedBy'],
+      relations: ['item', 'requestedById', 'approvedById'],
     });
   }
 
@@ -83,15 +83,16 @@ export class UsersItemsService {
   }
 
   // ฟังก์ชันสำหรับสร้างรายการอุปกรณ์
-  async create(item: CreateItemDto): Promise<UserItemResponseDto> {
+  async create(createdById: string, item: CreateItemDto): Promise<UsersItemEntity> {
     const newItem = this.itemRepository.create(item);
-    return this.toUserItemResponseDto(await this.itemRepository.save(newItem));
+    newItem.createdById = createdById;
+    return await this.itemRepository.save(newItem);
   }
 
   // ฟังก์ชันสำหรับอัพเดทรายการอุปกรณ์
-  async update(id: string, item: UpdateItemDto): Promise<UserItemResponseDto> {
+  async update(id: string, item: UpdateItemDto): Promise<UsersItemEntity> {
     await this.itemRepository.update(id, item);
-    return this.toUserItemResponseDto(await this.findOne(id));
+    return await this.findOne(id);
   }
 
   // ฟังก์ชันสำหรับลบรายการอุปกรณ์
@@ -99,31 +100,31 @@ export class UsersItemsService {
     await this.itemRepository.softDelete(id);
   }
 
-  // ฟังก์ชันสำหรับสร้างคำร้องขออุปกรณ์
-  async createRequest(request: Partial<UsersItemRequestEntity>): Promise<ItemRequestResponseDto> {
-    const newRequest = this.itemRequestRepository.create(request);
-    return this.toUserItemRequestResponseDto(await this.itemRequestRepository.save(newRequest));
-  }
+  // // ฟังก์ชันสำหรับสร้างคำร้องขออุปกรณ์
+  // async createRequest(request: Partial<UsersItemRequestEntity>): Promise<ItemRequestResponseDto> {
+  //   const newRequest = this.itemRequestRepository.create(request);
+  //   return await this.itemRequestRepository.save(newRequest);
+  // }
 
   // ฟังก์ชันสำหรับอัพเดทสถานะคำร้องขอ
-  async updateRequestStatus(
-    requestId: string,
-    status: EItemRequestStatus,
-    approvedBy?: UserEntity,
-  ): Promise<ItemRequestResponseDto> {
-    const request = await this.itemRequestRepository.findOne({
-      where: { id: requestId },
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedBy', 'createdAt', 'deletedAt'],
-      relations: ['item', 'requestedBy'],
-    });
+//   async updateRequestStatus(
+//     requestId: string,
+//     status: EItemRequestStatus,
+//     approvedBy?: string,
+//   ): Promise<ItemRequestResponseDto> {
+//     const request = await this.itemRequestRepository.findOne({
+//       where: { id: requestId },
+//       select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
+//       relations: ['item', 'requestedById', 'approvedById'],
+//     });
 
-    if (!request) {
-      throw new Error('Request not found');
-    }
+//     if (!request) {
+//       throw new Error('Request not found');
+//     }
 
-    request.status = status;
-    request.approvedBy = approvedBy;
+//     request.status = status;
+//     request.approvedBy.id = approvedBy;
 
-    return this.toUserItemRequestResponseDto(await this.itemRequestRepository.save(request));
-  }
+//     return await this.itemRequestRepository.save(request);
+//   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, UsePipes, ValidationPipe, Req } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { FacilityRequestsService } from './users-facility-requests.service';
 import { FacilityRequestResponseDto } from './respones/users-facility-requests.repones.dto';
@@ -12,6 +12,7 @@ import { EPermission } from '@src/common/constants/permission.enum';
 import { ValidateParamUsersFacilityRequestId } from './dto/users-facility-requests.validate';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
 import { HttpStatus } from '@nestjs/common';
+import { RequestWithUser } from '../../common/interfaces/request-with-user';
 
 @ApiTags('Users Facility Requests')
 @Controller('users-facility-requests')
@@ -20,13 +21,14 @@ import { HttpStatus } from '@nestjs/common';
 @UseGuards(JwtAuthGuard, RolesGuard)
 
 export class FacilityRequestsController {
-  constructor(private readonly facilityRequestsService: FacilityRequestsService) {}
+  constructor(private readonly facilityRequestsService: FacilityRequestsService) { }
 
   @Post()
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_FACILITY_REQUEST] })
   @ApiCreatedResponse({ type: FacilityRequestResponseDto })
-  async create(@Body() dto: CreateFacilityRequestDto): Promise<ResponseObject<FacilityRequestResponseDto>> {
-    const facilityRequest = await this.facilityRequestsService.create(dto);
+  async create(@Body() dto: CreateFacilityRequestDto,
+    @Req() req: RequestWithUser): Promise<ResponseObject<FacilityRequestResponseDto>> {
+    const facilityRequest = await this.facilityRequestsService.create(req.user.id,dto);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',

@@ -4,6 +4,7 @@ export class LeaveResponseDto {
   id: string;
   userId: string;
   leaveTypeId: ELeaveType;
+  title: string;
   startDate: Date;
   endDate: Date;
   totalDays: number;

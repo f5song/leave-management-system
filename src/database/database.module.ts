@@ -30,7 +30,7 @@ import { PermissionRoleEntity } from './entity/permission-role';
         // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         entities: [LeaveTypeEntity, LeaveEntity, HolidayEntity, RoleEntity, PermissionEntity, UserEntity, DepartmentEntity, JobTitleEntity, UsersFacilityRequestEntity, UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UsersItemEntity, PermissionRoleEntity],
         synchronize: true,
-        logging: true
+        logging: false
       }),
     }),
   ],

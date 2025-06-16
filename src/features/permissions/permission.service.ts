@@ -80,26 +80,26 @@ export class PermissionService {
     }
   }
 
-  async create(dto: CreatePermissionDto) {
-    // Validate permission name and creator ID
-    await this.validatePermissionName(dto.name);
-    await this.validatePermissionCreatedById(dto.createdById);
+  // async create(dto: CreatePermissionDto) {
+  //   // Validate permission name and creator ID
+  //   await this.validatePermissionName(dto.name);
+  //   await this.validatePermissionCreatedById(dto.createdById);
 
-    // Fetch the user who's creating this permission
-    const user = await this.userInfoRepository.findOne({
-      where: { id: dto.createdById },
-      relations: ['createdPermissions']
-    });
+  //   // Fetch the user who's creating this permission
+  //   const user = await this.userInfoRepository.findOne({
+  //     where: { id: dto.createdById },
+  //     relations: ['createdPermissions']
+  //   });
 
-    // Create new permission with the DTO data and set the creator
-    const permission = this.permissionRepository.create({
-      ...dto,
-      createdById: user.id
-    });
+  //   // Create new permission with the DTO data and set the creator
+  //   const permission = this.permissionRepository.create({
+  //     ...dto,
+  //     createdById: user.id
+  //   });
 
-    // Save the new permission to the database
-    return await this.permissionRepository.save(permission);
-  }
+  //   // Save the new permission to the database
+  //   return await this.permissionRepository.save(permission);
+  // }
 
   async findAll() {
     return this.permissionRepository.find({
@@ -144,25 +144,25 @@ export class PermissionService {
     return await this.permissionRepository.save(permission);
   }
 
-  async softDelete(id: EPermission) {
-    await this.validatePermissionId(id);
+  // async softDelete(id: EPermission) {
+  //   await this.validatePermissionId(id);
 
-    const permission = await this.permissionRepository.findOne({
-      select: ['id', 'deletedAt'],
-      where: { id }
-    });
+  //   const permission = await this.permissionRepository.findOne({
+  //     select: ['id', 'deletedAt'],
+  //     where: { id }
+  //   });
 
-    if (!permission || permission.deletedAt) {
-      throw new HttpException({
-        code: '0502',
-        message: errorMessage['0502'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
+  //   if (!permission || permission.deletedAt) {
+  //     throw new HttpException({
+  //       code: '0502',
+  //       message: errorMessage['0502'],
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //     }, HttpStatus.BAD_REQUEST);
+  //   }
 
-    permission.deletedAt = new Date();
-    return await this.permissionRepository.save(permission);
-  }
+  //   permission.deletedAt = new Date();
+  //   return await this.permissionRepository.save(permission);
+  // }
 
   async getPermissionById(id: EPermission) {
     await this.validatePermissionId(id);

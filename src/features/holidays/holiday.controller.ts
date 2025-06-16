@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UsePipes, ValidationPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UsePipes, ValidationPipe, HttpCode, HttpStatus, Req } from '@nestjs/common';
 import { HolidayService } from './holiday.service';
 import { CreateHolidayDto} from './dto/create.holidays.dto';
 import { UpdateHolidayDto } from './dto/update.holidays.dto';
@@ -15,6 +15,7 @@ import { ApiResponseError } from '@src/common/decorators/api-response-error.deco
 import { errorMessage } from '@src/common/constants/error-message';
 import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
 import { ValidateParamHolidayId } from '../holidays/dto/holidays.validate';
+import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 
 @ApiTags('Holidays')
 @Controller('holidays')
@@ -150,8 +151,8 @@ export class HolidayController {
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_HOLIDAY] })
   @ApiCreatedResponse({ type: HolidayResponseDto })
-  async create(@Body() createHolidayDto: CreateHolidayDto): Promise<ResponseObject<HolidayResponseDto>> {
-    const holiday = await this.holidayService.create(createHolidayDto);
+  async create(@Req() req: RequestWithUser, @Body() createHolidayDto: CreateHolidayDto): Promise<ResponseObject<HolidayResponseDto>> {
+    const holiday = await this.holidayService.create(req.user.id, createHolidayDto);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',

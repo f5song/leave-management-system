@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, UsePipes, ValidationPipe, Req, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersItemsService } from './users-items.service';
@@ -14,10 +14,14 @@ import { ItemRequestResponseDto } from '../users-items-requests/respones/users-i
 import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
 import { EPermission } from '@common/constants/permission.enum';
 import { ERole } from '@common/constants/roles.enum';
+import { ResponseObject } from '@common/dto/common-response.dto';
+import { RequestWithUser } from '@src/common/interfaces/request-with-user';
+
 
 @ApiTags('Users Items')
 @Controller('users-items')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class UsersItemsController {
   constructor(private readonly usersItemsService: UsersItemsService) { }
 
@@ -26,9 +30,13 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserItemResponseDto] })
-  async findAll(): Promise<UserItemResponseDto[]> {
+  async findAll(): Promise<ResponseObject<UserItemResponseDto[]>> {
     const items = await this.usersItemsService.findAll();
-    return items.map(item => this.usersItemsService.toUserItemResponseDto(item));
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: items.map(item => this.usersItemsService.toUserItemResponseDto(item)),
+    };
   }
 
   // แสดงรายการอุปกรณ์ตาม ID
@@ -36,17 +44,30 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
-  async findOne(@Param('id') id: string): Promise<UserItemResponseDto> {
+  async findOne(@Param('id') id: string): Promise<ResponseObject<UserItemResponseDto>> {
     const item = await this.usersItemsService.findOne(id);
-    return this.usersItemsService.toUserItemResponseDto(item);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsService.toUserItemResponseDto(item),
+    };
   }
 
   // สร้างรายการอุปกรณ์ใหม่
+  @Post()
+  @ApiOkResponse({ type: UserItemResponseDto })
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UserItemResponseDto })
-  async create(@Body() item: CreateItemDto): Promise<UserItemResponseDto> {
-    return this.usersItemsService.create(item);
+  async create(
+    @Req() req: RequestWithUser,
+    @Body() item: CreateItemDto): Promise<ResponseObject<UserItemResponseDto>> {
+    const createdItem = await this.usersItemsService.create(req.user.id, item);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsService.toUserItemResponseDto(createdItem),
+    };
   }
 
   // อัพเดทรายการอุปกรณ์
@@ -57,8 +78,13 @@ export class UsersItemsController {
   async update(
     @Param('id') id: string,
     @Body() item: UpdateItemDto,
-  ): Promise<UserItemResponseDto> {
-    return this.usersItemsService.update(id, item); // ✅ ไม่ต้องแปลงซ้ำ
+  ): Promise<ResponseObject<UserItemResponseDto>> {
+    const updatedItem = await this.usersItemsService.update(id, item);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsService.toUserItemResponseDto(updatedItem),
+    };
   }
 
 
@@ -72,51 +98,51 @@ export class UsersItemsController {
   }
 
   // สร้างคำร้องขออุปกรณ์
-  @Post('requests')
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
-  @ApiBearerAuth('access-token')
-  @ApiCreatedResponse({ type: ItemRequestResponseDto })
-  async createRequest(
-    @Req() req,
-    @Body() request: Partial<UsersItemRequestEntity>,
-  ): Promise<ItemRequestResponseDto> {
-    request.requestedBy = req.user;
-    return this.usersItemsService.createRequest(request);
-  }
+  // @Post('requests')
+  // @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
+  // @ApiBearerAuth('access-token')
+  // @ApiCreatedResponse({ type: ItemRequestResponseDto })
+  // async createRequest(
+  //   @Req() req: RequestWithUser,
+  //   @Body() request: Partial<UsersItemRequestEntity>,
+  // ): Promise<ItemRequestResponseDto> {
+  //   request.requestedBy.id = req.user.id;
+  //   return this.usersItemsService.createRequest(request);
+  // }
 
   // อัพเดทสถานะคำร้องขอ
-  @Put('requests/:requestId/approve')
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: ItemRequestResponseDto })
-  async approveRequest(
-    @Param('requestId') requestId: string,
-    @Body() body: { status: EItemRequestStatus },
-    @Req() req,
-  ): Promise<ItemRequestResponseDto> {
-    return this.usersItemsService.updateRequestStatus(
-      requestId,
-      body.status,
-      req.user,
-    );
-  }
+  // @Put('requests/:requestId/approve')
+  // @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
+  // @ApiBearerAuth('access-token')
+  // @ApiOkResponse({ type: ItemRequestResponseDto })
+  // async approveRequest(
+  //   @Param('requestId') requestId: string,
+  //   @Body() body: { status: EItemRequestStatus },
+  //   @Req() req: RequestWithUser,
+  // ): Promise<ItemRequestResponseDto> {
+  //   return this.usersItemsService.updateRequestStatus(
+  //     requestId,
+  //     body.status,
+  //     req.user.id,
+  //   );
+  // }
 
 
   // แสดงรายการคำร้องขอทั้งหมด
-  @Get('requests')
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: [UsersItemRequestEntity] })
-  async findRequests(): Promise<UsersItemRequestEntity[]> {
-    return this.usersItemsService.findAllRequests();
-  }
+  // @Get('requests')
+  // @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
+  // @ApiBearerAuth('access-token')
+  // @ApiOkResponse({ type: [UsersItemRequestEntity] })
+  // async findRequests(): Promise<UsersItemRequestEntity[]> {
+  //   return this.usersItemsService.findAllRequests();
+  // }
 
-  // แสดงรายการคำร้องขอของผู้ใช้
-  @Get('requests/user')
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
-  @ApiBearerAuth('access-token')
-  @ApiOkResponse({ type: [UsersItemRequestEntity] })
-  async findUserRequests(@Req() req): Promise<UsersItemRequestEntity[]> {
-    return this.usersItemsService.findAllRequests();
-  }
+  // // แสดงรายการคำร้องขอของผู้ใช้
+  // @Get('requests/user')
+  // @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
+  // @ApiBearerAuth('access-token')
+  // @ApiOkResponse({ type: [UsersItemRequestEntity] })
+  // async findUserRequests(@Req() req: RequestWithUser): Promise<UsersItemRequestEntity[]> {
+  //   return this.usersItemsService.findAllRequests();
+  // }
 }

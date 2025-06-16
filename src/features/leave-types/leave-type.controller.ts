@@ -25,50 +25,50 @@ import { ApiResponseError } from '@src/common/decorators/api-response-error.deco
 export class LeaveTypeController {
   constructor(private readonly leaveTypeService: LeaveTypeService) { }
 
-  @Post()
-  @ApiResponseSuccess({ type: LeaveTypeResponseDto })
-  @ApiResponseError([
-    {
-      code: '0301',
-      message: errorMessage['0301'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '0302',
-      message: errorMessage['0302'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0303',
-      message: errorMessage['0303'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0304',
-      message: errorMessage['0304'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0305',
-      message: errorMessage['0305'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_LEAVE_TYPE] })
-  @ApiCreatedResponse({ type: LeaveTypeResponseDto })
-  async create(@Body() createLeaveTypeDto: CreateLeaveTypeDto): Promise<ResponseObject<LeaveTypeResponseDto>> {
-    const leaveType = await this.leaveTypeService.create(createLeaveTypeDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: leaveType,
-    };
-  }
+  // @Post()
+  // @ApiResponseSuccess({ type: LeaveTypeResponseDto })
+  // @ApiResponseError([
+  //   {
+  //     code: '0301',
+  //     message: errorMessage['0301'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '0302',
+  //     message: errorMessage['0302'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0303',
+  //     message: errorMessage['0303'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0304',
+  //     message: errorMessage['0304'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0305',
+  //     message: errorMessage['0305'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_LEAVE_TYPE] })
+  // @ApiCreatedResponse({ type: LeaveTypeResponseDto })
+  // async create(@Body() createLeaveTypeDto: CreateLeaveTypeDto): Promise<ResponseObject<LeaveTypeResponseDto>> {
+  //   const leaveType = await this.leaveTypeService.create(createLeaveTypeDto);
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: leaveType,
+  //   };
+  // }
 
   @Get()
   @ApiResponseSuccess({ type: [LeaveTypeResponseDto] })
@@ -208,133 +208,133 @@ export class LeaveTypeController {
     };
   }
 
-  @Patch(':id')
-  @ApiResponseSuccess({ type: LeaveTypeResponseDto })
-  @ApiResponseError([
-    {
-      code: '0301',
-      message: errorMessage['0301'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '0302',
-      message: errorMessage['0302'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0303',
-      message: errorMessage['0303'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0304',
-      message: errorMessage['0304'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0305',
-      message: errorMessage['0305'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_LEAVE_TYPE] })
-  @ApiOkResponse({ type: LeaveTypeResponseDto })
-  async partialUpdate(@Param() param: ValidateParamLeaveTypeId, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<ResponseObject<LeaveTypeResponseDto>> {
-    const updatedLeaveType = await this.leaveTypeService.partialUpdate(param.id, data);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: updatedLeaveType,
-    };
-  }
+  // @Patch(':id')
+  // @ApiResponseSuccess({ type: LeaveTypeResponseDto })
+  // @ApiResponseError([
+  //   {
+  //     code: '0301',
+  //     message: errorMessage['0301'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '0302',
+  //     message: errorMessage['0302'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0303',
+  //     message: errorMessage['0303'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0304',
+  //     message: errorMessage['0304'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0305',
+  //     message: errorMessage['0305'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_LEAVE_TYPE] })
+  // @ApiOkResponse({ type: LeaveTypeResponseDto })
+  // async partialUpdate(@Param() param: ValidateParamLeaveTypeId, @Body() data: Partial<UpdateLeaveTypeDto>): Promise<ResponseObject<LeaveTypeResponseDto>> {
+  //   const updatedLeaveType = await this.leaveTypeService.partialUpdate(param.id, data);
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: updatedLeaveType,
+  //   };
+  // }
   
-  @Delete(':id')
-  @ApiResponseSuccess({ type: LeaveTypeResponseDto })
-  @ApiResponseError([
-    {
-      code: '0301',
-      message: errorMessage['0301'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '0302',
-      message: errorMessage['0302'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0303',
-      message: errorMessage['0303'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0304',
-      message: errorMessage['0304'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0305',
-      message: errorMessage['0305'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_LEAVE_TYPE] })
-  @ApiOkResponse({ type: LeaveTypeResponseDto })
-  async remove(@Param() param: ValidateParamLeaveTypeId): Promise<void> {
-    return this.leaveTypeService.softDelete(param.id);
-  }
+  // @Delete(':id')
+  // @ApiResponseSuccess({ type: LeaveTypeResponseDto })
+  // @ApiResponseError([
+  //   {
+  //     code: '0301',
+  //     message: errorMessage['0301'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '0302',
+  //     message: errorMessage['0302'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0303',
+  //     message: errorMessage['0303'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0304',
+  //     message: errorMessage['0304'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0305',
+  //     message: errorMessage['0305'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_LEAVE_TYPE] })
+  // @ApiOkResponse({ type: LeaveTypeResponseDto })
+  // async remove(@Param() param: ValidateParamLeaveTypeId): Promise<void> {
+  //   return this.leaveTypeService.softDelete(param.id);
+  // }
 
-  @Post(':id')
-  @ApiResponseSuccess({ type: LeaveTypeResponseDto })
-  @ApiResponseError([
-    {
-      code: '0301',
-      message: errorMessage['0301'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '0302',
-      message: errorMessage['0302'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0303',
-      message: errorMessage['0303'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0304',
-      message: errorMessage['0304'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0305',
-      message: errorMessage['0305'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_LEAVE_TYPE] })
-  @ApiOkResponse({ type: LeaveTypeResponseDto })
-  async restore(@Param() param: ValidateParamLeaveTypeId): Promise<ResponseObject<LeaveTypeResponseDto>> {
-    const restoredLeaveType = await this.leaveTypeService.restore(param.id);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: restoredLeaveType,
-    };
-  }
+  // @Post(':id')
+  // @ApiResponseSuccess({ type: LeaveTypeResponseDto })
+  // @ApiResponseError([
+  //   {
+  //     code: '0301',
+  //     message: errorMessage['0301'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '0302',
+  //     message: errorMessage['0302'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0303',
+  //     message: errorMessage['0303'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0304',
+  //     message: errorMessage['0304'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0305',
+  //     message: errorMessage['0305'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_LEAVE_TYPE] })
+  // @ApiOkResponse({ type: LeaveTypeResponseDto })
+  // async restore(@Param() param: ValidateParamLeaveTypeId): Promise<ResponseObject<LeaveTypeResponseDto>> {
+  //   const restoredLeaveType = await this.leaveTypeService.restore(param.id);
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: restoredLeaveType,
+  //   };
+  // }
 }
