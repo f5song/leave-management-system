@@ -1,4 +1,4 @@
-import { IsUUID, IsOptional, IsNumber, Min, IsEnum, IsDate } from "class-validator";
+import { IsUUID, IsOptional, IsNumber, Min, IsEnum, IsDateString } from "class-validator";
 import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
 
 export class UpdateItemRequestDto {
@@ -36,11 +36,11 @@ export class UpdateItemRequestDto {
   @IsOptional()
   requested_by?: string;
 
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   borrow_start_date?: Date;
 
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   borrow_end_date?: Date;
 }

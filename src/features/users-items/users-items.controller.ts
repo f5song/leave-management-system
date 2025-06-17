@@ -64,6 +64,11 @@ export class UsersItemsController {
   @ApiOkResponse({ type: [UserItemResponseDto] })
   async findAll(): Promise<ResponseObject<UserItemResponseDto[]>> {
     const items = await this.usersItemsService.findAll();
+
+    console.log('Items fetched:', items.length);
+    items.forEach((item, index) => {
+      console.log(`Response DTO index: ${index}, id: ${item.id}`);
+    });
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',

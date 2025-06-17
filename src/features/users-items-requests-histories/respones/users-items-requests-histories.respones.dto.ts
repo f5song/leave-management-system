@@ -15,7 +15,7 @@ export class ItemsRequestsHistoryResponseDto {
 
   borrow_end_date?: Date;
 
-  request: UsersItemRequestEntity;
+  // request?: UsersItemRequestEntity;
 
 
 }

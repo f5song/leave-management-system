@@ -1,4 +1,4 @@
-import { IsUUID, IsNumber, Min, IsDate } from "class-validator";
+import { IsUUID, IsNumber, Min, IsDate, IsDateString } from "class-validator";
 
 export class CreateItemRequestDto {
   @IsUUID()
@@ -8,9 +8,9 @@ export class CreateItemRequestDto {
   @Min(1)
   quantity: number;
 
-  @IsDate()
+  @IsDateString()
   borrow_start_date: Date;
 
-  @IsDate()
+  @IsDateString()
   borrow_end_date: Date;
 }

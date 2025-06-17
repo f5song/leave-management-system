@@ -27,7 +27,7 @@ export class UsersItemsRequestsHistoriesService {
       actionAt: entity.actionAt,
       // borrow_start_date: entity.borrow_start_date,
       // borrow_end_date: entity.borrow_end_date,
-      request: entity.request,
+      // request: entity.request,
     };
   }
 

@@ -74,46 +74,6 @@ export class UsersItemsRequestsService {
     return this.toUserItemRequestResponseDto(entity);
   }
 
-
-  // async approve(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
-  //   const itemRequest = await this.findOneEntity(id);
-
-  //   itemRequest.status = EItemRequestStatus.APPROVED;
-
-  //   const history = this.historyRepository.create({
-  //     request: itemRequest, // ใส่ object เลย
-  //     actionById: approvedBy,
-  //     actionType: EItemRequestStatus.APPROVED,
-  //   });
-
-
-  //   await this.historyRepository.save(history);
-
-  //   await this.itemRequestRepository.save(itemRequest);
-
-  //   // ✅ ดึง entity ใหม่หลัง save เพื่อให้ได้ relation `item` กลับมาครบ
-  //   const updatedRequest = await this.findOneEntity(id);
-  //   return this.toUserItemRequestResponseDto(updatedRequest);
-  // }
-
-
-
-  // async reject(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
-  //   const itemRequest = await this.findOneEntity(id);
-  //   itemRequest.status = EItemRequestStatus.REJECTED;
-
-  //   // Create history record
-  //   const history = this.historyRepository.create({
-  //     request: itemRequest,
-  //     actionById: approvedBy,
-  //     actionType: EItemRequestStatus.REJECTED,
-  //   });
-  //   await this.historyRepository.save(history);
-
-  //   const updatedRequest = await this.itemRequestRepository.save(itemRequest);
-  //   return this.toUserItemRequestResponseDto(updatedRequest);
-  // }
-
   async updateStatus(
     id: string,
     updateDto: UpdateItemRequestDto
@@ -203,8 +163,7 @@ export class UsersItemsRequestsService {
 
   async findAll(): Promise<ItemRequestResponseDto[]> {
     const itemRequests = await this.itemRequestRepository.find({
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
-      where: { deletedAt: null },
+      select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt', 'borrow_start_date', 'borrow_end_date'],
       relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
       order: { createdAt: 'DESC' },
     });
@@ -241,3 +200,42 @@ export class UsersItemsRequestsService {
   }
 
 }
+
+  // async approve(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
+  //   const itemRequest = await this.findOneEntity(id);
+
+  //   itemRequest.status = EItemRequestStatus.APPROVED;
+
+  //   const history = this.historyRepository.create({
+  //     request: itemRequest, // ใส่ object เลย
+  //     actionById: approvedBy,
+  //     actionType: EItemRequestStatus.APPROVED,
+  //   });
+
+
+  //   await this.historyRepository.save(history);
+
+  //   await this.itemRequestRepository.save(itemRequest);
+
+  //   // ✅ ดึง entity ใหม่หลัง save เพื่อให้ได้ relation `item` กลับมาครบ
+  //   const updatedRequest = await this.findOneEntity(id);
+  //   return this.toUserItemRequestResponseDto(updatedRequest);
+  // }
+
+
+
+  // async reject(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
+  //   const itemRequest = await this.findOneEntity(id);
+  //   itemRequest.status = EItemRequestStatus.REJECTED;
+
+  //   // Create history record
+  //   const history = this.historyRepository.create({
+  //     request: itemRequest,
+  //     actionById: approvedBy,
+  //     actionType: EItemRequestStatus.REJECTED,
+  //   });
+  //   await this.historyRepository.save(history);
+
+  //   const updatedRequest = await this.itemRequestRepository.save(itemRequest);
+  //   return this.toUserItemRequestResponseDto(updatedRequest);
+  // }

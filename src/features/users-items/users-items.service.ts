@@ -11,6 +11,7 @@ import { UserItemResponseDto } from './respones/users-items.respones.dto';
 import { UpdateItemDto } from './dto/update.users-items.dto';
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
 import { ItemsRequestsHistoryResponseDto } from '../users-items-requests-histories/respones/users-items-requests-histories.respones.dto';
+import { EItemStatus } from '@src/common/constants/item-status.enum';
 @Injectable()
 export class UsersItemsService {
   constructor(
@@ -20,7 +21,7 @@ export class UsersItemsService {
     private itemRequestRepository: Repository<UsersItemRequestEntity>,
     @InjectRepository(UsersItemsRequestsHistoryEntity)
     private historyRepository: Repository<UsersItemsRequestsHistoryEntity>,
-  ) {}
+  ) { }
 
   // แปลง UsersItemsRequestsHistoryEntity เป็น DTO
   toHistoryResponseDto(entity: UsersItemsRequestsHistoryEntity): ItemsRequestsHistoryResponseDto {
@@ -29,7 +30,7 @@ export class UsersItemsService {
       actionAt: entity.actionAt,
       actionType: entity.actionType,
       actionById: entity.actionedBy?.id ?? entity.actionById ?? null,
-      request: entity.request,
+      // request: entity.request ? { id: entity.request.id } : undefined,
       // เพิ่มเติมถ้ามี property อื่น ๆ ใน DTO
     };
   }
@@ -38,15 +39,16 @@ export class UsersItemsService {
   toUserItemRequestResponseDto(entity: UsersItemRequestEntity): ItemRequestResponseDto {
     return {
       id: entity.id,
-      itemId: entity.item.id,
+      itemId: entity.item?.id ?? entity.itemId,
       quantity: entity.quantity,
       status: entity.status,
-      requestedById: entity.requestedBy.id,
+      requestedById: entity.requestedBy ? entity.requestedBy.id : null,
       approvedById: entity.approvedBy ? entity.approvedBy.id : null,
       createdAt: entity.createdAt,
       deletedAt: entity.deletedAt,
       history: entity.history ? entity.history.map(h => this.toHistoryResponseDto(h)) : [],
     };
+    
   }
 
   // แปลง UsersItemEntity เป็น DTO พร้อมแปลง itemRequests เป็น DTO array
@@ -67,21 +69,32 @@ export class UsersItemsService {
   }
 
   // ดึงข้อมูลคำร้องขอทั้งหมด และแปลงเป็น DTO
-  async findAllRequests(): Promise<ItemRequestResponseDto[]> {
-    const itemRequests = await this.itemRequestRepository.find({
-      where: { deletedAt: null },
-      relations: ['item', 'requestedBy', 'approvedBy', 'history'],
-      order: { createdAt: 'DESC' },
-    });
-    return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
-  }
+  // async findAllRequests(): Promise<ItemRequestResponseDto[]> {
+  //   const itemRequests = await this.itemRequestRepository.find({
+  //     where: { deletedAt: null },
+  //     relations: ['item', 'requestedBy', 'approvedBy', 'history'],
+  //     order: { createdAt: 'DESC' },
+  //   });
+  //   return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+  // }
 
   // ดึงข้อมูลอุปกรณ์ทั้งหมด พร้อมแปลงเป็น DTO
   async findAll(): Promise<UserItemResponseDto[]> {
     const items = await this.itemRepository.find({
-      where: { deletedAt: null },
-      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history'],
+      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
       order: { createdAt: 'DESC' },
+    });
+
+    items.forEach((entity, index) => {
+      console.log(`Item index: ${index}, id: ${entity.id}`);
+      // ถ้าจะดูละเอียดกว่านี้ เช่น itemRequests
+      if (entity.itemRequests) {
+        entity.itemRequests.forEach((req, reqIndex) => {
+          console.log(`  ItemRequest index: ${reqIndex}, id: ${req.id}`);
+          console.log(`    requestedBy id: ${req.requestedBy?.id}`);
+          console.log(`    approvedBy id: ${req.approvedBy?.id}`);
+        });
+      }
     });
     return items.map(entity => this.toUserItemResponseDto(entity));
   }
@@ -90,7 +103,7 @@ export class UsersItemsService {
   async findOne(id: string): Promise<UserItemResponseDto> {
     const item = await this.itemRepository.findOne({
       where: { id },
-      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history'],
+      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
     });
     if (!item) {
       throw new Error('Item not found');
@@ -100,16 +113,22 @@ export class UsersItemsService {
 
   // สร้างรายการอุปกรณ์ใหม่
   async create(createdById: string, item: CreateItemDto): Promise<UserItemResponseDto> {
-    const newItem = this.itemRepository.create(item);
+    const newItem = this.itemRepository.create({
+      ...item,
+      status: EItemStatus.AVAILABLE,
+    });
     newItem.createdById = createdById;
+
     const savedItem = await this.itemRepository.save(newItem);
-    // โหลด relation ให้ครบถ้วนสำหรับแปลง DTO
+
     const fullItem = await this.itemRepository.findOne({
       where: { id: savedItem.id },
-      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history'],
+      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
     });
+
     return this.toUserItemResponseDto(fullItem!);
   }
+
 
   // อัพเดทรายการอุปกรณ์ตาม ID และคืนค่า DTO
   async update(id: string, item: UpdateItemDto): Promise<UserItemResponseDto> {

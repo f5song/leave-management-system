@@ -29,7 +29,7 @@ export class UsersItemEntity {
   quantity: number;
 
   @Column({ type: 'enum', enum: EItemStatus, default: EItemStatus.AVAILABLE })
-  status: EItemStatus;
+  status?: EItemStatus;
 
   @Column({ name: 'created_by', type: 'uuid' })
   createdById: string;

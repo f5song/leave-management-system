@@ -6,7 +6,7 @@ import { Type } from "class-transformer";
 export class CreateItemDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
@@ -15,13 +15,13 @@ export class CreateItemDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  quantity: number;
+  quantity?: number;
 
-  @IsNotEmpty()
   @IsEnum(EItemStatus)
-  status: EItemStatus;
+  @IsOptional()
+  status?: EItemStatus;
 
   @Type(() => UserEntity)
   @ValidateNested()
-  createdBy: UserEntity;
+  createdBy?: UserEntity;
 }
