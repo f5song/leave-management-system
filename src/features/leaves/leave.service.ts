@@ -179,7 +179,7 @@ export class LeaveService {
 
   async getMyLeaves(userId: string): Promise<LeaveEntity[]> {
     return this.leaveRepository.find({
-      select: ['id', 'userId', 'leaveTypeId','title','description', 'startDate', 'endDate', 'totalDays', 'status'],
+      select: ['id', 'userId', 'leaveTypeId', 'title', 'description', 'startDate', 'endDate', 'totalDays', 'status'],
       where: {
         userId: userId,
         deletedAt: null,
@@ -218,7 +218,7 @@ export class LeaveService {
     // }
 
     return this.leaveRepository.find({
-      select: ['id', 'userId', 'leaveTypeId','title','description', 'startDate', 'endDate', 'totalDays', 'status'],
+      select: ['id', 'userId', 'leaveTypeId', 'title', 'description', 'startDate', 'endDate', 'totalDays', 'status'],
       where: { deletedAt: null },
       relations: ['userInfo', 'leaveType', 'createdBy'],
     });
@@ -231,7 +231,7 @@ export class LeaveService {
 
   async updateLeaveDetails(leaveId: string, dto: UpdateLeaveDto, userId: string): Promise<LeaveEntity> {
     const existingLeave = await this.leaveRepository.findOne({
-      select: ['id','userId', 'status'],
+      select: ['id', 'userId', 'status'],
       where: { id: leaveId },
       relations: ['userInfo', 'leaveType']
     });
@@ -312,4 +312,33 @@ export class LeaveService {
     leave.deletedAt = new Date();
     return await this.leaveRepository.save(leave);
   }
+
+  async getLeaveId(id: string): Promise<LeaveEntity> {
+    console.log('id:', id);
+    const leave = await this.leaveRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    console.log('leave:', leave);
+
+    if (!leave) {
+      throw new HttpException({
+        code: '0401',
+        message: errorMessage['0401'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
+
+    if (leave.deletedAt) {
+      throw new HttpException({
+        code: '0401',
+        message: errorMessage['0401'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
+
+    return leave;
+  }
+
 }

@@ -25,21 +25,21 @@ export class UsersItemsRequestsHistoriesService {
       actionById: entity.actionedBy?.id ?? entity.actionById ?? null,
       actionType: entity.actionType,
       actionAt: entity.actionAt,
-      borrow_start_date: entity.borrow_start_date,
-      borrow_end_date: entity.borrow_end_date,
+      // borrow_start_date: entity.borrow_start_date,
+      // borrow_end_date: entity.borrow_end_date,
       request: entity.request,
     };
   }
 
   async findAll() {
     return this.usersItemsRequestsHistoriesRepository.find({
-      select: ['id', 'requestId', 'actionedBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
+      select: ['id', 'request', 'actionedBy', 'actionType', 'actionAt'],
     });
   }
 
   async findOne(id: string): Promise<ItemsRequestsHistoryResponseDto>{
     const history = await this.usersItemsRequestsHistoriesRepository.findOne({
-      select: ['id', 'requestId', 'actionedBy', 'actionType', 'actionAt', 'borrow_start_date', 'borrow_end_date'],
+      select: ['id', 'request', 'actionedBy', 'actionType', 'actionAt'],
       where: { id },
       relations: ['request', 'actionedBy']
     });

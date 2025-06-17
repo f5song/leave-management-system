@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Request, HttpStatus, Req } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Request, HttpStatus, Req, Put } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersItemsRequestsService } from './users-items-requests.service';
 import { ItemRequestResponseDto } from './respones/users-items-requests.respones.dto';
 import { CreateItemRequestDto } from './dto/create.users-items-requests.dto';
 import { UpdateItemRequestDto } from './dto/update.users-items-requests.dto';
-import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { RolesPermission } from '@src/common/decorators/roles-permission.decorator';
 import { EPermission } from '@src/common/constants/permission.enum';
@@ -15,6 +15,7 @@ import { ValidateParamUsersItemRequestId } from './dto/users-items-requests.vali
 import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
 import { ValidateParamUserId } from '../users/dto/users.validate';
+import { EItemRequestStatus } from '@src/common/constants/item-request-status.enum';
 
 @ApiTags('Users Items Requests')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -278,57 +279,56 @@ export class UsersItemsRequestsController {
   }
 
 
-  @Patch(':id/approve')
-  @ApiResponseError([
-    {
-      code: '0901',
-      message: errorMessage['0901'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '0902',
-      message: errorMessage['0902'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0903',
-      message: errorMessage['0903'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0904',
-      message: errorMessage['0904'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0905',
-      message: errorMessage['0905'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0906',
-      message: errorMessage['0906'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
-  @ApiOkResponse({ type: ItemRequestResponseDto })
-  async approve(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
-    const itemRequest = await this.usersItemsRequestsService.approve(param.id, req.user.id);
-    console.log('itemRequest >>>', itemRequest);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
-    };
-  }
+  // @Patch(':id/approve')
+  // @ApiResponseError([
+  //   {
+  //     code: '0901',
+  //     message: errorMessage['0901'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '0902',
+  //     message: errorMessage['0902'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0903',
+  //     message: errorMessage['0903'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0904',
+  //     message: errorMessage['0904'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0905',
+  //     message: errorMessage['0905'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0906',
+  //     message: errorMessage['0906'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
+  // @ApiOkResponse({ type: ItemRequestResponseDto })
+  // async approve(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
+  //   const itemRequest = await this.usersItemsRequestsService.approve(param.id, req.user.id);
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
+  //   };
+  // }
 
-  @Patch(':id/reject')
+  @Patch(':id/:status')
   @ApiResponseError([
     {
       code: '0901',
@@ -366,16 +366,26 @@ export class UsersItemsRequestsController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.APPROVE_USER_ITEM_REQUEST] })
+  @RolesPermission({
+    role: [ERole.ADMIN],
+    permissions: [EPermission.APPROVE_USER_ITEM_REQUEST],
+  })
+  @ApiParam({ name: 'id', type: 'string', description: 'Item Request ID' })
+  @ApiParam({ name: 'status', enum: EItemRequestStatus, description: 'New status' })
   @ApiOkResponse({ type: ItemRequestResponseDto })
-  async reject(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
-    const itemRequest = await this.usersItemsRequestsService.reject(param.id, req.user.id);
+  async updateStatus(
+    @Param('id') id: string,
+    @Param('status') status: EItemRequestStatus,
+    @Req() req: RequestWithUser,
+  ): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.updateStatus(id, {status, approveById: req.user.id});
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
       data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
     };
   }
+  
 
   @Delete(':id')
   @ApiResponseError([
@@ -419,6 +429,55 @@ export class UsersItemsRequestsController {
   @ApiOkResponse({ type: ItemRequestResponseDto })
   async remove(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
     const itemRequest = await this.usersItemsRequestsService.softDelete(param.id, req.user.id);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
+    };
+  }
+
+  @Put(':id')
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    {
+      code: '0902',
+      message: errorMessage['0902'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: errorMessage['0903'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: errorMessage['0904'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: errorMessage['0905'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0906',
+      message: errorMessage['0906'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM_REQUEST] })
+  @ApiOkResponse({ type: ItemRequestResponseDto })
+  async update(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.update(param.id, { approveById: req.user.id});
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',

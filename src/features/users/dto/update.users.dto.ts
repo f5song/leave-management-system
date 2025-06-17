@@ -5,25 +5,27 @@ import { ERole } from "@common/constants/roles.enum";
 
 export class UpdateUserDto {
   @IsString()
+  @IsOptional()
   nickName?: string;
 
   @IsString()
+  @IsOptional()
   avatarUrl?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   firstName: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   lastName: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   email: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   roleId: ERole;
 
   @IsOptional()

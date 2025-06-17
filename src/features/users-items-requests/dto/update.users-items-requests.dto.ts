@@ -1,8 +1,12 @@
-import { IsUUID, IsOptional, IsNumber, Min, IsEnum } from "class-validator";
+import { IsUUID, IsOptional, IsNumber, Min, IsEnum, IsDate } from "class-validator";
 import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
-import { UserEntity } from "../../../database/entity/users.entity";
 
 export class UpdateItemRequestDto {
+
+  @IsUUID()
+  @IsOptional()
+  id?: string;
+
   @IsUUID()
   @IsOptional()
   itemId?: string;
@@ -16,6 +20,10 @@ export class UpdateItemRequestDto {
   @IsOptional()
   status?: EItemRequestStatus;
 
+  @IsUUID()
+  @IsOptional()
+  approveById?: string;
+
   @IsOptional()
   action_at?: Date;
 
@@ -27,4 +35,12 @@ export class UpdateItemRequestDto {
 
   @IsOptional()
   requested_by?: string;
+
+  @IsDate()
+  @IsOptional()
+  borrow_start_date?: Date;
+
+  @IsDate()
+  @IsOptional()
+  borrow_end_date?: Date;
 }

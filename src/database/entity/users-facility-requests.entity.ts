@@ -1,5 +1,5 @@
 import {
-    Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn
+    Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn
   } from 'typeorm';
   import { UserEntity } from './users.entity';
 import { EFacilityStatus } from '@common/constants/facility-status.enum';
@@ -34,10 +34,10 @@ import { EFacilityStatus } from '@common/constants/facility-status.enum';
     @CreateDateColumn({ type: 'datetime', name: 'created_at' })
     createdAt: Date;
   
-    @Column({ type: 'datetime', nullable: true, name: 'updated_at' })
+    @UpdateDateColumn({ type: 'datetime', nullable: true, name: 'updated_at' })
     updatedAt?: Date;
   
-    @Column({ type: 'datetime', nullable: true, name: 'deleted_at' })
+    @DeleteDateColumn({ type: 'datetime', nullable: true, name: 'deleted_at' })
     deletedAt?: Date;
   
     @ManyToOne(() => UserEntity, user => user.facilityRequests)
@@ -47,5 +47,6 @@ import { EFacilityStatus } from '@common/constants/facility-status.enum';
     @ManyToOne(() => UserEntity, user => user.facilityApprovals)
     @JoinColumn({ name: 'approved_by' })
     approvedBy?:  UserEntity;
+  
   }
   

@@ -54,8 +54,8 @@ export class UserEntity {
   @Column({ name: 'birth_date', nullable: true })
   birthDate?: Date;
 
-  @Column({ default: 0 })
-  salary: number;
+  @Column({ default: 0 , nullable: true})
+  salary?: number;
 
   @Column({ name: 'role_id', default: 'employee' , nullable: true})
   roleId: ERole;

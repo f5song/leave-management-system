@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, UsePipes } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, UsePipes, Req } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserService } from './user.service';
@@ -17,6 +17,7 @@ import { errorMessage } from '@src/common/constants/error-message';
 import { HttpStatus } from '@nestjs/common';
 import { ApiResponseSuccess } from '../../common/decorators/api-response-success.decorator';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
+import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 
 @ApiTags('Users')
 @Controller('users')
@@ -74,7 +75,7 @@ export class UserController {
     };
   }
 
-  @Get(':id')
+  @Get(':userId')
   @ApiResponseSuccess({
     type: [UserResponseDto],
     },
@@ -222,7 +223,8 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER] })
-  async updateUser(@Param() param: ValidateParamUserId, @Body() updateData: UpdateUserDto): Promise<ResponseObject<UserResponseDto>> {
+  async updateUser(@Param() param: ValidateParamUserId, 
+  @Req() req: RequestWithUser, @Body() updateData: UpdateUserDto): Promise<ResponseObject<UserResponseDto>> {
     const updatedUser = await this.userService.update(param.userId, updateData);
     return {
       code: HttpStatus.OK,
@@ -242,7 +244,7 @@ export class UserController {
   //   return this.userService.toUserResponseDto(updatedUser);
   // }
 
-  @Delete(':id')
+  @Delete(':userId')
   @ApiOkResponse({ type: UserResponseDto })
   @ApiResponseError([
     {

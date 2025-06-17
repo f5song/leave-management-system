@@ -203,7 +203,6 @@ export class UsersItemsRequestsHistoriesController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemsRequestsHistoryResponseDto })
-  @ApiNotFoundResponse({ description: 'History not found' })
   async update(
     @Param() param: ValidateParamUsersItemRequestId,
     @Body() updateDto: UpdateItemsRequestsHistoryDto,

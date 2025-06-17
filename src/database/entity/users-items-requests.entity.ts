@@ -1,6 +1,7 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany,
-  DeleteDateColumn
+  DeleteDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { UsersItemEntity } from './users-items.entity';
 import { UserEntity } from './users.entity';
@@ -15,16 +16,14 @@ export class UsersItemRequestEntity {
   @Column({ name: 'item_id' })
   itemId: string;
 
-  @Column({
-    type: 'enum',
-    enum: EItemRequestStatus,
-    default: EItemRequestStatus.PENDING,
-  })
+  @Column({ type: 'enum', enum: EItemRequestStatus, default: EItemRequestStatus.PENDING })
   status: EItemRequestStatus;
 
   @Column()
   quantity: number;
 
+  @Column({ name: 'approved_by', nullable: true })
+  approvedById?: string;
 
   @CreateDateColumn({ name: 'action_at' })
   actionAt?: Date;
@@ -35,9 +34,15 @@ export class UsersItemRequestEntity {
   @CreateDateColumn({ type: 'datetime', name: 'created_at' })
   createdAt: Date;
 
+  @UpdateDateColumn({ type: 'datetime', nullable: true, name: 'updated_at' })
+  updatedAt?: Date;
+
   @Column({ name: 'requested_by' })
   requestedById?: string;
 
+  @ManyToOne(() => UserEntity, user => user.itemRequests)
+  @JoinColumn({ name: 'requested_by' })
+  requestedBy?: UserEntity;
 
   @OneToMany(() => UsersItemsRequestsHistoryEntity, history => history.request)
   history?: UsersItemsRequestsHistoryEntity[];
@@ -46,12 +51,13 @@ export class UsersItemRequestEntity {
   @JoinColumn({ name: 'item_id' })
   item?: UsersItemEntity;
 
-  @ManyToOne(() => UserEntity, user => user.itemRequests)
-  @JoinColumn({ name: 'requested_by' })
-  requestedBy?: UserEntity;
-
   @ManyToOne(() => UserEntity, user => user.itemApprovals)
   @JoinColumn({ name: 'approved_by' })
   approvedBy?: UserEntity;
 
+  @Column({ nullable: true })
+  borrow_start_date?: Date;
+
+  @Column({ nullable: true })
+  borrow_end_date?: Date;
 }

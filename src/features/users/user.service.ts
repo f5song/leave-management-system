@@ -51,34 +51,34 @@ export class UserService {
     };
   }
 
-  async patchUser(id: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
-    const user = await this.userInfoRepository.findOne({
-      select: ['id', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { id },
-      relations: ['jobTitle', 'department', 'role']
-    });
+  // async patchUser(id: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
+  //   const user = await this.userInfoRepository.findOne({
+  //     select: ['id', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
+  //     where: { id },
+  //     relations: ['jobTitle', 'department', 'role']
+  //   });
 
-    if (!user) {
-      throw new HttpException({
-        code: '0701',
-        message: errorMessage['0701'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
+  //   if (!user) {
+  //     throw new HttpException({
+  //       code: '0701',
+  //       message: errorMessage['0701'],
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //     }, HttpStatus.BAD_REQUEST);
+  //   }
 
-    // Update only the provided fields
-    if (updateData.email) user.email = updateData.email;
-    if (updateData.firstName) user.firstName = updateData.firstName;
-    if (updateData.lastName) user.lastName = updateData.lastName;
-    if (updateData.nickName) user.nickName = updateData.nickName;
-    if (updateData.avatarUrl) user.avatarUrl = updateData.avatarUrl;
-    if (updateData.birthDate) user.birthDate = updateData.birthDate;
-    if (updateData.jobTitleId) user.jobTitleId = updateData.jobTitleId;
-    if (updateData.departmentId) user.departmentId = updateData.departmentId;
-    if (updateData.roleId) user.roleId = updateData.roleId;
-    if (updateData.salary) user.salary = updateData.salary;
-    return this.toUserResponseDto(await this.userInfoRepository.save(user));
-  }
+  //   // Update only the provided fields
+  //   if (updateData.email) user.email = updateData.email;
+  //   if (updateData.firstName) user.firstName = updateData.firstName;
+  //   if (updateData.lastName) user.lastName = updateData.lastName;
+  //   if (updateData.nickName) user.nickName = updateData.nickName;
+  //   if (updateData.avatarUrl) user.avatarUrl = updateData.avatarUrl;
+  //   if (updateData.birthDate) user.birthDate = updateData.birthDate;
+  //   if (updateData.jobTitleId) user.jobTitleId = updateData.jobTitleId;
+  //   if (updateData.departmentId) user.departmentId = updateData.departmentId;
+  //   if (updateData.roleId) user.roleId = updateData.roleId;
+  //   if (updateData.salary) user.salary = updateData.salary;
+  //   return this.toUserResponseDto(await this.userInfoRepository.save(user));
+  // }
 
   async validateUserId(id: string): Promise<void> {
 
@@ -90,7 +90,8 @@ export class UserService {
     if (!user || user.deletedAt) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        // message: errorMessage['0701'],
+        message: "User not found in validateUserId",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -100,7 +101,8 @@ export class UserService {
     if (!email || typeof email !== 'string' || email.trim().length === 0) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        // message: errorMessage['0701'],
+        message: "User not found in EMAIL",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -120,8 +122,8 @@ export class UserService {
 
     if (existingUser && !existingUser.deletedAt) {
       throw new HttpException({
-        code: '0701',
-        message: errorMessage['0701'],
+        code: '0706',
+        message: errorMessage['0706'],
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -137,7 +139,7 @@ export class UserService {
     if (!role || role.deletedAt) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        message: "User not found in validateRole",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -152,7 +154,7 @@ export class UserService {
     if (!jobTitle || jobTitle.deletedAt) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        message: "User not found in validateJobTitle",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -167,7 +169,7 @@ export class UserService {
     if (!department || department.deletedAt) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        message: "User not found in validateDepartment",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -177,7 +179,7 @@ export class UserService {
     if (!firstName || typeof firstName !== 'string' || firstName.trim().length === 0) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        message: "User not found in validateNames",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -185,49 +187,59 @@ export class UserService {
     if (!lastName || typeof lastName !== 'string' || lastName.trim().length === 0) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        message: "User not found in validateNames",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
   }
 
   async validateBirthDate(birthDate: string | Date): Promise<void> {
-    if (!birthDate) {
-      throw new BadRequestException('Birth date is required');
-    }
 
     // Convert to Date if string
     const date = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
 
     if (isNaN(date.getTime())) {
       throw new HttpException({
-        code: '0701',
-        message: errorMessage['0701'],
+        code: '0707', 
+        message: errorMessage['0707'],
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
 
-    const today = new Date();
-    const minAge = 18;
-    const maxAge = 100;
+    // const today = new Date();
+    // const minAge = 18;
+    // const maxAge = 100;
 
-    const age = today.getFullYear() - date.getFullYear();
-    if (age < minAge || age > maxAge) {
-      throw new HttpException({
-        code: '0701',
-        message: errorMessage['0701'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
+    // const age = today.getFullYear() - date.getFullYear();
+    // if (age < minAge || age > maxAge) {
+    //   throw new HttpException({
+    //     code: '0701',
+    //     message: errorMessage['0701'],
+    //     statusCode: HttpStatus.BAD_REQUEST,
+    //   }, HttpStatus.BAD_REQUEST);
+    // }
   }
 
   async create(data: CreateUserDto): Promise<UserEntity> {
-    await this.validateEmail(data.email);
-    await this.validateRole(data.roleId);
-    await this.validateJobTitle(data.jobTitleId);
-    await this.validateDepartment(data.departmentId);
-    await this.validateNames(data.firstName, data.lastName);
-    await this.validateBirthDate(data.birthDate);
+    if(data.email){
+      await this.validateEmail(data.email);
+    }
+    if(data.roleId){
+      await this.validateRole(data.roleId);
+    }
+    if(data.jobTitleId){
+      await this.validateJobTitle(data.jobTitleId);
+    }
+    if(data.departmentId){
+      await this.validateDepartment(data.departmentId);
+    }
+    if(data.firstName && data.lastName){
+      await this.validateNames(data.firstName, data.lastName);
+    }
+
+    if(data.birthDate){
+      await this.validateBirthDate(data.birthDate);
+    }
 
     let nextNumber = 1;
     const last_user = await this.userInfoRepository.findOne({
@@ -275,38 +287,37 @@ export class UserService {
   }
 
   async update(userId: string, data: UpdateUserDto): Promise<UserResponseDto> {
+    console.log("update user: ", userId);
     await this.validateUserId(userId);
 
-    const updateData: Partial<UserEntity> = {};
-
-    if (data.email) await this.validateEmail(data.email);
-    if (data.roleId) await this.validateRole(data.roleId);
-    if (data.jobTitleId) await this.validateJobTitle(data.jobTitleId);
-    if (data.departmentId) await this.validateDepartment(data.departmentId);
-    if (data.firstName || data.lastName) {
-      await this.validateNames(
-        data.firstName || (await this.getUserById(userId)).firstName,
-        data.lastName || (await this.getUserById(userId)).lastName
-      );
+    // ตรวจสอบค่าใหม่ที่ส่งมาทั้งหมด
+    if(data.email){
+      await this.validateEmail(data.email);
     }
-    if (data.birthDate) await this.validateBirthDate(data.birthDate);
-
-    if (data.email) updateData.email = data.email;
-    if (data.firstName) updateData.firstName = data.firstName;
-    if (data.lastName) updateData.lastName = data.lastName;
-    if (data.birthDate) updateData.birthDate = data.birthDate;
-    if (data.roleId) updateData.roleId = data.roleId;
-    if (data.jobTitleId) updateData.jobTitleId = data.jobTitleId;
-    if (data.departmentId) updateData.departmentId = data.departmentId;
-    if (data.nickName) updateData.nickName = data.nickName;
-    if (data.avatarUrl) updateData.avatarUrl = data.avatarUrl;
-    if (data.salary) updateData.salary = data.salary;
-
+    if(data.firstName && data.lastName){
+      await this.validateNames(data.firstName, data.lastName);
+    }
+    if(data.birthDate){
+      await this.validateBirthDate(data.birthDate);
+    }
+    if(data.roleId){
+      await this.validateRole(data.roleId);
+    }
+    if(data.jobTitleId){
+      await this.validateJobTitle(data.jobTitleId);
+    }
+    if(data.departmentId){
+      await this.validateDepartment(data.departmentId);
+    }
 
     const user = await this.userInfoRepository.findOne({
-      select: ['id', 'employeeCode', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
+      select: [
+        'id'
+      ],
       where: { id: userId },
     });
+
+    console.log("update user: ", user);
 
     if (!user) {
       throw new HttpException({
@@ -316,8 +327,18 @@ export class UserService {
       }, HttpStatus.BAD_REQUEST);
     }
 
+    // เซตค่าทุก field ที่จำเป็นเสมอ (null ถ้าไม่ได้ส่งมา)
     Object.assign(user, {
-      ...updateData,
+      email: data.email ?? null,
+      firstName: data.firstName ?? null,
+      lastName: data.lastName ?? null,
+      birthDate: data.birthDate ?? null,
+      roleId: data.roleId ?? null,
+      jobTitleId: data.jobTitleId ?? null,
+      departmentId: data.departmentId ?? null,
+      nickName: data.nickName ?? null,
+      avatarUrl: data.avatarUrl ?? null,
+      salary: data.salary ?? null,
       updatedAt: new Date(),
     });
 
@@ -335,7 +356,7 @@ export class UserService {
     if (!user) {
       throw new HttpException({
         code: '0701',
-        message: errorMessage['0701'],
+        message: "User not found in deleteUser",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }

@@ -16,6 +16,8 @@ import { EPermission } from '@common/constants/permission.enum';
 import { ERole } from '@common/constants/roles.enum';
 import { ResponseObject } from '@common/dto/common-response.dto';
 import { RequestWithUser } from '@src/common/interfaces/request-with-user';
+import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
+import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
 
 
 @ApiTags('Users Items')
@@ -27,6 +29,36 @@ export class UsersItemsController {
 
   // แสดงรายการอุปกรณ์ทั้งหมด
   @Get()
+  @ApiResponseSuccess({
+    type: [UserItemResponseDto],
+  })
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: 'Item not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0902',
+      message: 'Item name already exists',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: 'Item name must be between 2 and 100 characters',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: 'Cannot delete item that has users',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: 'Invalid item ID',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserItemResponseDto] })
@@ -41,6 +73,36 @@ export class UsersItemsController {
 
   // แสดงรายการอุปกรณ์ตาม ID
   @Get(':id')
+  @ApiResponseSuccess({
+    type: UserItemResponseDto,
+  })
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: 'Item not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0902',
+      message: 'Item name already exists',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: 'Item name must be between 2 and 100 characters',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: 'Cannot delete item that has users',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: 'Invalid item ID',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
@@ -55,7 +117,36 @@ export class UsersItemsController {
 
   // สร้างรายการอุปกรณ์ใหม่
   @Post()
-  @ApiOkResponse({ type: UserItemResponseDto })
+  @ApiResponseSuccess({
+    type: UserItemResponseDto,
+  })
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: 'Item not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0902',
+      message: 'Item name already exists',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: 'Item name must be between 2 and 100 characters',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: 'Cannot delete item that has users',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: 'Invalid item ID',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UserItemResponseDto })
@@ -72,6 +163,36 @@ export class UsersItemsController {
 
   // อัพเดทรายการอุปกรณ์
   @Put(':id')
+  @ApiResponseSuccess({
+    type: UserItemResponseDto,
+  })
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: 'Item not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0902',
+      message: 'Item name already exists',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: 'Item name must be between 2 and 100 characters',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: 'Cannot delete item that has users',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: 'Invalid item ID',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
@@ -90,6 +211,36 @@ export class UsersItemsController {
 
   // ลบรายการอุปกรณ์
   @Delete(':id')
+  @ApiResponseSuccess({
+    type: UserItemResponseDto,
+  })
+  @ApiResponseError([
+    {
+      code: '0901',
+      message: 'Item not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0902',
+      message: 'Item name already exists',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0903',
+      message: 'Item name must be between 2 and 100 characters',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0904',
+      message: 'Cannot delete item that has users',
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0905',
+      message: 'Invalid item ID',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }
+  ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })

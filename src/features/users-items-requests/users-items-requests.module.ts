@@ -4,9 +4,10 @@ import { UsersItemsRequestsController } from './users-items-requests.controller'
 import { UsersItemsRequestsService } from './users-items-requests.service';
 import { UsersItemRequestEntity } from '../../database/entity/users-items-requests.entity';
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
+import { UserEntity } from '../../database/entity/users.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsersItemRequestEntity, UsersItemsRequestsHistoryEntity])],
+  imports: [TypeOrmModule.forFeature([UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UserEntity])],
   controllers: [UsersItemsRequestsController],
   providers: [UsersItemsRequestsService],
   exports: [UsersItemsRequestsService],

@@ -32,6 +32,7 @@ import { errorMessage } from '@src/common/constants/error-message';
 import { ValidateParamUserId } from '../users/dto/users.validate';
 import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 import { AuthGuard } from '@nestjs/passport';
+import { get } from 'http';
 
 @ApiTags('Leaves')
 @Controller('leaves')
@@ -43,7 +44,7 @@ export class LeaveController {
   private readonly logger = new Logger(LeaveController.name, { timestamp: true });
   constructor(private readonly leaveService: LeaveService) { }
 
-  @Get(':userId')
+  @Get('user/:userId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
 @ApiResponseError([
   {
@@ -293,6 +294,53 @@ export class LeaveController {
     };
   }
 
+  @Get('id/:leaveId')
+  @ApiOkResponse({ type: [LeaveResponseDto] })
+  @ApiResponseError([
+    {
+      code: '0401',
+      message: errorMessage['0401'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0402',
+      message: errorMessage['0402'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0403',
+      message: errorMessage['0403'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0404',
+      message: errorMessage['0404'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0405',
+      message: errorMessage['0405'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
+  @ApiOkResponse({ type: LeaveResponseDto })
+  async getLeave(@Param() param: ValidateParamLeaveId): Promise<ResponseObject<LeaveResponseDto>> {
+    console.log("param", param);              
+    console.log("leaveId", param.leaveId);
+    const leave = await this.leaveService.getLeaveId(param.leaveId);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: this.leaveService.toLeaveResponseDto(leave),
+    };
+  }
+
   @Delete(':leaveId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
@@ -333,4 +381,5 @@ export class LeaveController {
     await this.leaveService.deleteLeave(param.leaveId);
     return;
   }
+
 }

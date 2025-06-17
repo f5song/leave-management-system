@@ -71,6 +71,8 @@ export const errorMessage = {
   '0703': 'User name must be between 2 and 100 characters',
   '0704': 'Cannot delete user that has users',
   '0705': 'Invalid user ID',
+  '0706': 'Email already exists',
+  '0707': 'Birth date is not valid',
 
   '0801': 'Facility Request not found',
   '0802': 'Facility Request name already exists',

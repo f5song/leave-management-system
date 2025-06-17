@@ -11,8 +11,8 @@ export class UserResponseDto {
     lastName: string;
     nickName?: string;
     avatarUrl?: string;
-    birthDate: Date;
-    salary: number;
+    birthDate?: Date;
+    salary?: number;
     roleId: ERole;
     jobTitleId: EJobTitleId;
     departmentId: EDepartmentId;

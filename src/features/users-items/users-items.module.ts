@@ -3,11 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersItemsService } from './users-items.service';
 import { UsersItemEntity } from '../../database/entity/users-items.entity';
 import { UsersItemRequestEntity } from '../../database/entity/users-items-requests.entity';
+import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
 import { UsersItemsController } from './users-items.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UsersItemEntity, UsersItemRequestEntity]),
+    TypeOrmModule.forFeature([UsersItemEntity, UsersItemRequestEntity, UsersItemsRequestsHistoryEntity]),
   ],
   providers: [UsersItemsService],
   exports: [UsersItemsService],

@@ -12,5 +12,6 @@ export class UserItemResponseDto {
     updatedAt: Date;
     deletedAt: Date;
     createdBy: UserEntity;
+    itemRequests: ItemRequestResponseDto[];
   }
   

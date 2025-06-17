@@ -50,7 +50,7 @@ export class FacilityRequestsService {
   async findOne(id: string): Promise<FacilityRequestResponseDto> {
     const facilityRequest = await this.facilityRequestRepository.findOne({
       select: ['id', 'title', 'description', 'requestedById', 'status', 'approvedById', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { id, deletedAt: null },
+      where: { id },
     });
     if (!facilityRequest) {
       throw new HttpException({
@@ -65,14 +65,16 @@ export class FacilityRequestsService {
   async findAll(): Promise<FacilityRequestResponseDto[]> {
     const facilityRequests = await this.facilityRequestRepository.find({
       select: ['id', 'title', 'description', 'requestedById', 'status', 'approvedById', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { deletedAt: null },
       order: { createdAt: 'DESC' },
     });
     return facilityRequests.map(entity => this.toFacilityRequestResponseDto(entity));
   }
 
   async update(id: string, updateDto: UpdateFacilityRequestDto): Promise<FacilityRequestResponseDto> {
-    const facilityRequest = await this.facilityRequestRepository.findOne({ where: { id } });
+    const facilityRequest = await this.facilityRequestRepository.findOne({
+      select: ['id'],
+      where: { id }
+    });
 
     if (!facilityRequest) {
       throw new HttpException({
@@ -94,9 +96,36 @@ export class FacilityRequestsService {
 
 
   async softDelete(id: string): Promise<FacilityRequestResponseDto> {
-    const facilityRequest = await this.findOne(id);
+    const facilityRequest = await this.facilityRequestRepository.findOne({
+      select: ['id'],
+      where: { id }
+    });
     facilityRequest.deletedAt = new Date();
     const deletedRequest = await this.facilityRequestRepository.save(facilityRequest);
     return this.toFacilityRequestResponseDto(deletedRequest);
   }
+
+  async updateStatus(
+    id: string,
+    status: EFacilityStatus,
+    actionById: string
+  ): Promise<FacilityRequestResponseDto> {
+    const facilityRequest = await this.findOne(id);
+
+    facilityRequest.status = status;
+
+    if (status === EFacilityStatus.APPROVED) {
+      facilityRequest.approvedById = actionById;
+      facilityRequest.approvedAt = new Date();
+    } else {
+      facilityRequest.approvedById = null;
+      facilityRequest.approvedAt = null;
+    }
+
+    const updatedRequest = await this.facilityRequestRepository.save(facilityRequest);
+
+    return this.toFacilityRequestResponseDto(updatedRequest);
+  }
+
 }
+

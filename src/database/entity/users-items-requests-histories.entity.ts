@@ -8,7 +8,7 @@ export class UsersItemsRequestsHistoryEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => UsersItemRequestEntity, (request) => request.history)
+  @ManyToOne(() => UsersItemRequestEntity, request => request.history)
   @JoinColumn({ name: 'request_id' })
   request?: UsersItemRequestEntity;
 
@@ -21,11 +21,11 @@ export class UsersItemsRequestsHistoryEntity {
   @CreateDateColumn({ name: 'action_at' })
   actionAt: Date;
 
-  @Column({ nullable: true })
-  borrow_start_date?: Date;
+  // @Column({ nullable: true })
+  // borrow_start_date?: Date;
 
-  @Column({ nullable: true })
-  borrow_end_date?: Date;
+  // @Column({ nullable: true })
+  // borrow_end_date?: Date;
 
   @Column('uuid', { name: 'action_by', nullable: true })
   actionById?: string;

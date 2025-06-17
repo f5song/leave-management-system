@@ -63,5 +63,13 @@ import {
     @IsOptional()
     @IsUUID()
     approvedBy?: UserEntity;
+
+    @IsOptional()
+    @IsDate()
+    borrow_start_date?: Date;
+
+    @IsOptional()
+    @IsDate()
+    borrow_end_date?: Date;
   }
   
