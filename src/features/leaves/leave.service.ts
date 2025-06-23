@@ -162,6 +162,9 @@ export class LeaveService {
 
     const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
+    console.log("start date", start);
+    console.log("end date", end);
+
     const leave = this.leaveRepository.create({
       userId: userId,
       leaveTypeId: dto.leaveTypeId,
@@ -187,7 +190,7 @@ export class LeaveService {
     });
   }
 
-  async getAllLeaves(): Promise<LeaveEntity[]> {
+  async getAllLeaves(start?: string, end?: string): Promise<LeaveEntity[]> {
     //   return this.leaveRepository.find({
     //     select: ['id', 'userId', 'leaveTypeId', 'startDate', 'endDate', 'totalDays', 'description', 'status'],
     //     where: { deletedAt: null },
@@ -219,9 +222,16 @@ export class LeaveService {
 
     return this.leaveRepository.find({
       select: ['id', 'userId', 'leaveTypeId', 'title', 'description', 'startDate', 'endDate', 'totalDays', 'status'],
-      where: { deletedAt: null },
+      where: {
+        deletedAt: null,
+        ...(start && end ? {
+          startDate: LessThanOrEqual(new Date(end)),
+          endDate: MoreThanOrEqual(new Date(start)),
+        } : {}),
+      },
       relations: ['userInfo', 'leaveType', 'createdBy'],
     });
+
 
   }
 

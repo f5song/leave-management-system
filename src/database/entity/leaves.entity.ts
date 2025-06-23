@@ -27,10 +27,10 @@ export class LeaveEntity {
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ name: 'start_date' })
+  @Column({ name: 'start_date', type: 'datetime'})
   startDate: Date;
 
-  @Column({ name: 'end_date' })
+  @Column({ name: 'end_date', type: 'datetime'})
   endDate: Date;
 
   @Column({ name: 'total_days', type: 'int', nullable: true })
@@ -75,7 +75,7 @@ export class LeaveEntity {
   @JoinColumn({ name: 'created_by' })
   createdBy?: UserEntity;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at'})
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at', nullable: true })

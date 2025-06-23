@@ -9,9 +9,14 @@ import { RoleEntity } from '../../database/entity/roles.entity';
 import { UsersItemRequestEntity } from '../../database/entity/users-items-requests.entity';
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
 import { UsersFacilityRequestEntity } from '../../database/entity/users-facility-requests.entity';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity,JobTitleEntity,DepartmentEntity,RoleEntity,UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UsersFacilityRequestEntity])  ],
+  imports: [TypeOrmModule.forFeature([UserEntity,JobTitleEntity,DepartmentEntity,RoleEntity,UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UsersFacilityRequestEntity]),
+    JwtModule.register({
+    secret: 'secretKey',
+    signOptions: { expiresIn: '24h' },
+  })],
   providers: [UserService],
   controllers: [UserController],
   exports: [UserService],

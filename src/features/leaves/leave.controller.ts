@@ -12,6 +12,7 @@ import {
   HttpStatus,
   Req,
   Logger,
+  Query,
 } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import {
@@ -122,8 +123,9 @@ export class LeaveController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  async getAllLeaves(): Promise<ResponseObject<LeaveResponseDto[]>> {
-    const leaves = await this.leaveService.getAllLeaves();
+  async getAllLeaves(@Query("start") start?: string,
+  @Query("end") end?: string): Promise<ResponseObject<LeaveResponseDto[]>> {
+    const leaves = await this.leaveService.getAllLeaves(start, end);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -183,6 +185,9 @@ export class LeaveController {
     @Param() param: ValidateParamUserId,
   ): Promise<ResponseObject<LeaveResponseDto>> {
     const leave = await this.leaveService.createLeave(req.user.id, dto, param.userId);
+    // console.log(leave);
+    // console.log("created at", new Date(leave.createdAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+    // console.log("now at", new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -310,7 +315,7 @@ export class LeaveController {
     {
       code: '0403',
       message: errorMessage['0403'],
-      statusCode: HttpStatus.BAD_REQUEST,
+      statusCode: HttpStatus.BAD_REQUEST, 
     },
     {
       code: '0404',

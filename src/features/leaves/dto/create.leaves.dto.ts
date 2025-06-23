@@ -12,7 +12,7 @@ export class CreateLeaveDto {
   leaveTypeId: ELeaveType;
 
   @IsString()
-  @Length(10, 500)
+  @IsOptional()
   description?: string;
 
   @IsOptional()

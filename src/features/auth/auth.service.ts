@@ -44,70 +44,148 @@ export class AuthService {
     };
   }
 
+  // async loginWithGoogle(idToken: string) {
+  //   const googleUser = await this.verifyGoogleToken(idToken);
+
+  //   let isNewUser = false;
+
+  //   let user = await this.userRepository.findOne({
+  //     where: { googleId: googleUser.googleId }
+  //   });
+
+  //   if (!user) {
+  //     isNewUser = true;
+
+  //     const lastUser = await this.userRepository.findOne({
+  //       where: { employeeCode: Not(IsNull()) },
+  //       order: { createdAt: 'DESC' },
+  //       select: ['employeeCode']
+  //     });
+
+  //     let employeeCode: string;
+  //     if (!lastUser || !lastUser.employeeCode) {
+  //       employeeCode = 'fh-0001';
+  //     } else {
+  //       const match = lastUser.employeeCode.match(/\d+$/);
+  //       const nextNumber = match ? parseInt(match[0]) + 1 : 1;
+  //       const paddedNumber = nextNumber.toString().padStart(4, '0');
+  //       employeeCode = `fh-${paddedNumber}`;
+  //     }
+
+  //     const nameParts = googleUser.name?.split(' ') || [];
+  //     const firstName = nameParts[0] || '';
+  //     const lastName = nameParts.slice(1).join(' ') || '';
+
+  //     const newUser = this.userRepository.create({
+  //       employeeCode,
+  //       email: googleUser.email,
+  //       firstName,
+  //       lastName,
+  //       googleId: googleUser.googleId,
+  //       avatarUrl: googleUser.picture,
+  //       roleId: ERole.EMPLOYEE,
+  //       createdAt: new Date(),
+  //       updatedAt: new Date()
+  //     });
+
+  //     user = await this.userRepository.save(newUser);
+  //   }
+
+  //   const payload = {
+  //     sub: user.id,
+  //     email: user.email,
+  //   };
+
+  //   const userWithEmployeeCode = await this.userRepository.findOne({
+  //     where: { id: user.id },
+  //     select: [
+  //       'id',
+  //       'email',
+  //       'firstName',
+  //       'lastName',
+  //       'employeeCode',
+  //       'roleId',
+  //       'avatarUrl',
+  //       'googleId',
+  //       'birthDate',
+  //       'salary',
+  //       'jobTitleId',
+  //       'departmentId',
+  //       'approvedAt'
+  //     ]
+  //   });
+
+  //   return {
+  //     access_token: this.jwtService.sign(payload),
+  //     user: userWithEmployeeCode,
+  //     isNewUser
+  //   };
+  // }
+
   async loginWithGoogle(idToken: string) {
     const googleUser = await this.verifyGoogleToken(idToken);
-
+  
     let user = await this.userRepository.findOne({
       where: { googleId: googleUser.googleId }
     });
-
+  
+    let isNewUser = false;
+    let emailForRegister = null;
+    let googleIdForRegister = null;
+    let avatarForRegister = null;
+  
     if (!user) {
-
-      const lastUser = await this.userRepository.findOne({
-        where: { employeeCode: Not(IsNull()) },
-        order: { createdAt: 'DESC' },
-        select: ['employeeCode']
-      });
-
-      let employeeCode: string;
-      if (!lastUser || !lastUser.employeeCode) {
-        employeeCode = 'fh-0001';   
-      } else {
-        const match = lastUser.employeeCode.match(/\d+$/);
-        const nextNumber = match ? parseInt(match[0]) + 1 : 1;
-        const paddedNumber = nextNumber.toString().padStart(4, '0');
-        employeeCode = `fh-${paddedNumber}`;
-      }
-
-      const nameParts = googleUser.name?.split(' ') || [];
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-
-
-      const newUser = this.userRepository.create({
-        employeeCode: employeeCode,
-        email: googleUser.email,
-        firstName: firstName,
-        lastName: lastName,
-        googleId: googleUser.googleId,
-        avatarUrl: googleUser.picture,
-        roleId: ERole.EMPLOYEE,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-
-      user = await this.userRepository.save(newUser);
-      const savedUser = await this.userRepository.findOne({
-        where: { id: user.id },
-        select: ['id', 'email', 'firstName', 'lastName', 'employeeCode', 'roleId', 'googleId', 'avatarUrl']
-      });
-
+      isNewUser = true;
+      emailForRegister = googleUser.email;
+      googleIdForRegister = googleUser.googleId;
+      avatarForRegister = googleUser.picture || null; // ✅ เพิ่ม avatar ด้วย
     }
-
-    const payload = {
-      sub: user.id,
-      email: user.email,
-    };
-    const userWithEmployeeCode = await this.userRepository.findOne({
-      where: { id: user.id },
-      select: ['id', 'email', 'firstName', 'lastName', 'employeeCode', 'roleId']
-    });
-
+  
+    let userWithEmployeeCode = null;
+    let accessToken = null;
+  
+    if (user) {
+      emailForRegister = user.email;
+  
+      const payload = {
+        sub: user.id,
+        email: user.email,
+      };
+  
+      accessToken = this.jwtService.sign(payload);
+  
+      userWithEmployeeCode = await this.userRepository.findOne({
+        where: { id: user.id },
+        select: [
+          'id',
+          'email',
+          'firstName',
+          'lastName',
+          'employeeCode',
+          'roleId',
+          'googleId',
+          'birthDate',
+          'salary',
+          'jobTitleId',
+          'departmentId',
+          'approvedAt',
+          'avatarUrl' // ✅ ดึง avatar จาก DB ถ้ามี
+        ]
+      });
+    }
+  
     return {
-      access_token: this.jwtService.sign(payload),
-      user: userWithEmployeeCode
+      access_token: accessToken,
+      user: userWithEmployeeCode,
+      isNewUser,
+      email: emailForRegister,
+      googleId: googleIdForRegister,
+      avatarUrl: avatarForRegister,
     };
   }
+  
+
+
 
   async validateUser(userId: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({
@@ -134,7 +212,7 @@ export class AuthService {
         lastName: googleUser.lastName,
         email: googleUser.email,
         googleId: googleUser.sub,
-        avatarUrl: googleUser.picture,
+        // avatarUrl: googleUser.picture,
         roleId: ERole.EMPLOYEE,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -158,9 +236,9 @@ export class AuthService {
       where: { id: userId },
       relations: ['role', 'role.permissionRoles', 'role.permissionRoles.permission'],
     });
-  
+
     if (!user) return null;
-  
+
     return user;
   }
 }

@@ -474,10 +474,15 @@ export class UsersItemsRequestsController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM_REQUEST] })
-  @ApiOkResponse({ type: ItemRequestResponseDto })
-  async update(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
-    const itemRequest = await this.usersItemsRequestsService.update(param.id, { approveById: req.user.id});
+  async update(
+    @Param() param: ValidateParamUsersItemRequestId,
+    @Body() body: UpdateItemRequestDto, // <-- เพิ่มตรงนี้
+    @Request() req: RequestWithUser
+  ): Promise<ResponseObject<ItemRequestResponseDto>> {
+    const itemRequest = await this.usersItemsRequestsService.update(param.id, {
+      ...body,
+      approveById: req.user.id,
+    });
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',

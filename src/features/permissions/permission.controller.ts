@@ -1,7 +1,5 @@
 import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PermissionService } from './permission.service';
-import { CreatePermissionDto } from './dto/create.permissions.dto';
-import { UpdatePermissionDto } from './dto/update.permissions.dto';
 import { PermissionResponseDto } from './respones/permissions.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

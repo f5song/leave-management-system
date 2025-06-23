@@ -25,9 +25,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
-// console.log('eieieiei', user);
+
     return {
       id: user.id,
+      employeeCode: user.employeeCode,
+      googleId: user.googleId,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      nickname: user.nickName,
+      avatarUrl: user.avatarUrl,
+      birthDate: user.birthDate,
+      salary: user.salary,
+      jobTitleId: user.jobTitleId,
+      departmentId: user.departmentId,
+      approvedAt: user.approvedAt,
       email: user.email,
       role: user.role.name, 
       permissions: user.role.permissionRoles.map(pr => pr.permission.id), 

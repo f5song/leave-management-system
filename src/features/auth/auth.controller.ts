@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { UserEntity } from '../../database/entity/users.entity';
+import { UserResponseDto } from '../users/respones/users.respones.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
@@ -22,7 +22,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Get('profile')
-  getProfile(@Request() req): Promise<UserEntity> {
+  getProfile(@Request() req): Promise<UserResponseDto> {
+    console.log(req.user);
     return req.user;
   }
 }

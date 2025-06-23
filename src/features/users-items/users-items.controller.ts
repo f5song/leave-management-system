@@ -18,6 +18,9 @@ import { ResponseObject } from '@common/dto/common-response.dto';
 import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 import { ApiResponseSuccess } from '@src/common/decorators/api-response-success.decorator';
 import { ApiResponseError } from '@src/common/decorators/api-response-error.decorator';
+import { ValidateParamUserId } from '../users/dto/users.validate';
+import { ValidateParamUsersItemId } from './dto/users-items.validate';
+import { ValidateParamUsersItemRequestId } from '../users-items-requests/dto/users-items-requests.validate';
 
 
 @ApiTags('Users Items')
@@ -202,10 +205,10 @@ export class UsersItemsController {
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
   async update(
-    @Param('id') id: string,
+    @Param() param: ValidateParamUsersItemRequestId,
     @Body() item: UpdateItemDto,
   ): Promise<ResponseObject<UserItemResponseDto>> {
-    const updatedItem = await this.usersItemsService.update(id, item);
+    const updatedItem = await this.usersItemsService.update(param.id, item);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -249,8 +252,8 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
-  async remove(@Param('id') id: string): Promise<void> {
-    return this.usersItemsService.remove(id);
+  async remove(@Param() param: ValidateParamUsersItemRequestId): Promise<void> {
+    return this.usersItemsService.remove(param.id);
   }
 
   // สร้างคำร้องขออุปกรณ์

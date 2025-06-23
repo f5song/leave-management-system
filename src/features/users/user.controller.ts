@@ -18,6 +18,8 @@ import { HttpStatus } from '@nestjs/common';
 import { ApiResponseSuccess } from '../../common/decorators/api-response-success.decorator';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
 import { RequestWithUser } from '@src/common/interfaces/request-with-user';
+import { UserWithTokenResponseDto } from './respones/users-with-access-token.respones.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @ApiTags('Users')
 @Controller('users')
@@ -25,62 +27,33 @@ import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 
 
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService, private readonly jwtService: JwtService) { }
 
   @Post()
-  @ApiCreatedResponse({ type: UserResponseDto })
-  @ApiResponseError([
-      {
-        code: '0701',
-        message: errorMessage['0701'],
-        statusCode: HttpStatus.NOT_FOUND,
-      },
-      {
-        code: '0702',
-        message: errorMessage['0702'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0703',
-        message: errorMessage['0703'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0704',
-        message: errorMessage['0704'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0705',
-        message: errorMessage['0705'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: '0706',
-        message: errorMessage['0706'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      },
-      {
-        code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-        message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      }
-    ])
-  async createUser(@Body() userData: CreateUserDto): Promise<ResponseObject<UserResponseDto>> {
+  async createUser(@Body() userData: CreateUserDto): Promise<ResponseObject<{ user: UserResponseDto, access_token: string }>> {
     const userEntity = await this.userService.create(userData);
+
+    const payload = { sub: userEntity.id, email: userEntity.email };
+    const access_token = this.jwtService.sign(payload); // ✅
+
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
-      data: this.userService.toUserResponseDto(userEntity),
+      data: {
+        user: this.userService.toUserResponseDto(userEntity),
+        access_token,
+      },
     };
   }
+
+
 
   @Get(':userId')
   @ApiResponseSuccess({
     type: [UserResponseDto],
-    },
+  },
   )
-  
+
   @ApiResponseError([
     {
       code: '0701',
@@ -119,7 +92,7 @@ export class UserController {
     }
   ])
   @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER] })
   async getUserById(@Param() param: ValidateParamUserId): Promise<ResponseObject<UserResponseDto>> {
     const userEntity = await this.userService.getUserById(param.userId);
@@ -223,8 +196,8 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER] })
-  async updateUser(@Param() param: ValidateParamUserId, 
-  @Req() req: RequestWithUser, @Body() updateData: UpdateUserDto): Promise<ResponseObject<UserResponseDto>> {
+  async updateUser(@Param() param: ValidateParamUserId,
+    @Req() req: RequestWithUser, @Body() updateData: UpdateUserDto): Promise<ResponseObject<UserResponseDto>> {
     const updatedUser = await this.userService.update(param.userId, updateData);
     return {
       code: HttpStatus.OK,

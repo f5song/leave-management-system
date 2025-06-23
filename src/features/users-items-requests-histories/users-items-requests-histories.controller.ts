@@ -114,54 +114,54 @@ export class UsersItemsRequestsHistoriesController {
     };
   }
 
-  @Post()
-  @ApiResponseError([
-    {
-      code: '1101',
-      message: errorMessage['1101'],
-      statusCode: HttpStatus.NOT_FOUND,
-    },
-    {
-      code: '1102',
-      message: errorMessage['1102'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '1103',
-      message: errorMessage['1103'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '1104',
-      message: errorMessage['1104'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '1105',
-      message: errorMessage['1105'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '1106',
-      message: errorMessage['1106'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
-  @ApiCreatedResponse({ type: ItemsRequestsHistoryResponseDto })
-  async create(@Body() createDto: CreateItemsRequestsHistoryDto) {
-    const history = await this.usersItemsRequestsHistoriesService.create(createDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: this.usersItemsRequestsHistoriesService.toUserItemRequestHistoryResponseDto(history),
-    };
-  }
+  // @Post()
+  // @ApiResponseError([
+  //   {
+  //     code: '1101',
+  //     message: errorMessage['1101'],
+  //     statusCode: HttpStatus.NOT_FOUND,
+  //   },
+  //   {
+  //     code: '1102',
+  //     message: errorMessage['1102'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '1103',
+  //     message: errorMessage['1103'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '1104',
+  //     message: errorMessage['1104'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '1105',
+  //     message: errorMessage['1105'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '1106',
+  //     message: errorMessage['1106'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
+  // @ApiCreatedResponse({ type: ItemsRequestsHistoryResponseDto })
+  // async create(@Body() createDto: CreateItemsRequestsHistoryDto) {
+  //   const history = await this.usersItemsRequestsHistoriesService.create(createDto);
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: this.usersItemsRequestsHistoriesService.toUserItemRequestHistoryResponseDto(history),
+  //   };
+  // }
 
   @Put(':id')
   @ApiResponseError([

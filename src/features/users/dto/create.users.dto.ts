@@ -15,8 +15,8 @@ export class CreateUserDto {
   @IsString()
   nickName?: string;
 
-  @IsString()
-  avatarUrl?: string;
+  // @IsString()
+  // avatarUrl?: string;
 
   @IsEmail()
   @IsNotEmpty()
