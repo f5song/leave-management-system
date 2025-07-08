@@ -85,7 +85,7 @@ export class LeaveController {
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
-      data: leaves.map(leave => this.leaveService.toLeaveResponseDto(leave)),
+      data: leaves,
     };
   }
 
@@ -129,7 +129,7 @@ export class LeaveController {
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
-      data: leaves.map(leave => this.leaveService.toLeaveResponseDto(leave)),
+      data: leaves,
     };
   }
 

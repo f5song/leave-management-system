@@ -20,6 +20,9 @@ import { ResponseObject } from '@src/common/dto/common-response.dto';
 import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 import { UserWithTokenResponseDto } from './respones/users-with-access-token.respones.dto';
 import { JwtService } from '@nestjs/jwt';
+import { UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
 
 @ApiTags('Users')
 @Controller('users')
@@ -30,11 +33,15 @@ export class UserController {
   constructor(private readonly userService: UserService, private readonly jwtService: JwtService) { }
 
   @Post()
-  async createUser(@Body() userData: CreateUserDto): Promise<ResponseObject<{ user: UserResponseDto, access_token: string }>> {
-    const userEntity = await this.userService.create(userData);
+  @UseInterceptors(FileInterceptor('avatar')) // 👈 ต้องตรงกับ key ใน form-data
+  async createUser(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() userData: CreateUserDto,
+  ): Promise<ResponseObject<{ user: UserResponseDto; access_token: string }>> {
+    const userEntity = await this.userService.create(userData, file); // 👈 ส่ง file ไปด้วย
 
     const payload = { sub: userEntity.id, email: userEntity.email };
-    const access_token = this.jwtService.sign(payload); // ✅
+    const access_token = this.jwtService.sign(payload);
 
     return {
       code: HttpStatus.OK,

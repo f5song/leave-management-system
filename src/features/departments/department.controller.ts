@@ -29,8 +29,6 @@ import { EPermission } from '@src/common/constants/permission.enum';
 @ApiTags('Departments')
 @Controller('departments')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, RolesGuard)
 
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) { }
@@ -38,9 +36,9 @@ export class DepartmentController {
   @Get()
   @ApiResponseSuccess({
     type: [DepartmentResponseDto],
-    },
+  },
   )
-  
+
   @ApiResponseError([
     {
       code: '0001',
@@ -78,7 +76,6 @@ export class DepartmentController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
-  @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_DEPARTMENT] })
   async findAll(): Promise<ResponseObject<DepartmentResponseDto[]>> {
     const departments = await this.departmentService.findAll();
     return {
@@ -92,9 +89,9 @@ export class DepartmentController {
   @Get(':id')
   @ApiResponseSuccess({
     type: [DepartmentResponseDto],
-    },
+  },
   )
-  
+
   @ApiResponseError([
     {
       code: '0001',
@@ -132,6 +129,8 @@ export class DepartmentController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_DEPARTMENT] })
   async findOne(@Param() param: ValidateParamDepartmentId): Promise<ResponseObject<DepartmentResponseDto>> {
     const department = await this.departmentService.findOne(param.id);
@@ -145,9 +144,9 @@ export class DepartmentController {
   @Put(':id')
   @ApiResponseSuccess({
     type: [DepartmentResponseDto],
-    },
+  },
   )
-  
+
   @ApiResponseError([
     {
       code: '0001',
@@ -184,7 +183,9 @@ export class DepartmentController {
       message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
-  ])  
+  ])
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_DEPARTMENT] })
   async update(
     @Param() param: ValidateParamDepartmentId,

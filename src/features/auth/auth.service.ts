@@ -2,14 +2,14 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not, IsNull } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserEntity } from '../../database/entity/users.entity';
 import { ERole } from '@src/common/constants/roles.enum';
 
 
 @Injectable()
 export class AuthService {
-  private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'postmessage');
 
   constructor(
     @InjectRepository(UserEntity)
@@ -17,18 +17,19 @@ export class AuthService {
     private jwtService: JwtService
   ) { }
 
-  // validateToken(authToken: any) {
-  //   throw new Error('Method not implemented.');
-  // }
 
   generateJwtToken(payload: { email: string; sub: string | number }) {
     return this.jwtService.sign(payload);
   }
 
   async verifyGoogleToken(idToken: string) {
-    const ticket = await this.client.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
+    try {
+      console.log(idToken);
+      const { tokens } = await this.client.getToken(idToken);
+      console.log(tokens);
+      const ticket = await this.client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
@@ -42,88 +43,15 @@ export class AuthService {
       googleId: payload.sub,
       picture: payload.picture,
     };
+    } catch (error) {
+      console.log("google login error", error)
+      throw error
+    }
   }
 
-  // async loginWithGoogle(idToken: string) {
-  //   const googleUser = await this.verifyGoogleToken(idToken);
 
-  //   let isNewUser = false;
-
-  //   let user = await this.userRepository.findOne({
-  //     where: { googleId: googleUser.googleId }
-  //   });
-
-  //   if (!user) {
-  //     isNewUser = true;
-
-  //     const lastUser = await this.userRepository.findOne({
-  //       where: { employeeCode: Not(IsNull()) },
-  //       order: { createdAt: 'DESC' },
-  //       select: ['employeeCode']
-  //     });
-
-  //     let employeeCode: string;
-  //     if (!lastUser || !lastUser.employeeCode) {
-  //       employeeCode = 'fh-0001';
-  //     } else {
-  //       const match = lastUser.employeeCode.match(/\d+$/);
-  //       const nextNumber = match ? parseInt(match[0]) + 1 : 1;
-  //       const paddedNumber = nextNumber.toString().padStart(4, '0');
-  //       employeeCode = `fh-${paddedNumber}`;
-  //     }
-
-  //     const nameParts = googleUser.name?.split(' ') || [];
-  //     const firstName = nameParts[0] || '';
-  //     const lastName = nameParts.slice(1).join(' ') || '';
-
-  //     const newUser = this.userRepository.create({
-  //       employeeCode,
-  //       email: googleUser.email,
-  //       firstName,
-  //       lastName,
-  //       googleId: googleUser.googleId,
-  //       avatarUrl: googleUser.picture,
-  //       roleId: ERole.EMPLOYEE,
-  //       createdAt: new Date(),
-  //       updatedAt: new Date()
-  //     });
-
-  //     user = await this.userRepository.save(newUser);
-  //   }
-
-  //   const payload = {
-  //     sub: user.id,
-  //     email: user.email,
-  //   };
-
-  //   const userWithEmployeeCode = await this.userRepository.findOne({
-  //     where: { id: user.id },
-  //     select: [
-  //       'id',
-  //       'email',
-  //       'firstName',
-  //       'lastName',
-  //       'employeeCode',
-  //       'roleId',
-  //       'avatarUrl',
-  //       'googleId',
-  //       'birthDate',
-  //       'salary',
-  //       'jobTitleId',
-  //       'departmentId',
-  //       'approvedAt'
-  //     ]
-  //   });
-
-  //   return {
-  //     access_token: this.jwtService.sign(payload),
-  //     user: userWithEmployeeCode,
-  //     isNewUser
-  //   };
-  // }
-
-  async loginWithGoogle(idToken: string) {
-    const googleUser = await this.verifyGoogleToken(idToken);
+  async loginWithGoogle(code: string) {
+    const googleUser = await this.verifyGoogleToken(code);
   
     let user = await this.userRepository.findOne({
       where: { googleId: googleUser.googleId }
@@ -138,7 +66,7 @@ export class AuthService {
       isNewUser = true;
       emailForRegister = googleUser.email;
       googleIdForRegister = googleUser.googleId;
-      avatarForRegister = googleUser.picture || null; // ✅ เพิ่ม avatar ด้วย
+      avatarForRegister = googleUser.picture || null; 
     }
   
     let userWithEmployeeCode = null;
@@ -169,7 +97,7 @@ export class AuthService {
           'jobTitleId',
           'departmentId',
           'approvedAt',
-          'avatarUrl' // ✅ ดึง avatar จาก DB ถ้ามี
+          'avatarUrl' 
         ]
       });
     }
@@ -183,7 +111,7 @@ export class AuthService {
       avatarUrl: avatarForRegister,
     };
   }
-  
+
 
 
 

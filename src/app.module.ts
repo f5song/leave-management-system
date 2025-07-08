@@ -31,6 +31,7 @@ import { UsersFacilityRequestsModule } from './features/users-facility-requests/
 import { UsersItemEntity } from './database/entity/users-items.entity';
 import { PermissionRoleEntity } from './database/entity/permission-role';
 import { SeedService } from './database/seed/seed.service';
+import { AwsS3Module } from './features/aws-s3/aws-s3.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { SeedService } from './database/seed/seed.service';
     UsersItemsRequestsModule,
     UsersItemsRequestsHistoriesModule,
     UsersFacilityRequestsModule,
+    AwsS3Module,
     TypeOrmModule.forFeature([
       LeaveTypeEntity,
       LeaveEntity,

@@ -12,10 +12,12 @@ import { UpdateUserDto } from './dto/update.users.dto';
 import { UserResponseDto } from './respones/users.respones.dto';
 import { ERole } from '@src/common/constants/roles.enum';
 import { errorMessage } from '@src/common/constants/error-message';
+import { AwsS3Service } from '../aws-s3/aws-s3.service';
 
 @Injectable()
 export class UserService {
   constructor(
+    private awsS3Service: AwsS3Service,
     @InjectRepository(UserEntity)
     private userInfoRepository: Repository<UserEntity>,
     @InjectRepository(JobTitleEntity)
@@ -219,7 +221,7 @@ export class UserService {
     // }
   }
 
-  async create(data: CreateUserDto): Promise<UserEntity> {
+  async create(data: CreateUserDto, file?: Express.Multer.File): Promise<UserEntity> {
     if(data.email){
       await this.validateEmail(data.email);
     }
@@ -235,9 +237,17 @@ export class UserService {
     if(data.firstName && data.lastName){
       await this.validateNames(data.firstName, data.lastName);
     }
+ 
+    
 
     if(data.birthDate){
       await this.validateBirthDate(data.birthDate);
+    }
+
+    let avatar: string | null = null;
+    if (file) {
+      const result = await this.awsS3Service.uploadFile('profile', file);
+      avatar = result?.Location; 
     }
 
     let nextNumber = 1;
@@ -253,14 +263,16 @@ export class UserService {
     }
     const paddedNumber = nextNumber.toString().padStart(3, '0');
 
-    const user = await this.userInfoRepository.save({
+      
+
+    const user = this.userInfoRepository.create({
       employeeCode: `fh-${paddedNumber}`,
       googleId: data.googleId,
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
       nickName: data.nickName,
-      // avatarUrl: data.avatarUrl,
+      avatarUrl: avatar,
       birthDate: data.birthDate,
       salary: data.salary,
       roleId: data.roleId,
@@ -268,6 +280,8 @@ export class UserService {
       departmentId: data.departmentId,
       createdAt: new Date(),
     });
+
+    await this.userInfoRepository.save(user);
     return user;
   }
 

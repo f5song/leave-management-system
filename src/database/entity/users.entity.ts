@@ -133,6 +133,9 @@ export class UserEntity {
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt?: Date;
 
+  @Column({ name: 'color', nullable: true })
+  color: string | null;
+
   @BeforeInsert()
   async generateEmployeeCode(userRepository: Repository<UserEntity>) {
     if (!this.employeeCode) {

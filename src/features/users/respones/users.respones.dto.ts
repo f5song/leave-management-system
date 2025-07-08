@@ -10,7 +10,7 @@ export class UserResponseDto {
     firstName?: string;
     lastName?: string;
     nickName?: string;
-    // avatarUrl?: string;
+    avatar?: string;
     birthDate?: Date;
     salary?: number;
     roleId: ERole;

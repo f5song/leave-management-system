@@ -180,7 +180,7 @@ export class LeaveService {
     return await this.leaveRepository.save(leave);
   }
 
-  async getMyLeaves(userId: string): Promise<LeaveEntity[]> {
+  async getMyLeaves(userId: string): Promise<LeaveResponseDto[]> {
     return this.leaveRepository.find({
       select: ['id', 'userId', 'leaveTypeId', 'title', 'description', 'startDate', 'endDate', 'totalDays', 'status'],
       where: {
@@ -190,46 +190,17 @@ export class LeaveService {
     });
   }
 
-  async getAllLeaves(start?: string, end?: string): Promise<LeaveEntity[]> {
-    //   return this.leaveRepository.find({
-    //     select: ['id', 'userId', 'leaveTypeId', 'startDate', 'endDate', 'totalDays', 'description', 'status'],
-    //     where: { deletedAt: null },
-    //     relations: ['userInfo', 'leaveType', 'createdBy'],
-    //   });
-    // }
-
-    // async updateLeaveDetails(id: string, dto: UpdateLeaveDto, userId: string): Promise<LeaveEntity> {
-    //   const existingLeave = await this.leaveRepository.findOne({
-    //     where: { id },
-    //     relations: ['user', 'leaveType']
-    //   });
-
-    //   if (!existingLeave) {
-    //   throw new HttpException({
-    //     code: '0302',
-    //     message: errorMessage['0302'],
-    //     statusCode: HttpStatus.BAD_REQUEST,
-    //   }, HttpStatus.BAD_REQUEST);
-    // }
-
-    // if (currentUser.role.id !== ERole.ADMIN) {
-    //   throw new HttpException({
-    //     code: '0302',
-    //     message: errorMessage['0302'],
-    //     statusCode: HttpStatus.BAD_REQUEST,
-    //   }, HttpStatus.BAD_REQUEST);
-    // }
+  async getAllLeaves(start?: string, end?: string): Promise<LeaveResponseDto[]> {
 
     return this.leaveRepository.find({
-      select: ['id', 'userId', 'leaveTypeId', 'title', 'description', 'startDate', 'endDate', 'totalDays', 'status'],
+      relations: ['userInfo', 'leaveType'],
+      select: ['id', 'userId', 'leaveTypeId', 'title', 'description', 'startDate', 'endDate', 'totalDays', 'status','userInfo'],
       where: {
-        deletedAt: null,
         ...(start && end ? {
           startDate: LessThanOrEqual(new Date(end)),
           endDate: MoreThanOrEqual(new Date(start)),
         } : {}),
       },
-      relations: ['userInfo', 'leaveType', 'createdBy'],
     });
 
 

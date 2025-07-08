@@ -10,9 +10,11 @@ import { UsersItemRequestEntity } from '../../database/entity/users-items-reques
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
 import { UsersFacilityRequestEntity } from '../../database/entity/users-facility-requests.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { AwsS3Module } from '../aws-s3/aws-s3.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity,JobTitleEntity,DepartmentEntity,RoleEntity,UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UsersFacilityRequestEntity]),
+    AwsS3Module,
     JwtModule.register({
     secret: 'secretKey',
     signOptions: { expiresIn: '24h' },

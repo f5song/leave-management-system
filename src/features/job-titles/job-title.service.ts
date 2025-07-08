@@ -155,7 +155,6 @@ export class JobTitleService {
     return this.jobTitleRepository.find({
       select: ['id', 'name', 'color', 'department', 'createdAt', 'updatedAt', 'deletedAt'],
       relations: ['department'],
-      where: { deletedAt: null },
     });
   }
 

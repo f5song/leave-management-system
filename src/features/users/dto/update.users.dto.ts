@@ -49,6 +49,14 @@ export class UpdateUserDto {
   @IsNumber()
   salary?: number;
 
+  @IsOptional()
+  @IsString()
+  color?: string;
+
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
   
 }
 

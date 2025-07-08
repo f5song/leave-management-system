@@ -9,8 +9,8 @@ export class LeaveResponseDto {
   endDate: Date;
   totalDays: number;
   status: string;
-  description: string;
+  description?: string;
   createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
 }

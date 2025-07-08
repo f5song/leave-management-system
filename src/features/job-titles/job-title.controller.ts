@@ -20,11 +20,9 @@ import { ValidateParamJobTitleId } from '../job-titles/dto/job-titles.validate';
 @ApiTags('Job Titles')
 @Controller('job-titles')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, RolesGuard)
 
 export class JobTitleController {
-  constructor(private readonly jobTitleService: JobTitleService) {}
+  constructor(private readonly jobTitleService: JobTitleService) { }
 
   @Get()
   @ApiResponseSuccess({ type: [JobTitleResponseDto] })
@@ -108,6 +106,8 @@ export class JobTitleController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_JOB_TITLE] })
   @ApiOkResponse({ type: JobTitleResponseDto })
   async findOne(@Param() param: ValidateParamJobTitleId): Promise<ResponseObject<JobTitleResponseDto>> {
@@ -203,6 +203,8 @@ export class JobTitleController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_JOB_TITLE] })
   @ApiOkResponse({ type: JobTitleResponseDto })
   async update(

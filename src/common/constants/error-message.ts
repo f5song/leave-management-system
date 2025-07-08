@@ -98,4 +98,8 @@ export const errorMessage = {
   '1104': 'Cannot delete item request history that has users',
   '1105': 'Invalid item request history ID',
 
+  '1201': 'File not found',
+  '1202': 'File size must not exceed 5MB',
+  '1203': 'File type must be image (jpg, png, webp)',
+
 };

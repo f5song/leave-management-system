@@ -22,7 +22,7 @@ export class LeaveEntity {
   userId: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  title?: string;
+  title: string;
 
   @Column({ type: 'text', nullable: true })
   description?: string;
@@ -48,7 +48,7 @@ export class LeaveEntity {
     enum: ELeaveStatus,
     default: ELeaveStatus.PENDING,
   })
-  status?: ELeaveStatus;
+  status: ELeaveStatus;
 
   @Column({ name: 'action_by', type: 'uuid', nullable: true })
   actionBy?: string;
