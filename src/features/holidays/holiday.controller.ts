@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, UsePipes, ValidationPipe, HttpCode, HttpStatus, Req } from '@nestjs/common';
 import { HolidayService } from './holiday.service';
-import { CreateHolidayDto} from './dto/create.holidays.dto';
+import { CreateHolidayDto } from './dto/create.holidays.dto';
 import { UpdateHolidayDto } from './dto/update.holidays.dto';
 import { HolidayResponseDto } from './response/holidays.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -19,12 +19,11 @@ import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 
 @ApiTags('Holidays')
 @Controller('holidays')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-@ApiBearerAuth('access-token')
+
 
 export class HolidayController {
-  constructor(private readonly holidayService: HolidayService) {}
+  constructor(private readonly holidayService: HolidayService) { }
 
   @Get()
   @ApiResponseSuccess({ type: [HolidayResponseDto] })
@@ -60,8 +59,6 @@ export class HolidayController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
-  
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_HOLIDAY] })
   async findAll(): Promise<ResponseObject<HolidayResponseDto[]>> {
     const holidays = await this.holidayService.findAll();
     return {
@@ -106,6 +103,8 @@ export class HolidayController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_HOLIDAY] })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   async findOne(@Param() param: ValidateParamHolidayId): Promise<ResponseObject<HolidayResponseDto>> {
     const holiday = await this.holidayService.findOne(param.id);
     return {
@@ -150,6 +149,8 @@ export class HolidayController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.CREATE_HOLIDAY] })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: HolidayResponseDto })
   async create(@Req() req: RequestWithUser, @Body() createHolidayDto: CreateHolidayDto): Promise<ResponseObject<HolidayResponseDto>> {
     const holiday = await this.holidayService.create(req.user.id, createHolidayDto);
@@ -195,6 +196,8 @@ export class HolidayController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_HOLIDAY] })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   async update(
     @Param() param: ValidateParamHolidayId,
@@ -243,6 +246,8 @@ export class HolidayController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.DELETE_HOLIDAY] })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   @HttpCode(HttpStatus.NO_CONTENT)
   async softDelete(@Param() param: ValidateParamHolidayId): Promise<void> {

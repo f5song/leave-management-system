@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AwsS3Service } from './aws-s3.service';
 import { AwsS3Controller } from './aws-s3.controller';
 

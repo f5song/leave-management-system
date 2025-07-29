@@ -3,7 +3,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create.users.dto';
-import { UserResponseDto } from './respones/users.respones.dto';
+import { UserResponseDto, UserResponseDtoBirthDate } from './respones/users.respones.dto';
 import { UpdateUserDto } from './dto/update.users.dto';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { RolesPermission } from '../../common/decorators/roles-permission.decorator';
@@ -31,6 +31,16 @@ import { UploadedFile } from '@nestjs/common';
 
 export class UserController {
   constructor(private readonly userService: UserService, private readonly jwtService: JwtService) { }
+
+  @Get('/birthdays')
+  async getBirthdays() {
+    const birthDateUsers = await this.userService.getAllBirthDate();
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: birthDateUsers,
+    };
+  }
 
   @Post()
   @UseInterceptors(FileInterceptor('avatar')) // 👈 ต้องตรงกับ key ใน form-data
@@ -224,6 +234,8 @@ export class UserController {
   //   return this.userService.toUserResponseDto(updatedUser);
   // }
 
+
+
   @Delete(':userId')
   @ApiOkResponse({ type: UserResponseDto })
   @ApiResponseError([
@@ -274,4 +286,6 @@ export class UserController {
       data: deletedUser,
     };
   }
+
+
 }

@@ -263,8 +263,7 @@ export class UserService {
     }
     const paddedNumber = nextNumber.toString().padStart(3, '0');
 
-      
-
+    
     const user = this.userInfoRepository.create({
       employeeCode: `fh-${paddedNumber}`,
       googleId: data.googleId,
@@ -384,6 +383,12 @@ export class UserService {
     return this.userInfoRepository.findOne({
       where: { id: id },
       relations: ['role', 'role.permissionRoles', 'role.permissionRoles.permission'],
+    });
+  }
+
+  async getAllBirthDate(): Promise<UserEntity[]> {
+    return this.userInfoRepository.find({
+      select: ['id', 'birthDate','nickName','firstName','lastName'],
     });
   }
 

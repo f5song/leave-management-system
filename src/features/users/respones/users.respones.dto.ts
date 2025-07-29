@@ -22,3 +22,12 @@ export class UserResponseDto {
     updatedAt?: Date;
     deletedAt?: Date;
 }
+
+
+export class UserResponseDtoBirthDate {
+    id: string;
+    birthDate: Date;
+    nickName: string;
+    firstName: string;
+    lastName: string;
+}
