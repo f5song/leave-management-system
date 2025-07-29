@@ -22,10 +22,10 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async verifyGoogleToken(idToken: string) {
+  async verifyGoogleToken(code: string) {
     try {
-      console.log(idToken);
-      const { tokens } = await this.client.getToken(idToken);
+      console.log(code);
+      const { tokens } = await this.client.getToken(code);
       console.log(tokens);
       const ticket = await this.client.verifyIdToken({
         idToken: tokens.id_token,
@@ -101,6 +101,7 @@ export class AuthService {
         ]
       });
     }
+    console.log("JWT access token:", accessToken);
   
     return {
       access_token: accessToken,

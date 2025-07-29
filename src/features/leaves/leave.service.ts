@@ -1,10 +1,7 @@
 import {
-  BadRequestException,
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
@@ -18,8 +15,9 @@ import { ELeaveType } from '@common/constants/leave-type.enum';
 import { ELeaveStatus } from '@common/constants/leave-status.enum';
 import { LeaveResponseDto } from './respones/leaves.respones.dto';
 import { UpdateLeaveDto } from './dto/update.leaves.dto';
-import { ERole } from '@src/common/constants/roles.enum';
 import { errorMessage } from '@src/common/constants/error-message';
+import { getPaginationParams } from '@src/common/utils/pagination';
+import { PaginatedResponseObject } from '@src/common/dto/pagination-response.dto';
 
 @Injectable()
 export class LeaveService {
@@ -202,9 +200,38 @@ export class LeaveService {
         } : {}),
       },
     });
-
-
   }
+
+async getAllLeavesPagination(page?: number, limit?: number): Promise<PaginatedResponseObject<LeaveResponseDto>>{
+    const { skip, take } = getPaginationParams(page, limit);
+  
+    const [data, total] = await this.leaveRepository.findAndCount({
+      relations: ['leaveType','userInfo'],
+      select: [
+        'id', 'userId', 'leaveTypeId', 'title', 'description',
+        'startDate', 'endDate', 'totalDays', 'status',
+        'createdAt',
+        'userInfo',
+      ],
+      skip,
+      take,
+      order: { createdAt: 'DESC' },
+    });
+  
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      pagination:{
+        totalItems: total,
+        totalPages,
+        currentPage: page,
+        itemsPerPage: limit,
+      }
+    };
+  }
+  
+  
 
 
 
