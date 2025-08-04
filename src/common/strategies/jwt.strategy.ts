@@ -12,7 +12,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private configService: ConfigService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req) => {
+          return req?.cookies?.authToken || null;
+        },
+      ]),
       secretOrKey: configService.get<string>('JWT_SECRET'),
       ignoreExpiration: false,
       passReqToCallback: false,
@@ -40,8 +44,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       departmentId: user.departmentId,
       approvedAt: user.approvedAt,
       email: user.email,
-      role: user.role.name, 
-      permissions: user.role.permissionRoles.map(pr => pr.permission.id), 
+      role: user.role.name,
+      permissions: user.role.permissionRoles.map(pr => pr.permission.id),
     };
   }
 }

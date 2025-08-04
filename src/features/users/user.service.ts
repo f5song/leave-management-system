@@ -247,8 +247,9 @@ export class UserService {
     let avatar: string | null = null;
     if (file) {
       const result = await this.awsS3Service.uploadFile('profile', file);
-      avatar = result?.Location; 
+      avatar = result?.url;
     }
+    
 
     let nextNumber = 1;
     const last_user = await this.userInfoRepository.findOne({
