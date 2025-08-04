@@ -1,11 +1,12 @@
-import { Controller, Post, Get, Request, UseGuards, Body } from '@nestjs/common';
+import { Controller, Post, Get, Request, UseGuards, Body, Res } from '@nestjs/common';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
-import { AuthResponseDto } from './dto/auth-response.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserResponseDto } from '../users/respones/users.respones.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Response } from 'express';
+import { AuthResponseDto } from './dto/auth-response.dto';
 
 @Controller('auth')
 @UsePipes(new ValidationPipe())
@@ -15,9 +16,22 @@ export class AuthController {
   ) {}
 
   @Post('google-login')
-  async googleLogin(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.loginWithGoogle(loginDto.code);
+  async googleLogin(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response): Promise<AuthResponseDto> {
+    const result = await this.authService.loginWithGoogle(loginDto.code);
+  
+    res.cookie('authToken', result.access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+  
+    return {
+      access_token: result.access_token,
+      user: result.user,
+    };
   }
+  
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')

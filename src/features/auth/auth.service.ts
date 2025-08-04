@@ -89,6 +89,7 @@ export class AuthService {
           'email',
           'firstName',
           'lastName',
+          'nickName',
           'employeeCode',
           'roleId',
           'googleId',
@@ -101,7 +102,15 @@ export class AuthService {
         ]
       });
     }
+    const userByEmail = await this.userRepository.findOne({
+      where: { email: googleUser.email }
+    });
+    
+    console.log('userByEmail:', userByEmail);
+    
     console.log("JWT access token:", accessToken);
+    console.log('Google user:', googleUser);
+
   
     return {
       access_token: accessToken,
@@ -139,8 +148,10 @@ export class AuthService {
       const user = await this.userRepository.save({
         firstName: googleUser.firstName,
         lastName: googleUser.lastName,
+        nickName: googleUser.firstName,
         email: googleUser.email,
         googleId: googleUser.sub,
+        
         // avatarUrl: googleUser.picture,
         roleId: ERole.EMPLOYEE,
         createdAt: new Date(),
