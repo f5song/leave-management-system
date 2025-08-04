@@ -362,10 +362,11 @@ export class UserService {
   async deleteUser(id: string): Promise<UserResponseDto> {
     await this.validateUserId(id);
 
-    const user = await this.userInfoRepository.findOne({
-      select: ['id', 'employeeCode', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { id },
-    });
+    try {
+      const user = await this.userInfoRepository.findOne({
+        select: ['id', 'employeeCode', 'email', 'firstName', 'lastName', 'nickName', 'avatarUrl', 'birthDate', 'salary', 'roleId', 'jobTitleId', 'departmentId', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
+        where: { id },
+      });
 
     if (!user) {
       throw new HttpException({
@@ -377,19 +378,43 @@ export class UserService {
 
     user.deletedAt = new Date();
     return this.toUserResponseDto(await this.userInfoRepository.save(user));
+    } catch (error) {
+      throw new HttpException({
+        code: '0701',
+        message: "User not found in deleteUser",
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findByIdWithPermissions(id: string): Promise<UserEntity> {
-    return this.userInfoRepository.findOne({
-      where: { id: id },
-      relations: ['role', 'role.permissionRoles', 'role.permissionRoles.permission'],
-    });
+    await this.validateUserId(id);
+    try {
+      return this.userInfoRepository.findOne({
+        where: { id: id },
+        relations: ['role', 'role.permissionRoles', 'role.permissionRoles.permission'],
+      });
+    } catch (error) {
+      throw new HttpException({
+        code: '0701',
+        message: "User not found in findByIdWithPermissions",
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async getAllBirthDate(): Promise<UserEntity[]> {
-    return this.userInfoRepository.find({
-      select: ['id', 'birthDate','nickName','firstName','lastName'],
-    });
+    try {
+      return this.userInfoRepository.find({
+        select: ['id', 'birthDate','nickName','firstName','lastName'],
+      });
+    } catch (error) {
+      throw new HttpException({
+        code: '0701',
+        message: "User not found in getAllBirthDate",
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
 }

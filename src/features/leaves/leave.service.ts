@@ -160,9 +160,6 @@ export class LeaveService {
 
     const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-    console.log("start date", start);
-    console.log("end date", end);
-
     const leave = this.leaveRepository.create({
       userId: userId,
       leaveTypeId: dto.leaveTypeId,
@@ -225,8 +222,8 @@ async getAllLeavesPagination(page?: number, limit?: number): Promise<PaginatedRe
       pagination:{
         totalItems: total,
         totalPages,
-        currentPage: page,
-        itemsPerPage: limit,
+        page,
+        limit,
       }
     };
   }

@@ -49,49 +49,6 @@ export class LeaveController {
 
   @Get('user/:userId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
-@ApiResponseError([
-  {
-    code: '0401',
-    message: errorMessage['0401'],
-    statusCode: HttpStatus.BAD_REQUEST,
-  }, 
-  {
-    code: '0402',
-    message: errorMessage['0402'],
-    statusCode: HttpStatus.BAD_REQUEST,
-  },
-  {
-    code: '0403',
-    message: errorMessage['0403'],
-    statusCode: HttpStatus.BAD_REQUEST,
-  },
-  {
-    code: '0404',
-    message: errorMessage['0404'],
-    statusCode: HttpStatus.BAD_REQUEST,
-  },
-  {
-    code: '0405',
-    message: errorMessage['0405'],
-    statusCode: HttpStatus.BAD_REQUEST,
-  },
-  {
-    code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-    message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-  }
-])
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  async getMyLeaves(@Param() param: ValidateParamUserId): Promise<ResponseObject<LeaveResponseDto[]>> {
-    const leaves = await this.leaveService.getMyLeaves(param.userId);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: leaves,
-    };
-  }
-
-  @Get()
   @ApiResponseError([
     {
       code: '0401',
@@ -125,8 +82,52 @@ export class LeaveController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
+  @Get('user/:userId')
+  async getMyLeaves(@Param() param: ValidateParamUserId): Promise<ResponseObject<LeaveResponseDto[]>> {
+    const leaves = await this.leaveService.getMyLeaves(param.userId);
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: leaves,
+    };
+  }
+
+  @ApiResponseError([
+    {
+      code: '0401',
+      message: errorMessage['0401'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0402',
+      message: errorMessage['0402'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0403',
+      message: errorMessage['0403'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0404',
+      message: errorMessage['0404'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0405',
+      message: errorMessage['0405'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
+  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
+  @Get()
   async getAllLeaves(@Query("start") start?: string,
-  @Query("end") end?: string): Promise<ResponseObject<LeaveResponseDto[]>> {
+    @Query("end") end?: string): Promise<ResponseObject<LeaveResponseDto[]>> {
     const leaves = await this.leaveService.getAllLeaves(start, end);
     return {
       code: HttpStatus.OK,
@@ -135,7 +136,6 @@ export class LeaveController {
     };
   }
 
-  @Post(':userId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -181,6 +181,7 @@ export class LeaveController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_LEAVE] })
   @ApiCreatedResponse({ type: LeaveResponseDto })
+  @Post(':userId')
   async create(
     @Req() req: RequestWithUser,
     @Body() dto: CreateLeaveDto,
@@ -197,8 +198,6 @@ export class LeaveController {
     };
   }
 
-
-  @Patch(':leaveId/details')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -234,6 +233,7 @@ export class LeaveController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_LEAVE] })
   @ApiOkResponse({ type: LeaveResponseDto })
+  @Patch(':leaveId/details')
   async updateDetails(
     @Param() param: ValidateParamLeaveId,
     @Body() dto: UpdateLeaveDto,
@@ -251,7 +251,6 @@ export class LeaveController {
     };
   }
 
-  @Patch(':leaveId/status')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -287,6 +286,7 @@ export class LeaveController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_LEAVE] })
   @ApiOkResponse({ type: LeaveResponseDto })
+  @Patch(':leaveId/status')
   async updateStatus(
     @Param() param: ValidateParamLeaveId,
     @Body() dto: UpdateLeaveDto,
@@ -301,7 +301,6 @@ export class LeaveController {
     };
   }
 
-  @Get('id/:leaveId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -317,7 +316,7 @@ export class LeaveController {
     {
       code: '0403',
       message: errorMessage['0403'],
-      statusCode: HttpStatus.BAD_REQUEST, 
+      statusCode: HttpStatus.BAD_REQUEST,
     },
     {
       code: '0404',
@@ -337,8 +336,9 @@ export class LeaveController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
   @ApiOkResponse({ type: LeaveResponseDto })
+  @Get('id/:leaveId')
   async getLeave(@Param() param: ValidateParamLeaveId): Promise<ResponseObject<LeaveResponseDto>> {
-    console.log("param", param);              
+    console.log("param", param);
     console.log("leaveId", param.leaveId);
     const leave = await this.leaveService.getLeaveId(param.leaveId);
     return {
@@ -348,7 +348,6 @@ export class LeaveController {
     };
   }
 
-  @Delete(':leaveId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {
@@ -384,14 +383,14 @@ export class LeaveController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_LEAVE] })
   @ApiOkResponse({ type: LeaveResponseDto })
+  @Delete(':leaveId')
   async delete(@Param() param: ValidateParamLeaveId): Promise<void> {
     await this.leaveService.deleteLeave(param.leaveId);
     return;
   }
 
-  @Get('/:page/:limit')
   @ApiOkResponse({ type: [LeaveResponseDto] })
-  @ApiResponseError([ 
+  @ApiResponseError([
     {
       code: '0401',
       message: errorMessage['0401'],
@@ -405,7 +404,7 @@ export class LeaveController {
     {
       code: '0403',
       message: errorMessage['0403'],
-      statusCode: HttpStatus.BAD_REQUEST, 
+      statusCode: HttpStatus.BAD_REQUEST,
     },
     {
       code: '0404',
@@ -425,12 +424,13 @@ export class LeaveController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
   @ApiOkResponse({ type: LeaveResponseDto })
+  @Get('/:page/:limit')
   async getAllLeavesPagination(@Param() param: PaginationDto): Promise<ResponseObject<PaginatedResponseObject<LeaveResponseDto>>> {
-    const leaves = await this.leaveService.getAllLeavesPagination(param.page, param.limit);
+    const leaves = await this.leaveService.getAllLeavesPagination(param.page, param.limit); // query param
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
-      data:leaves,
+      data: leaves,
     };
   }
 

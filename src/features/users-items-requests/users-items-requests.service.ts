@@ -44,6 +44,7 @@ export class UsersItemsRequestsService {
 
 
   async create(createDto: CreateItemRequestDto, id: string): Promise<ItemRequestResponseDto> {
+    try {
     const itemRequest = this.itemRequestRepository.create({
       itemId: createDto.itemId,
       quantity: createDto.quantity,
@@ -56,16 +57,31 @@ export class UsersItemsRequestsService {
 
     const savedRequest = await this.itemRequestRepository.save(itemRequest);
     return this.toUserItemRequestResponseDto(savedRequest);
+    } catch (error) {
+      throw new HttpException({
+        code: '1001',
+        message: errorMessage['1001'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
 
   async findOneEntity(id: string): Promise<UsersItemRequestEntity> {
+    try {
     const entity = await this.itemRequestRepository.findOne({
       where: { id },
       relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
     });
     if (!entity) throw new Error('Item request not found');
     return entity;
+    } catch (error) {
+      throw new HttpException({
+        code: '1001',
+        message: errorMessage['1001'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   // ดึง DTO สำหรับส่ง response (return DTO)
@@ -79,6 +95,7 @@ export class UsersItemsRequestsService {
     updateDto: UpdateItemRequestDto
   ): Promise<ItemRequestResponseDto> {
     return await this.dataSource.transaction(async (manager) => {
+      try {
       const itemRequest = await manager.findOne(UsersItemRequestEntity, {
         where: { id },
         relations: ['item', 'requestedBy', 'approvedBy', 'history'],
@@ -118,12 +135,20 @@ export class UsersItemsRequestsService {
       });
 
       return this.toUserItemRequestResponseDto(updated!);
+      } catch (error) {
+        throw new HttpException({
+          code: '1001',
+          message: errorMessage['1001'],
+          statusCode: HttpStatus.BAD_REQUEST,
+        }, HttpStatus.BAD_REQUEST);
+      }
     });
   }
 
 
 
   async findAllByUser(userId: string): Promise<ItemRequestResponseDto[]> {
+    try {
     const itemRequests = await this.itemRequestRepository.find({
       where: { requestedById: userId, deletedAt: null },
       relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
@@ -131,9 +156,17 @@ export class UsersItemsRequestsService {
     });
 
     return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+    } catch (error) {
+      throw new HttpException({
+        code: '1001',
+        message: errorMessage['1001'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async softDelete(id: string, userId: string): Promise<ItemRequestResponseDto> {
+    try {
     const itemRequest = await this.findOneEntity(id);
     itemRequest.deletedAt = new Date();
 
@@ -148,10 +181,18 @@ export class UsersItemsRequestsService {
 
     const deletedRequest = await this.itemRequestRepository.save(itemRequest);
     return this.toUserItemRequestResponseDto(deletedRequest);
+    } catch (error) {
+      throw new HttpException({
+        code: '1001',
+        message: errorMessage['1001'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
 
   async findAllPending(): Promise<ItemRequestResponseDto[]> {
+    try {
     const itemRequests = await this.itemRequestRepository.find({
       select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
       where: { status: EItemRequestStatus.PENDING, deletedAt: null },
@@ -159,18 +200,34 @@ export class UsersItemsRequestsService {
       order: { createdAt: 'DESC' },
     });
     return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+    } catch (error) {
+      throw new HttpException({
+        code: '1001',
+        message: errorMessage['1001'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findAll(): Promise<ItemRequestResponseDto[]> {
+    try {
     const itemRequests = await this.itemRequestRepository.find({
       select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt', 'borrow_start_date', 'borrow_end_date'],
       relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
       order: { createdAt: 'DESC' },
     });
     return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+    } catch (error) {
+      throw new HttpException({
+        code: '1001',
+        message: errorMessage['1001'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async update(id: string, updateDto: UpdateItemRequestDto): Promise<ItemRequestResponseDto> {
+    try {
     const itemRequest = await this.findOneEntity(id);
 
     if (updateDto.status !== undefined) {
@@ -197,6 +254,13 @@ export class UsersItemsRequestsService {
 
     const saved = await this.itemRequestRepository.save(itemRequest);
     return this.toUserItemRequestResponseDto(saved);
+    } catch (error) {
+      throw new HttpException({
+        code: '1001',
+        message: errorMessage['1001'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
 }

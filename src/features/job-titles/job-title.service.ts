@@ -152,37 +152,51 @@ export class JobTitleService {
   // }
 
   async findAll(): Promise<JobTitleResponseDto[]> {
-    return this.jobTitleRepository.find({
-      select: ['id', 'name', 'color', 'department', 'createdAt', 'updatedAt', 'deletedAt'],
-      relations: ['department'],
-    });
-  }
-
-  async findOne(id: EJobTitleId): Promise<JobTitleResponseDto> {
-    const jobTitle = await this.jobTitleRepository.findOne({
-      select: ['id', 'name', 'color', 'department', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { id, deletedAt: null },
-      relations: ['department'],
-    });
-
-    if (!jobTitle) {
+    try {
+      return this.jobTitleRepository.find({
+        select: ['id', 'name', 'color', 'department', 'createdAt', 'updatedAt', 'deletedAt'],
+        relations: ['department'],
+      });
+    } catch (error) {
       throw new HttpException({
         message: errorMessage['0101'],
         code: '0101',
       },
         HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async findOne(id: EJobTitleId): Promise<JobTitleResponseDto> {
+    try {
+      const jobTitle = await this.jobTitleRepository.findOne({
+        select: ['id', 'name', 'color', 'department', 'createdAt', 'updatedAt', 'deletedAt'],
+        where: { id, deletedAt: null },
+        relations: ['department'],
+      });
+
+      if (!jobTitle) {
+        throw new HttpException({
+          message: errorMessage['0101'],
+          code: '0101',
+      },
+        HttpStatus.BAD_REQUEST);
+    }
 
     return jobTitle;
+  } catch (error) {
+    throw new HttpException({
+      message: errorMessage['0101'],
+      code: '0101',
+    },
+      HttpStatus.BAD_REQUEST);
   }
+}
 
   async update(id: EJobTitleId, updateJobTitleDto: UpdateJobTitleDto): Promise<JobTitleResponseDto> {
     try {
       await this.validateJobTitleId(id);
       await this.validateDepartmentExists(updateJobTitleDto.departmentId);
       await this.validateUniqueName(updateJobTitleDto.name, updateJobTitleDto.departmentId, id);
-
-
       const jobTitle = await this.findOne(id);
       
       // Update fields

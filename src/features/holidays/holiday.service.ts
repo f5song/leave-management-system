@@ -100,13 +100,20 @@ export class HolidayService {
   
 
   async findAll(): Promise<HolidayResponseDto[]> {
-    const holidays = await this.holidayRepository.find({
-      select: ['id', 'title', 'startDate', 'endDate', 'description', 'totalDays', 'color'],
-      where: { deletedAt: null },
-      order: { startDate: 'ASC' },
-      take: 15,
+    try {
+      const holidays = await this.holidayRepository.find({
+        select: ['id', 'title', 'startDate', 'endDate', 'description', 'totalDays', 'color'],
+        where: { deletedAt: null },
+        order: { startDate: 'ASC' },
+        take: 15,
     });
     return holidays.map(holiday => this.toHolidayResponseDto(holiday));
+    } catch (error) {
+      throw new HttpException({
+        message: errorMessage['0201'],
+        code: '0201',
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findOne(id: string): Promise<HolidayResponseDto> {

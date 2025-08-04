@@ -7,6 +7,7 @@ import { LeaveTypeResponseDto } from './respones/leave-types.respones.dto';
 import { ELeaveType } from '@common/constants/leave-type.enum';
 import { UpdateLeaveTypeDto } from './dto/update.leave-types.dto';
 import { errorMessage } from '@src/common/constants/error-message';
+import { async } from 'rxjs';
 
 @Injectable()
 export class LeaveTypeService {
@@ -57,15 +58,24 @@ export class LeaveTypeService {
   // }
 
   async findAll(): Promise<LeaveTypeResponseDto[]> {
+    try {
     const leaveTypes = await this.leaveTypeRepository.find({
       select: ['id', 'name', 'leaves', 'description'],
       where: { deletedAt: null },
       order: { id: 'ASC' },
     });
     return leaveTypes.map(leaveType => this.toLeaveTypeResponseDto(leaveType));
+  } catch (error) {
+    throw new HttpException({
+      code: '0301',
+      message: errorMessage['0301'],
+      statusCode: HttpStatus.NOT_FOUND,
+    }, HttpStatus.NOT_FOUND);
+    }
   }
 
   async findOne(id: ELeaveType): Promise<LeaveTypeResponseDto> {
+    try {
     const leaveType = await this.leaveTypeRepository.findOne({
       select: ['id', 'name', 'leaves', 'description'],
       where: { id, deletedAt: null },
@@ -80,9 +90,17 @@ export class LeaveTypeService {
     }
 
     return this.toLeaveTypeResponseDto(leaveType);
+  } catch (error) {
+    throw new HttpException({
+      code: '0301',
+      message: errorMessage['0301'],
+      statusCode: HttpStatus.NOT_FOUND,
+    }, HttpStatus.NOT_FOUND);
+    }
   }
 
   async update(id: ELeaveType, updateLeaveTypeDto: UpdateLeaveTypeDto): Promise<LeaveTypeResponseDto> {
+    try {
     const leaveType = await this.findOne(id);
     if (!leaveType) {
       throw new HttpException({
@@ -95,6 +113,13 @@ export class LeaveTypeService {
     leaveType.updatedAt = new Date();
     await this.leaveTypeRepository.save(leaveType);
     return this.toLeaveTypeResponseDto(leaveType);
+  } catch (error) {
+    throw new HttpException({
+      code: '0301',
+      message: errorMessage['0301'],
+      statusCode: HttpStatus.NOT_FOUND,
+    }, HttpStatus.NOT_FOUND);
+    }
   }
 
   // async partialUpdate(id: ELeaveType, partialData: Partial<UpdateLeaveTypeDto>): Promise<LeaveTypeResponseDto> {
@@ -145,6 +170,7 @@ export class LeaveTypeService {
   // }
 
   private async validateLeaveTypeExists(id: ELeaveType): Promise<void> {
+    try {
     const leaveType = await this.leaveTypeRepository.findOne({
       select: ['id'],
       where: { id },
@@ -157,6 +183,13 @@ export class LeaveTypeService {
         message: errorMessage['0301'],
         statusCode: HttpStatus.NOT_FOUND,
       }, HttpStatus.NOT_FOUND);
+    }
+  } catch (error) {
+    throw new HttpException({
+      code: '0301',
+      message: errorMessage['0301'],
+      statusCode: HttpStatus.NOT_FOUND,
+    }, HttpStatus.NOT_FOUND);
     }
   }
 

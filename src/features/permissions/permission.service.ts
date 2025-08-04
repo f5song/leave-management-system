@@ -65,20 +65,20 @@ export class PermissionService {
     }
   }
 
-  private async validatePermissionCreatedById(creatorId: string): Promise<void> {
+  // private async validatePermissionCreatedById(creatorId: string): Promise<void> {
 
-    const user = await this.userInfoRepository.findOne({
-      where: { id: creatorId }
-    });
+  //   const user = await this.userInfoRepository.findOne({
+  //     where: { id: creatorId }
+  //   });
 
-    if (!user || user.deletedAt) {
-      throw new  HttpException({
-        code: '0502',
-        message: errorMessage['0502'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
-  }
+  //   if (!user || user.deletedAt) {
+  //     throw new  HttpException({
+  //       code: '0502',
+  //       message: errorMessage['0502'],
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //     }, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
   // async create(dto: CreatePermissionDto) {
   //   // Validate permission name and creator ID
@@ -102,20 +102,38 @@ export class PermissionService {
   // }
 
   async findAll() {
-    return this.permissionRepository.find({
-      select: ['id', 'name', 'permissionRoles', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { deletedAt: null },
-      order: { name: 'ASC' }
-    });
+    try {
+      const permissions = await this.permissionRepository.find({
+        select: ['id', 'name', 'permissionRoles', 'createdAt', 'updatedAt', 'deletedAt'],
+        where: { deletedAt: null },
+        order: { name: 'ASC' }
+      });
+      return permissions;
+    } catch (error) {
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findOne(id: EPermission) {
-    await this.validatePermissionId(id);
-    return this.permissionRepository.findOne({
-      select: ['id', 'name', 'permissionRoles', 'createdAt', 'updatedAt', 'deletedAt'],
-      where: { id },
-      relations: ['createdBy']
-    });
+    try {
+      await this.validatePermissionId(id);
+      const permission = await this.permissionRepository.findOne({
+        select: ['id', 'name', 'permissionRoles', 'createdAt', 'updatedAt', 'deletedAt'],
+        where: { id },
+        relations: ['createdBy']
+      });
+      return permission;
+    } catch (error) {
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async update(id: EPermission, dto: UpdatePermissionDto) {
@@ -166,19 +184,37 @@ export class PermissionService {
 
   async getPermissionById(id: EPermission) {
     await this.validatePermissionId(id);
-    return this.permissionRepository.findOne({
-      select: ['id'],
-      where: { id },
-      relations: ['createdBy']
-    });
+    try {
+      const permission = await this.permissionRepository.findOne({
+        select: ['id'],
+        where: { id },
+        relations: ['createdBy']
+      });
+      return permission;
+    } catch (error) {
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async getPermissionsByRole(roleId: ERole) {
-    return this.permissionRepository.createQueryBuilder('permission')
-      .leftJoinAndSelect('permission.roles', 'role')
-      .where('role.id = :roleId', { roleId })
-      .andWhere('role.deletedAt IS NULL')
-      .andWhere('permission.deletedAt IS NULL')
-      .getMany();
+    try {
+    const role = this.permissionRepository.createQueryBuilder('permission')
+    .leftJoinAndSelect('permission.roles', 'role')
+    .where('role.id = :roleId', { roleId })
+    .andWhere('role.deletedAt IS NULL')
+    .andWhere('permission.deletedAt IS NULL')
+    .getMany();
+    return role;
+    } catch (error) {
+      throw new HttpException({
+        code: '0502',
+        message: errorMessage['0502'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 }

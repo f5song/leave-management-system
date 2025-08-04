@@ -32,6 +32,48 @@ import { UploadedFile } from '@nestjs/common';
 export class UserController {
   constructor(private readonly userService: UserService, private readonly jwtService: JwtService) { }
 
+  @ApiResponseError([
+    {
+      code: '0701',
+      message: errorMessage['0701'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0702',
+      message: errorMessage['0702'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0703',
+      message: errorMessage['0703'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0704',
+      message: errorMessage['0704'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0705',
+      message: errorMessage['0705'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0706',
+      message: errorMessage['0706'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: '0707',
+      message: errorMessage['0707'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    {
+      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    }
+  ])
   @Get('/birthdays')
   async getBirthdays() {
     const birthDateUsers = await this.userService.getAllBirthDate();

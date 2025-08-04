@@ -33,12 +33,10 @@ import { EPermission } from '@src/common/constants/permission.enum';
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) { }
 
-  @Get()
   @ApiResponseSuccess({
     type: [DepartmentResponseDto],
   },
   )
-
   @ApiResponseError([
     {
       code: '0001',
@@ -76,6 +74,7 @@ export class DepartmentController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @Get()
   async findAll(): Promise<ResponseObject<DepartmentResponseDto[]>> {
     const departments = await this.departmentService.findAll();
     return {
@@ -85,13 +84,10 @@ export class DepartmentController {
     };
   }
 
-
-  @Get(':id')
   @ApiResponseSuccess({
     type: [DepartmentResponseDto],
   },
   )
-
   @ApiResponseError([
     {
       code: '0001',
@@ -129,6 +125,7 @@ export class DepartmentController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @Get(':id')
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_DEPARTMENT] })
@@ -141,12 +138,11 @@ export class DepartmentController {
     };
   }
 
-  @Put(':id')
+
   @ApiResponseSuccess({
     type: [DepartmentResponseDto],
   },
   )
-
   @ApiResponseError([
     {
       code: '0001',
@@ -184,6 +180,7 @@ export class DepartmentController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @Put(':id')
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_DEPARTMENT] })

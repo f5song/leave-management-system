@@ -48,6 +48,7 @@ export class FacilityRequestsService {
 
 
   async findOne(id: string): Promise<FacilityRequestResponseDto> {
+    try {
     const facilityRequest = await this.facilityRequestRepository.findOne({
       select: ['id', 'title', 'description', 'requestedById', 'status', 'approvedById', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
       where: { id },
@@ -60,17 +61,33 @@ export class FacilityRequestsService {
       }, HttpStatus.NOT_FOUND);
     }
     return this.toFacilityRequestResponseDto(facilityRequest);
+  } catch (error) {
+    throw new HttpException({
+      code: '0801',
+      message: errorMessage['0801'],
+      statusCode: HttpStatus.NOT_FOUND,
+    }, HttpStatus.NOT_FOUND);
   }
+}
 
   async findAll(): Promise<FacilityRequestResponseDto[]> {
+    try {
     const facilityRequests = await this.facilityRequestRepository.find({
       select: ['id', 'title', 'description', 'requestedById', 'status', 'approvedById', 'approvedAt', 'createdAt', 'updatedAt', 'deletedAt'],
       order: { createdAt: 'DESC' },
     });
     return facilityRequests.map(entity => this.toFacilityRequestResponseDto(entity));
+  } catch (error) {
+    throw new HttpException({
+      code: '0801',
+      message: errorMessage['0801'],
+      statusCode: HttpStatus.NOT_FOUND,
+    }, HttpStatus.NOT_FOUND);
+  }
   }
 
   async update(id: string, updateDto: UpdateFacilityRequestDto): Promise<FacilityRequestResponseDto> {
+    try {
     const facilityRequest = await this.facilityRequestRepository.findOne({
       select: ['id'],
       where: { id }
@@ -92,24 +109,40 @@ export class FacilityRequestsService {
     const updatedRequest = await this.facilityRequestRepository.save(facilityRequest);
 
     return this.toFacilityRequestResponseDto(updatedRequest);
+  } catch (error) {
+    throw new HttpException({
+      code: '0701',
+      message: 'Facility request not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
   }
+}
 
 
   async softDelete(id: string): Promise<FacilityRequestResponseDto> {
-    const facilityRequest = await this.facilityRequestRepository.findOne({
+    try {
+      const facilityRequest = await this.facilityRequestRepository.findOne({
       select: ['id'],
       where: { id }
     });
     facilityRequest.deletedAt = new Date();
     const deletedRequest = await this.facilityRequestRepository.save(facilityRequest);
     return this.toFacilityRequestResponseDto(deletedRequest);
+  } catch (error) {
+    throw new HttpException({
+      code: '0701',
+      message: 'Facility request not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
   }
+}
 
   async updateStatus(
     id: string,
     status: EFacilityStatus,
     actionById: string
   ): Promise<FacilityRequestResponseDto> {
+    try {
     const facilityRequest = await this.findOne(id);
 
     facilityRequest.status = status;
@@ -125,7 +158,14 @@ export class FacilityRequestsService {
     const updatedRequest = await this.facilityRequestRepository.save(facilityRequest);
 
     return this.toFacilityRequestResponseDto(updatedRequest);
+  } catch (error) {
+    throw new HttpException({
+      code: '0701',
+      message: 'Facility request not found',
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
   }
+}
 
 }
 

@@ -26,7 +26,6 @@ import { EFacilityStatus } from '@src/common/constants/facility-status.enum';
 export class FacilityRequestsController {
   constructor(private readonly facilityRequestsService: FacilityRequestsService) { }
 
-  @Post()
   @ApiResponseSuccess({
     type: FacilityRequestResponseDto,
   })
@@ -58,6 +57,7 @@ export class FacilityRequestsController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_FACILITY_REQUEST] })
+  @Post()
   async create(@Body() dto: CreateFacilityRequestDto,
     @Req() req: RequestWithUser): Promise<ResponseObject<FacilityRequestResponseDto>> {
     const facilityRequest = await this.facilityRequestsService.create(req.user.id, dto);
@@ -68,7 +68,6 @@ export class FacilityRequestsController {
     };
   }
 
-  @Get()
   @ApiResponseSuccess({
     type: FacilityRequestResponseDto,
   })
@@ -101,6 +100,7 @@ export class FacilityRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_FACILITY_REQUEST] })
   @ApiOkResponse({ type: [FacilityRequestResponseDto] })
+  @Get()
   async findAll(): Promise<ResponseObject<FacilityRequestResponseDto[]>> {
     const facilityRequests = await this.facilityRequestsService.findAll();
     return {
@@ -110,7 +110,6 @@ export class FacilityRequestsController {
     };
   }
 
-  @Get(':id')
   @ApiResponseSuccess({
     type: FacilityRequestResponseDto,
   })
@@ -143,6 +142,7 @@ export class FacilityRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_FACILITY_REQUEST] })
   @ApiOkResponse({ type: FacilityRequestResponseDto })
+  @Get(':id')
   async findOne(@Param() param: ValidateParamUsersFacilityRequestId): Promise<ResponseObject<FacilityRequestResponseDto>> {
     const facilityRequest = await this.facilityRequestsService.findOne(param.id);
     return {
@@ -152,7 +152,6 @@ export class FacilityRequestsController {
     };
   }
 
-  @Put(':id')
   @ApiResponseSuccess({
     type: FacilityRequestResponseDto,
   })
@@ -185,6 +184,7 @@ export class FacilityRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_FACILITY_REQUEST] })
   @ApiOkResponse({ type: FacilityRequestResponseDto })
+  @Put(':id')
   async update(@Param() param: ValidateParamUsersFacilityRequestId, @Body() dto: UpdateFacilityRequestDto): Promise<ResponseObject<FacilityRequestResponseDto>> {
     const facilityRequest = await this.facilityRequestsService.update(param.id, dto);
     return {
@@ -194,7 +194,6 @@ export class FacilityRequestsController {
     };
   }
 
-  @Patch('/:id/:status')
   @ApiResponseSuccess({
     type: FacilityRequestResponseDto,
   })
@@ -229,6 +228,7 @@ export class FacilityRequestsController {
   @ApiOkResponse({ type: FacilityRequestResponseDto })
   @ApiParam({ name: 'id', type: 'string', description: 'Item Request ID' })
   @ApiParam({ name: 'status', enum: EFacilityStatus, description: 'New status' })
+  @Patch('/:id/:status')
   async updateStatus(@Param('id') id: string,
     @Param('status') status: EFacilityStatus,
     @Req() req: RequestWithUser,
@@ -241,7 +241,6 @@ export class FacilityRequestsController {
     };
   }
 
-  @Delete(':id')
   @ApiResponseSuccess({
     type: FacilityRequestResponseDto,
   })
@@ -274,6 +273,7 @@ export class FacilityRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_FACILITY_REQUEST] })
   @ApiOkResponse({ type: FacilityRequestResponseDto })
+  @Delete(':id')
   async remove(@Param('id') id: string): Promise<ResponseObject<FacilityRequestResponseDto>> {
     const facilityRequest = await this.facilityRequestsService.softDelete(id);
     return {

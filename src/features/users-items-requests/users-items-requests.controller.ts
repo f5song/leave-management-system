@@ -24,8 +24,6 @@ import { EItemRequestStatus } from '@src/common/constants/item-request-status.en
 export class UsersItemsRequestsController {
   constructor(private readonly usersItemsRequestsService: UsersItemsRequestsService) { }
 
-
-  @Get()
   @ApiResponseError([
     {
       code: '0901',
@@ -65,6 +63,7 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
+  @Get()
   async findAll(): Promise<ResponseObject<ItemRequestResponseDto[]>> {
     const itemRequests = await this.usersItemsRequestsService.findAll();
     return {
@@ -74,7 +73,6 @@ export class UsersItemsRequestsController {
     };
   }
 
-  @Get('pending')
   @ApiResponseError([
     {
       code: '0901',
@@ -114,6 +112,7 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
+  @Get('pending')
   async findAllPending(): Promise<ResponseObject<ItemRequestResponseDto[]>> {
     const itemRequests = await this.usersItemsRequestsService.findAllPending();
     return {
@@ -123,7 +122,6 @@ export class UsersItemsRequestsController {
     };
   }
 
-  @Get(':id')
   @ApiResponseError([
     {
       code: '0901',
@@ -163,6 +161,7 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemRequestResponseDto })
+  @Get(':id')
   async findOne(@Param() param: ValidateParamUsersItemRequestId): Promise<ResponseObject<ItemRequestResponseDto>> {
     const itemRequest = await this.usersItemsRequestsService.findOneDto(param.id);
     return {
@@ -172,7 +171,6 @@ export class UsersItemsRequestsController {
     };
   }
 
-  @Get('user/:userId')
   @ApiResponseError([
     {
       code: '0901',
@@ -212,6 +210,7 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
+  @Get('user/:userId')
   async findAllByUser(
     @Req() req: RequestWithUser,
     @Param() param: ValidateParamUserId): Promise<ResponseObject<ItemRequestResponseDto[]>> {
@@ -225,8 +224,6 @@ export class UsersItemsRequestsController {
     };
   }
 
-
-  @Post()
   @ApiResponseError([
     {
       code: '0901',
@@ -267,6 +264,7 @@ export class UsersItemsRequestsController {
 
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM_REQUEST] })
   @ApiCreatedResponse({ type: ItemRequestResponseDto })
+  @Post()
   async create(
     @Req() req: RequestWithUser,
     @Body() dto: CreateItemRequestDto): Promise<ResponseObject<ItemRequestResponseDto>> {
@@ -328,7 +326,6 @@ export class UsersItemsRequestsController {
   //   };
   // }
 
-  @Patch(':id/:status')
   @ApiResponseError([
     {
       code: '0901',
@@ -373,6 +370,7 @@ export class UsersItemsRequestsController {
   @ApiParam({ name: 'id', type: 'string', description: 'Item Request ID' })
   @ApiParam({ name: 'status', enum: EItemRequestStatus, description: 'New status' })
   @ApiOkResponse({ type: ItemRequestResponseDto })
+  @Patch(':id/:status')
   async updateStatus(
     @Param('id') id: string,
     @Param('status') status: EItemRequestStatus,
@@ -386,8 +384,6 @@ export class UsersItemsRequestsController {
     };
   }
   
-
-  @Delete(':id')
   @ApiResponseError([
     {
       code: '0901',
@@ -427,6 +423,7 @@ export class UsersItemsRequestsController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemRequestResponseDto })
+  @Delete(':id')
   async remove(@Param() param: ValidateParamUsersItemRequestId, @Request() req: RequestWithUser): Promise<ResponseObject<ItemRequestResponseDto>> {
     const itemRequest = await this.usersItemsRequestsService.softDelete(param.id, req.user.id);
     return {
@@ -436,7 +433,6 @@ export class UsersItemsRequestsController {
     };
   }
 
-  @Put(':id')
   @ApiResponseError([
     {
       code: '0901',
@@ -474,6 +470,7 @@ export class UsersItemsRequestsController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @Put(':id')
   async update(
     @Param() param: ValidateParamUsersItemRequestId,
     @Body() body: UpdateItemRequestDto, // <-- เพิ่มตรงนี้

@@ -24,7 +24,6 @@ import { ValidateParamJobTitleId } from '../job-titles/dto/job-titles.validate';
 export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) { }
 
-  @Get()
   @ApiResponseSuccess({ type: [JobTitleResponseDto] })
   @ApiResponseError([
     {
@@ -58,6 +57,7 @@ export class JobTitleController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @Get()
   async findAll(): Promise<ResponseObject<JobTitleResponseDto[]>> {
     const jobTitles = await this.jobTitleService.findAll();
     return {
@@ -67,7 +67,6 @@ export class JobTitleController {
     };
   }
 
-  @Get(':id')
   @ApiOkResponse({ type: JobTitleResponseDto })
   @ApiResponseError([
     {
@@ -110,6 +109,7 @@ export class JobTitleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_JOB_TITLE] })
   @ApiOkResponse({ type: JobTitleResponseDto })
+  @Get(':id')
   async findOne(@Param() param: ValidateParamJobTitleId): Promise<ResponseObject<JobTitleResponseDto>> {
     const jobTitle = await this.jobTitleService.findOne(param.id);
     return {
@@ -164,7 +164,6 @@ export class JobTitleController {
   //   };
   // }
 
-  @Put(':id')
   @ApiOkResponse({ type: JobTitleResponseDto })
   @ApiResponseError([
     {
@@ -207,6 +206,7 @@ export class JobTitleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_JOB_TITLE] })
   @ApiOkResponse({ type: JobTitleResponseDto })
+  @Put(':id')
   async update(
     @Param() param: ValidateParamJobTitleId,
     @Body() updateJobTitleDto: UpdateJobTitleDto,

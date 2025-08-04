@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersItemEntity } from '../../database/entity/users-items.entity';
@@ -12,6 +12,7 @@ import { UpdateItemDto } from './dto/update.users-items.dto';
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
 import { ItemsRequestsHistoryResponseDto } from '../users-items-requests-histories/respones/users-items-requests-histories.respones.dto';
 import { EItemStatus } from '@src/common/constants/item-status.enum';
+import { errorMessage } from '@src/common/constants/error-message';
 @Injectable()
 export class UsersItemsService {
   constructor(
@@ -80,6 +81,7 @@ export class UsersItemsService {
 
   // ดึงข้อมูลอุปกรณ์ทั้งหมด พร้อมแปลงเป็น DTO
   async findAll(): Promise<UserItemResponseDto[]> {
+    try {
     const items = await this.itemRepository.find({
       relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
       order: { createdAt: 'DESC' },
@@ -97,19 +99,31 @@ export class UsersItemsService {
       }
     });
     return items.map(entity => this.toUserItemResponseDto(entity));
+  } catch (error) {
+    throw new HttpException({
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
   }
+}
 
   // ดึงข้อมูลอุปกรณ์ตาม ID พร้อมแปลงเป็น DTO
   async findOne(id: string): Promise<UserItemResponseDto> {
+    try {
     const item = await this.itemRepository.findOne({
       where: { id },
       relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
     });
-    if (!item) {
-      throw new Error('Item not found');
-    }
     return this.toUserItemResponseDto(item);
+  } catch (error) {
+    throw new HttpException({
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
   }
+}
 
   // สร้างรายการอุปกรณ์ใหม่
   async create(createdById: string, item: CreateItemDto): Promise<UserItemResponseDto> {
@@ -121,24 +135,47 @@ export class UsersItemsService {
 
     const savedItem = await this.itemRepository.save(newItem);
 
+    try {
     const fullItem = await this.itemRepository.findOne({
       where: { id: savedItem.id },
       relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
     });
 
     return this.toUserItemResponseDto(fullItem!);
+  } catch (error) {
+    throw new HttpException({
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
   }
+}
 
 
   // อัพเดทรายการอุปกรณ์ตาม ID และคืนค่า DTO
   async update(id: string, item: UpdateItemDto): Promise<UserItemResponseDto> {
+    try {
     await this.itemRepository.update(id, item);
     return this.findOne(id);
-  }
-
-  // ลบรายการอุปกรณ์แบบ soft delete
-  async remove(id: string): Promise<void> {
-    await this.itemRepository.softDelete(id);
+  } catch (error) {
+    throw new HttpException({
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
   }
 }
 
+  // ลบรายการอุปกรณ์แบบ soft delete
+  async remove(id: string): Promise<void> {
+    try {
+    await this.itemRepository.softDelete(id);
+  } catch (error) {
+    throw new HttpException({
+      code: '0901',
+      message: errorMessage['0901'],
+      statusCode: HttpStatus.BAD_REQUEST,
+    }, HttpStatus.BAD_REQUEST);
+  }
+}
+}

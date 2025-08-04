@@ -30,8 +30,6 @@ import { ValidateParamUsersItemRequestId } from '../users-items-requests/dto/use
 export class UsersItemsController {
   constructor(private readonly usersItemsService: UsersItemsService) { }
 
-  // แสดงรายการอุปกรณ์ทั้งหมด
-  @Get()
   @ApiResponseSuccess({
     type: [UserItemResponseDto],
   })
@@ -65,6 +63,7 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: [UserItemResponseDto] })
+  @Get()
   async findAll(): Promise<ResponseObject<UserItemResponseDto[]>> {
     const items = await this.usersItemsService.findAll();
 
@@ -79,8 +78,6 @@ export class UsersItemsController {
     };
   }
 
-  // แสดงรายการอุปกรณ์ตาม ID
-  @Get(':id')
   @ApiResponseSuccess({
     type: UserItemResponseDto,
   })
@@ -114,6 +111,7 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
+  @Get(':id')
   async findOne(@Param('id') id: string): Promise<ResponseObject<UserItemResponseDto>> {
     const item = await this.usersItemsService.findOne(id);
     return {
@@ -123,8 +121,6 @@ export class UsersItemsController {
     };
   }
 
-  // สร้างรายการอุปกรณ์ใหม่
-  @Post()
   @ApiResponseSuccess({
     type: UserItemResponseDto,
   })
@@ -158,6 +154,7 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.CREATE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UserItemResponseDto })
+  @Post()
   async create(
     @Req() req: RequestWithUser,
     @Body() item: CreateItemDto): Promise<ResponseObject<UserItemResponseDto>> {
@@ -169,8 +166,6 @@ export class UsersItemsController {
     };
   }
 
-  // อัพเดทรายการอุปกรณ์
-  @Put(':id')
   @ApiResponseSuccess({
     type: UserItemResponseDto,
   })
@@ -204,6 +199,7 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
+  @Put(':id')
   async update(
     @Param() param: ValidateParamUsersItemRequestId,
     @Body() item: UpdateItemDto,
@@ -216,9 +212,6 @@ export class UsersItemsController {
     };
   }
 
-
-  // ลบรายการอุปกรณ์
-  @Delete(':id')
   @ApiResponseSuccess({
     type: UserItemResponseDto,
   })
@@ -252,6 +245,7 @@ export class UsersItemsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM] })
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: UserItemResponseDto })
+  @Delete(':id')
   async remove(@Param() param: ValidateParamUsersItemRequestId): Promise<void> {
     return this.usersItemsService.remove(param.id);
   }

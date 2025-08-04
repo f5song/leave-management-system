@@ -76,25 +76,29 @@ export class DepartmentService {
   // }
 
   async findAll(): Promise<DepartmentResponseDto[]> {
-    const departments = await this.departmentRepository.find({
-      select: ['id', 'name', 'color'],
-      order: { name: 'ASC' },
-      take: 15,
-    });
-
-    return departments.map(dept => ({
-      id: dept.id,
-      name: dept.name,
-      color: dept.color,
-    }));
+    try {
+      const departments = await this.departmentRepository.find({
+        select: ['id', 'name', 'color'],
+        order: { name: 'ASC' },
+        take: 15,
+      });
+      return departments;
+    } catch (error) {
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
+    }
   }
 
 
   async findOne(id: EDepartmentId): Promise<DepartmentResponseDto> {
-    const department = await this.departmentRepository.findOne({
-      select: ['id', 'name', 'color'],
-      where: { id },
-    });
+    try {
+      const department = await this.departmentRepository.findOne({
+        select: ['id', 'name', 'color'],
+        where: { id },
+      });
 
     if (!department) {
       throw new HttpException({
@@ -105,9 +109,17 @@ export class DepartmentService {
     }
 
     return department;
+    } catch (error) {
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
+    }
   }
 
   async update(id: EDepartmentId, updateDepartmentDto: UpdateDepartmentDto): Promise<DepartmentResponseDto> {
+    try {
     const { name, color } = updateDepartmentDto;
 
     await this.validateUniqueName(name);
@@ -130,6 +142,13 @@ export class DepartmentService {
 
     await this.departmentRepository.save(department);
     return department;
+    } catch (error) {
+      throw new HttpException({
+        message: errorMessage['0001'],
+        code: '0001',
+      },
+        HttpStatus.BAD_REQUEST);
+    }
   }
 
   // async remove(id: EDepartmentId): Promise<void> {

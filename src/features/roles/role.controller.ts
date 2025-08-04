@@ -65,7 +65,6 @@ export class RoleController {
   //   return this.roleService.toRoleResponseDto(role);
   // }
 
-  @Get()
   @ApiOkResponse({ type: RoleResponseDto })
   @ApiResponseError([
     {
@@ -101,6 +100,7 @@ export class RoleController {
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_ROLE] })
   @ApiOkResponse({ type: [RoleResponseDto] })
+  @Get()
   async findAll(): Promise<ResponseObject<RoleResponseDto[]>> {
     const roles = await this.roleService.findAll();
     return {
@@ -110,8 +110,6 @@ export class RoleController {
     };
   }
 
-
-  @Get(':id')
   @ApiOkResponse({ type: RoleResponseDto })
   @ApiResponseError([
     {
@@ -147,6 +145,7 @@ export class RoleController {
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_ROLE] })
   @ApiOkResponse({ type: RoleResponseDto })
+  @Get(':id')
   async findOne(@Param() param: ValidateParamRoleId): Promise<ResponseObject<RoleResponseDto>> {
     const role = await this.roleService.findOne(param.id);
     return {

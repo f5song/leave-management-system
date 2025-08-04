@@ -33,6 +33,7 @@ export class RoleService {
   }
 
   private async validateRoleId(id: ERole): Promise<void> {
+    try {
     const role = await this.roleRepository.findOne({
       select: ['id'],
       where: { id },
@@ -45,26 +46,7 @@ export class RoleService {
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
-  }
-
-  private async validateRoleName(name: string): Promise<void> {
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      throw new HttpException({
-        code: '0606',
-        message: errorMessage['0606'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
-
-    const existingRole = await this.roleRepository.findOne({
-      select: ['id'],
-      where: {
-        name: name.trim(),
-        deletedAt: null,
-      },
-    });
-
-    if (existingRole) {
+    } catch (error) {
       throw new HttpException({
         code: '0601',
         message: errorMessage['0601'],
@@ -73,22 +55,49 @@ export class RoleService {
     }
   }
 
-  private async validateRoleCreator(creatorId: string): Promise<void> {
-    const user = await this.userInfoRepository.findOne({
-      select: ['id'],
-      where: { id: creatorId },
-    });
+  // private async validateRoleName(name: string): Promise<void> {
+  //   if (!name || typeof name !== 'string' || name.trim().length === 0) {
+  //     throw new HttpException({
+  //       code: '0606',
+  //       message: errorMessage['0606'],
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //     }, HttpStatus.BAD_REQUEST);
+  //   }
 
-    if (!user || user.deletedAt) {
-      throw new HttpException({
-        code: '0605',
-        message: errorMessage['0605'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
-  }
+  //   const existingRole = await this.roleRepository.findOne({
+  //     select: ['id'],
+  //     where: {
+  //       name: name.trim(),
+  //       deletedAt: null,
+  //     },
+  //   });
+
+  //   if (existingRole) {
+  //     throw new HttpException({
+  //       code: '0601',
+  //       message: errorMessage['0601'],
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //     }, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
+
+  // private async validateRoleCreator(creatorId: string): Promise<void> {
+  //   const user = await this.userInfoRepository.findOne({
+  //     select: ['id'],
+  //     where: { id: creatorId },
+  //   });
+
+  //   if (!user || user.deletedAt) {
+  //     throw new HttpException({
+  //       code: '0605',
+  //       message: errorMessage['0605'],
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //     }, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
   async findAll(): Promise<RoleResponseDto[]> {
+    try {
     const roles = await this.roleRepository.find({
       where: { deletedAt: null },
       order: { name: 'ASC' },
@@ -96,10 +105,18 @@ export class RoleService {
     });
 
     return roles.map(role => this.toRoleResponseDto(role));
+    } catch (error) {
+      throw new HttpException({
+        code: '0601',
+        message: errorMessage['0601'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
 
   async findOne(id: ERole): Promise<RoleResponseDto> {
+    try {
     await this.validateRoleId(id);
     const role = await this.roleRepository.findOne({
       select: ['id', 'name', 'createdById', 'createdBy', 'user', 'createdAt', 'updatedAt', 'deletedAt'],
@@ -114,6 +131,13 @@ export class RoleService {
       }, HttpStatus.BAD_REQUEST);
     }
     return role;
+    } catch (error) {
+      throw new HttpException({
+        code: '0601',
+        message: errorMessage['0601'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   // async create(data: CreateRoleDto): Promise<RoleEntity> {

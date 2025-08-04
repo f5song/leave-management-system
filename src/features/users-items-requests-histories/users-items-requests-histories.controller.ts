@@ -21,7 +21,6 @@ import { ResponseObject } from '@src/common/dto/common-response.dto';
 export class UsersItemsRequestsHistoriesController {
   constructor(private readonly usersItemsRequestsHistoriesService: UsersItemsRequestsHistoriesService) {}
 
-  @Get()
    @ApiResponseError([
       {
         code: '1101',
@@ -61,11 +60,16 @@ export class UsersItemsRequestsHistoriesController {
     ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: [ItemsRequestsHistoryResponseDto] })
-  findAll() {
-    return this.usersItemsRequestsHistoriesService.findAll();
+  @Get()
+  async findAll(): Promise<ResponseObject<ItemsRequestsHistoryResponseDto[]>> {
+    const history = await this.usersItemsRequestsHistoriesService.findAll();
+    return {
+      code: HttpStatus.OK,
+      message: 'SUCCESS',
+      data: history,
+    };
   }
 
-  @Get(':id')
   @ApiResponseError([
     {
       code: '1101',
@@ -105,6 +109,7 @@ export class UsersItemsRequestsHistoriesController {
   ])
   @ApiOkResponse({ type: ItemsRequestsHistoryResponseDto })
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
+  @Get(':id')
   async findOne(@Param() param: ValidateParamUsersItemRequestId): Promise<ResponseObject<ItemsRequestsHistoryResponseDto>> {
     const history = await this.usersItemsRequestsHistoriesService.findOne(param.id);
     return {
@@ -163,7 +168,6 @@ export class UsersItemsRequestsHistoriesController {
   //   };
   // }
 
-  @Put(':id')
   @ApiResponseError([
     {
       code: '1101',
@@ -203,6 +207,7 @@ export class UsersItemsRequestsHistoriesController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: ItemsRequestsHistoryResponseDto })
+  @Put(':id')
   async update(
     @Param() param: ValidateParamUsersItemRequestId,
     @Body() updateDto: UpdateItemsRequestsHistoryDto,
@@ -215,7 +220,6 @@ export class UsersItemsRequestsHistoriesController {
     };
   }
 
-  @Delete(':id')
   @ApiResponseError([
     {
       code: '1101',
@@ -255,6 +259,7 @@ export class UsersItemsRequestsHistoriesController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.DELETE_USER_ITEM_REQUEST] })
   @ApiOkResponse({ description: 'Successfully deleted' })
+  @Delete(':id')
   async delete(@Param() param: ValidateParamUsersItemRequestId): Promise<ResponseObject<void>> {
     await this.usersItemsRequestsHistoriesService.delete(param.id);
     return {

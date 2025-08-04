@@ -2,8 +2,8 @@ export class PaginatedResponseObject<T> {
     data: T[];
     pagination: {
         totalItems: number;
-        currentPage: number;
         totalPages: number;
-        itemsPerPage: number;
+        page: number;
+        limit: number;
     };
 }

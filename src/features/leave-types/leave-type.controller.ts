@@ -70,7 +70,6 @@ export class LeaveTypeController {
   //   };
   // }
 
-  @Get()
   @ApiResponseSuccess({ type: [LeaveTypeResponseDto] })
   @ApiResponseError([
     {
@@ -106,6 +105,7 @@ export class LeaveTypeController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE_TYPE] })
   @ApiOkResponse({ type: [LeaveTypeResponseDto] })
+  @Get()
   async findAll(): Promise<ResponseObject<LeaveTypeResponseDto[]>> {
     const leaveTypes = await this.leaveTypeService.findAll();
     return {
@@ -115,7 +115,7 @@ export class LeaveTypeController {
     };
   }
 
-  @Get(':id')
+
   @ApiResponseSuccess({ type: LeaveTypeResponseDto })
   @ApiResponseError([
     {
@@ -151,6 +151,7 @@ export class LeaveTypeController {
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE_TYPE] })
   @ApiOkResponse({ type: LeaveTypeResponseDto })
+  @Get(':id')
   async findOne(@Param() param: ValidateParamLeaveTypeId): Promise<ResponseObject<LeaveTypeResponseDto>> {
     const leaveType = await this.leaveTypeService.findOne(param.id);
     return {
@@ -160,7 +161,6 @@ export class LeaveTypeController {
     };
   }
 
-  @Put(':id')
   @ApiResponseSuccess({ type: LeaveTypeResponseDto })
   @ApiResponseError([
     {
@@ -196,6 +196,7 @@ export class LeaveTypeController {
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.UPDATE_LEAVE_TYPE] })
   @ApiOkResponse({ type: LeaveTypeResponseDto })
+  @Put(':id')
   async update(
     @Param() param: ValidateParamLeaveTypeId,
     @Body() updateLeaveTypeDto: UpdateLeaveTypeDto

@@ -27,7 +27,6 @@ export class PermissionController {
   //   return this.permissionService.toPermissionResponseDto(permission);
   // }
 
-  @Get()
   @ApiOkResponse({ type: [PermissionResponseDto] })
   @ApiResponseError([
     {
@@ -62,6 +61,7 @@ export class PermissionController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_PERMISSION] })
+  @Get()
   async findAll(): Promise<ResponseObject<PermissionResponseDto[]>> {
     const permissions = await this.permissionService.findAll();
     return {
@@ -71,7 +71,6 @@ export class PermissionController {
     };
   }
 
-  @Get(':id')
   @ApiOkResponse({ type: PermissionResponseDto })
   @ApiResponseError([
     {
@@ -106,6 +105,7 @@ export class PermissionController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN], permissions: [EPermission.READ_PERMISSION] })
+  @Get(':id')
   async findOne(@Param() param: ValidateParamPermissionId): Promise<ResponseObject<PermissionResponseDto>> {
     const permission = await this.permissionService.findOne(param.id);
     return {

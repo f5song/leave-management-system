@@ -25,7 +25,7 @@ import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 export class HolidayController {
   constructor(private readonly holidayService: HolidayService) { }
 
-  @Get()
+
   @ApiResponseSuccess({ type: [HolidayResponseDto] })
   @ApiResponseError([
     {
@@ -59,6 +59,7 @@ export class HolidayController {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     }
   ])
+  @Get()
   async findAll(): Promise<ResponseObject<HolidayResponseDto[]>> {
     const holidays = await this.holidayService.findAll();
     return {
@@ -68,7 +69,6 @@ export class HolidayController {
     };
   }
 
-  @Get(':id')
   @ApiResponseSuccess({ type: HolidayResponseDto })
   @ApiResponseError([
     {
@@ -105,6 +105,7 @@ export class HolidayController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_HOLIDAY] })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
+  @Get(':id')
   async findOne(@Param() param: ValidateParamHolidayId): Promise<ResponseObject<HolidayResponseDto>> {
     const holiday = await this.holidayService.findOne(param.id);
     return {
@@ -114,7 +115,6 @@ export class HolidayController {
     };
   }
 
-  @Post()
   @ApiResponseSuccess({ type: HolidayResponseDto })
   @ApiResponseError([
     {
@@ -152,6 +152,7 @@ export class HolidayController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: HolidayResponseDto })
+  @Post()
   async create(@Req() req: RequestWithUser, @Body() createHolidayDto: CreateHolidayDto): Promise<ResponseObject<HolidayResponseDto>> {
     const holiday = await this.holidayService.create(req.user.id, createHolidayDto);
     return {
@@ -161,7 +162,6 @@ export class HolidayController {
     };
   }
 
-  @Put(':id')
   @ApiResponseSuccess({ type: HolidayResponseDto })
   @ApiResponseError([
     {
@@ -199,6 +199,7 @@ export class HolidayController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
+  @Put(':id')
   async update(
     @Param() param: ValidateParamHolidayId,
     @Body() updateHolidayDto: UpdateHolidayDto,
@@ -211,7 +212,6 @@ export class HolidayController {
     };
   }
 
-  @Delete(':id')
   @ApiResponseSuccess({ type: HolidayResponseDto })
   @ApiResponseError([
     {
@@ -250,6 +250,7 @@ export class HolidayController {
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: HolidayResponseDto })
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
   async softDelete(@Param() param: ValidateParamHolidayId): Promise<void> {
     await this.holidayService.softDelete(param.id);
   }

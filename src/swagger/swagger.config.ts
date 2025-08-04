@@ -1,5 +1,5 @@
 import { DocumentBuilder } from '@nestjs/swagger';
-
+// add auth swagger
 export const swaggerConfig = new DocumentBuilder()
   .setTitle('Leave Management System')
   .setDescription('Leave Management System API description')
