@@ -1,43 +1,59 @@
-import { Controller, Post, Get, Request, UseGuards, Body, Res } from '@nestjs/common';
-import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/auth.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { UserResponseDto } from '../users/respones/users.respones.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { Response } from 'express';
-import { AuthResponseDto } from './dto/auth-response.dto';
 
 @Controller('auth')
-@UsePipes(new ValidationPipe())
 export class AuthController {
-  constructor(
-    private authService: AuthService
-  ) {}
+  constructor(private authService: AuthService) { }
 
+  // Google OAuth login redirect
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() { }
+
+  // Google login callback
   @Post('google-login')
-  async googleLogin(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response): Promise<AuthResponseDto> {
-    const result = await this.authService.loginWithGoogle(loginDto.code);
-  
-    res.cookie('authToken', result.access_token, {
+  async googleLogin(@Body('code') code: string, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.loginWithGoogle(code);
+
+    // เซ็ต HttpOnly cookie
+    res.cookie('authToken', result.accessToken ?? '', {
       httpOnly: true,
-      // secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 วัน
+      path: '/',
     });
-  
+
+    // return ข้อมูลให้ frontend
     return {
-      access_token: result.access_token,
+      access_token: result.accessToken,
       user: result.user,
+      isNewUser: result.isNewUser,
+      email: result.email,
+      googleId: result.googleId,
+      avatarUrl: result.avatarUrl,
     };
   }
-  
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('access-token')
-  @Get('profile')
-  getProfile(@Request() req): Promise<UserResponseDto> {
-    console.log(req.user);
-    return req.user;
+  // Logout
+  @Post('logout')
+  async logout(@Res() res: Response) {
+    try {
+      res
+        .clearCookie('authToken', {
+          httpOnly: true,
+          path: '/',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+        })
+        .status(200)
+        .json({ message: 'Logged out successfully' });
+      console.log('Logged out successfully');
+    } catch (error) {
+      console.log('Logout failed', error);
+      throw error;
+    }
   }
 }
