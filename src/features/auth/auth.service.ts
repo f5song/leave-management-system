@@ -30,19 +30,19 @@ export class AuthService {
       const ticket = await this.client.verifyIdToken({
         idToken: tokens.id_token,
         audience: process.env.GOOGLE_CLIENT_ID,
-    });
+      });
 
-    const payload = ticket.getPayload();
-    if (!payload) {
-      throw new UnauthorizedException('Invalid Google token');
-    }
+      const payload = ticket.getPayload();
+      if (!payload) {
+        throw new UnauthorizedException('Invalid Google token');
+      }
 
-    return {
-      email: payload.email,
-      name: payload.name,
-      googleId: payload.sub,
-      picture: payload.picture,
-    };
+      return {
+        email: payload.email,
+        name: payload.name,
+        googleId: payload.sub,
+        picture: payload.picture,
+      };
     } catch (error) {
       console.log("google login error", error)
       throw error
@@ -50,71 +50,90 @@ export class AuthService {
   }
 
 
+  // async loginWithGoogle(code: string) {
+  //   const googleUser = await this.verifyGoogleToken(code);
+
+  //   let user = await this.userRepository.findOne({
+  //     where: { googleId: googleUser.googleId }
+  //   });
+
+  //   let isNewUser = false;
+  //   let emailForRegister = null;
+  //   let googleIdForRegister = null;
+  //   let avatarForRegister = null;
+
+  //   if (!user) {
+  //     isNewUser = true;
+  //     emailForRegister = googleUser.email;
+  //     googleIdForRegister = googleUser.googleId;
+  //     avatarForRegister = googleUser.picture || null; 
+  //   }
+
+  //   let userWithEmployeeCode = null;
+  //   let accessToken = null;
+
+  //   if (user) {
+  //     emailForRegister = user.email;
+
+  //     const payload = {
+  //       sub: user.id,
+  //       email: user.email,
+  //     };
+
+  //     accessToken = this.jwtService.sign(payload);
+
+  //     userWithEmployeeCode = await this.userRepository.findOne({
+  //       where: { id: user.id },
+  //       select: [
+  //         'id',
+  //         'email',
+  //         'firstName',
+  //         'lastName',
+  //         'nickName',
+  //         'employeeCode',
+  //         'roleId',
+  //         'googleId',
+  //         'birthDate',
+  //         'salary',
+  //         'jobTitleId',
+  //         'departmentId',
+  //         'approvedAt',
+  //         'avatarUrl' 
+  //       ]
+  //     });
+  //   }
+
+  //   return {
+  //     access_token: accessToken,
+  //     user: userWithEmployeeCode,
+  //     isNewUser,
+  //     email: emailForRegister,
+  //     googleId: googleIdForRegister,
+  //     avatarUrl: avatarForRegister,
+  //   };
+  // }
+
   async loginWithGoogle(code: string) {
     const googleUser = await this.verifyGoogleToken(code);
-  
-    let user = await this.userRepository.findOne({
-      where: { googleId: googleUser.googleId }
-    });
-  
+    let user = await this.userRepository.findOne({ where: { googleId: googleUser.googleId } });
     let isNewUser = false;
     let emailForRegister = null;
     let googleIdForRegister = null;
     let avatarForRegister = null;
-  
     if (!user) {
       isNewUser = true;
       emailForRegister = googleUser.email;
       googleIdForRegister = googleUser.googleId;
-      avatarForRegister = googleUser.picture || null; 
+      avatarForRegister = googleUser.picture;
     }
-  
-    let userWithEmployeeCode = null;
     let accessToken = null;
-  
     if (user) {
-      emailForRegister = user.email;
-  
-      const payload = {
-        sub: user.id,
-        email: user.email,
-      };
-  
+      const payload = { sub: user.id, email: user.email };
       accessToken = this.jwtService.sign(payload);
-  
-      userWithEmployeeCode = await this.userRepository.findOne({
-        where: { id: user.id },
-        select: [
-          'id',
-          'email',
-          'firstName',
-          'lastName',
-          'nickName',
-          'employeeCode',
-          'roleId',
-          'googleId',
-          'birthDate',
-          'salary',
-          'jobTitleId',
-          'departmentId',
-          'approvedAt',
-          'avatarUrl' 
-        ]
-      });
     }
-    const userByEmail = await this.userRepository.findOne({
-      where: { email: googleUser.email }
-    });
-    
-    console.log('userByEmail:', userByEmail);
-    
-    console.log("JWT access token:", accessToken);
-    console.log('Google user:', googleUser);
-
-  
     return {
-      access_token: accessToken,
-      user: userWithEmployeeCode,
+      accessToken,
+      user,
       isNewUser,
       email: emailForRegister,
       googleId: googleIdForRegister,
@@ -151,7 +170,7 @@ export class AuthService {
         nickName: googleUser.firstName,
         email: googleUser.email,
         googleId: googleUser.sub,
-        
+
         // avatarUrl: googleUser.picture,
         roleId: ERole.EMPLOYEE,
         createdAt: new Date(),

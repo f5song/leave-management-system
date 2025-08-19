@@ -84,13 +84,14 @@ export class UserController {
     };
   }
 
+  
+  @UseInterceptors(FileInterceptor('avatar'))
   @Post()
-  @UseInterceptors(FileInterceptor('avatar')) // 👈 ต้องตรงกับ key ใน form-data
   async createUser(
     @UploadedFile() file: Express.Multer.File,
     @Body() userData: CreateUserDto,
   ): Promise<ResponseObject<{ user: UserResponseDto; access_token: string }>> {
-    const userEntity = await this.userService.create(userData, file); // 👈 ส่ง file ไปด้วย
+    const userEntity = await this.userService.create(userData, file);
 
     const payload = { sub: userEntity.id, email: userEntity.email };
     const access_token = this.jwtService.sign(payload);

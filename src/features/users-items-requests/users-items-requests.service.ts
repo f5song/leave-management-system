@@ -149,13 +149,16 @@ export class UsersItemsRequestsService {
 
   async findAllByUser(userId: string): Promise<ItemRequestResponseDto[]> {
     try {
-    const itemRequests = await this.itemRequestRepository.find({
-      where: { requestedById: userId, deletedAt: null },
-      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
-      order: { createdAt: 'DESC' },
-    });
-
-    return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+      const itemRequests = await this.itemRequestRepository.find({
+        where: { requestedById: userId, deletedAt: null },
+        relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
+        order: { createdAt: 'DESC' },
+      });
+      
+      return itemRequests.map(entity => ({
+        ...this.toUserItemRequestResponseDto(entity),
+        itemName: entity.item?.name
+      }));
     } catch (error) {
       throw new HttpException({
         code: '1001',

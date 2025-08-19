@@ -1,9 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport/dist';
+import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../../features/auth/auth.service';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -12,11 +13,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private configService: ConfigService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          return req?.cookies?.authToken;
+        },
+      ]),
       secretOrKey: configService.get<string>('JWT_SECRET'),
       ignoreExpiration: false,
       passReqToCallback: false,
-      name: 'jwt'
     });
   }
 
@@ -40,8 +44,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       departmentId: user.departmentId,
       approvedAt: user.approvedAt,
       email: user.email,
-      role: user.role.name, 
-      permissions: user.role.permissionRoles.map(pr => pr.permission.id), 
+      role: user.role.name,
+      permissions: user.role.permissionRoles.map(pr => pr.permission.id),
     };
   }
 }

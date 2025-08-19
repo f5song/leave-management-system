@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { swaggerConfig } from './swagger/swagger.config';
 import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
 import { SeedService } from './database/seed/seed.service';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,6 +29,8 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL || 'http://localhost:8081', 
     credentials: true, 
   });
+
+  app.use(cookieParser());
 
   await app.listen(process.env.PORT || 3000);
 

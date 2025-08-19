@@ -47,7 +47,6 @@ export class LeaveController {
   private readonly logger = new Logger(LeaveController.name, { timestamp: true });
   constructor(private readonly leaveService: LeaveService) { }
 
-  @Get('user/:userId')
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
     {

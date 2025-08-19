@@ -87,17 +87,6 @@ export class UsersItemsService {
       order: { createdAt: 'DESC' },
     });
 
-    items.forEach((entity, index) => {
-      console.log(`Item index: ${index}, id: ${entity.id}`);
-      // ถ้าจะดูละเอียดกว่านี้ เช่น itemRequests
-      if (entity.itemRequests) {
-        entity.itemRequests.forEach((req, reqIndex) => {
-          console.log(`  ItemRequest index: ${reqIndex}, id: ${req.id}`);
-          console.log(`    requestedBy id: ${req.requestedBy?.id}`);
-          console.log(`    approvedBy id: ${req.approvedBy?.id}`);
-        });
-      }
-    });
     return items.map(entity => this.toUserItemResponseDto(entity));
   } catch (error) {
     throw new HttpException({

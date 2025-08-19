@@ -417,4 +417,17 @@ export class UserService {
     }
   }
 
+  
+  async findByGoogleId(googleId: string): Promise<UserEntity | null> {
+    try {
+      return this.userInfoRepository.findOne({ where: { googleId } });
+    } catch (error) {
+      throw new HttpException({
+        code: '0701',
+        message: errorMessage['0701'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
+  }
+
 }
