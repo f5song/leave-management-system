@@ -44,6 +44,7 @@ export class UserService {
       roleId: entity.roleId,
       jobTitleId: entity.jobTitleId,
       departmentId: entity.departmentId,
+      avatar: entity.avatarUrl,
       approvedBy: entity.approvedBy,
       approvedAt: entity.approvedAt,
       createdAt: entity.createdAt,
@@ -98,7 +99,7 @@ export class UserService {
     }
   }
 
-  async validateEmail(email: string): Promise<void> {
+  async validateEmail(email: string, id?: string): Promise<void> {
     if (!email || typeof email !== 'string' || email.trim().length === 0) {
       throw new HttpException({
         code: '0701',
@@ -108,23 +109,16 @@ export class UserService {
       }, HttpStatus.BAD_REQUEST);
     }
 
-    if (!email.includes('@')) {
-      throw new HttpException({
-        code: '0701',
-        message: errorMessage['0701'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
-
     const existingUser = await this.userInfoRepository.findOne({
       select: ['id'],
       where: { email },
     });
 
-    if (existingUser && !existingUser.deletedAt) {
+
+    if (existingUser && !existingUser.deletedAt && existingUser.id !== id) {
       throw new HttpException({
         code: '0706',
-        message: errorMessage['0706'],
+        message: "User not found in validateEmail",
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
     }
@@ -306,7 +300,7 @@ export class UserService {
 
     // ตรวจสอบค่าใหม่ที่ส่งมาทั้งหมด
     if(data.email){
-      await this.validateEmail(data.email);
+      await this.validateEmail(data.email, userId);
     }
     if(data.firstName && data.lastName){
       await this.validateNames(data.firstName, data.lastName);
@@ -351,7 +345,7 @@ export class UserService {
       jobTitleId: data.jobTitleId ?? null,
       departmentId: data.departmentId ?? null,
       nickName: data.nickName ?? null,
-      // avatarUrl: data.avatarUrl ?? null,
+      avatarUrl: data.avatar ?? null,
       salary: data.salary ?? null,
       updatedAt: new Date(),
     });

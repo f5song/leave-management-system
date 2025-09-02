@@ -2,10 +2,18 @@ import { Controller, Get, Post, Body, Req, Res, UseGuards } from '@nestjs/common
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import { RequestWithUser } from '@src/common/interfaces/request-with-user';
+import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Req() req: RequestWithUser) {
+    return req.user;
+  }
 
   // Google OAuth login redirect
   @Get('google')

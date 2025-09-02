@@ -3,31 +3,31 @@ import { EDepartmentId } from "@common/constants/department.enum";
 import { ERole } from "@common/constants/roles.enum";
 
 export class UserResponseDto {
-    id: string;
-    employeeCode: string;
-    googleId: string;
-    email: string;
+    id?: string;
+    employeeCode?: string;
+    googleId?: string;
+    email?: string;
     firstName?: string;
     lastName?: string;
     nickName?: string;
     avatar?: string;
     birthDate?: Date;
     salary?: number;
-    roleId: ERole;
+    roleId?: ERole;
     jobTitleId?: EJobTitleId;
     departmentId?: EDepartmentId;
     approvedBy?: string;
     approvedAt?: Date;
-    createdAt: Date;
+    createdAt?: Date;
     updatedAt?: Date;
     deletedAt?: Date;
 }
 
 
 export class UserResponseDtoBirthDate {
-    id: string;
-    birthDate: Date;
-    nickName: string;
-    firstName: string;
-    lastName: string;
+    id?: string;
+    birthDate?: Date;
+    nickName?: string;
+    firstName?: string;
+    lastName?: string;
 }

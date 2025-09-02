@@ -36,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       googleId: user.googleId,
       firstName: user.firstName,
       lastName: user.lastName,
-      nickname: user.nickName,
+      nickName: user.nickName,
       avatarUrl: user.avatarUrl,
       birthDate: user.birthDate,
       salary: user.salary,
