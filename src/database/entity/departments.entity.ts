@@ -29,6 +29,4 @@ export class DepartmentEntity {
   @OneToMany(() => JobTitleEntity, jobTitle => jobTitle.departmentId)
   jobTitles: JobTitleEntity[];
 
-
-
 }

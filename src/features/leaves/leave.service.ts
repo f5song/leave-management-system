@@ -199,7 +199,7 @@ export class LeaveService {
     });
   }
 
-async getAllLeavesPagination(page?: number, limit?: number): Promise<PaginatedResponseObject<LeaveResponseDto>>{
+async getAllLeavesPagination(page?: number, limit?: number, userId?:string, status?: ELeaveStatus): Promise<PaginatedResponseObject<LeaveResponseDto>>{
     const { skip, take } = getPaginationParams(page, limit);
   
     const [data, total] = await this.leaveRepository.findAndCount({
@@ -212,6 +212,10 @@ async getAllLeavesPagination(page?: number, limit?: number): Promise<PaginatedRe
       ],
       skip,
       take,
+      where:{
+        userId: userId,
+        status: status,
+      },
       order: { createdAt: 'DESC' },
     });
   

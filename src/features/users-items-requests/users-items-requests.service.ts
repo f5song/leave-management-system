@@ -11,6 +11,8 @@ import { UserEntity } from '../../database/entity/users.entity';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { errorMessage } from '@src/common/constants/error-message';
+import { getPaginationParams } from '@src/common/utils/pagination';
+import { PaginatedResponseObject } from '@src/common/dto/pagination-response.dto';
 
 @Injectable()
 export class UsersItemsRequestsService {
@@ -30,10 +32,12 @@ export class UsersItemsRequestsService {
   ): ItemRequestResponseDto {
     return {
       id: entity.id,
-      itemId: entity.item?.id ?? entity.itemId, // fallback ด้วย itemId ถ้า item null
+      itemId: entity.item?.id ?? entity.itemId,
+      item: entity.item,
       quantity: entity.quantity,
       status: entity.status,
-      requestedById: entity.requestedBy?.id ?? entity.requestedById ?? null, // fallback
+      requestedById: entity.requestedBy?.id ?? entity.requestedById ?? null,
+      requestedBy: entity.requestedBy,
       createdAt: entity.createdAt,
       deletedAt: entity.deletedAt,
       borrow_start_date: entity.borrow_start_date,
@@ -45,18 +49,18 @@ export class UsersItemsRequestsService {
 
   async create(createDto: CreateItemRequestDto, id: string): Promise<ItemRequestResponseDto> {
     try {
-    const itemRequest = this.itemRequestRepository.create({
-      itemId: createDto.itemId,
-      quantity: createDto.quantity,
-      status: EItemRequestStatus.PENDING,
-      borrow_start_date: createDto.borrow_start_date,
-      borrow_end_date: createDto.borrow_end_date,
-      requestedById: id,
-      history: [],
-    });
+      const itemRequest = this.itemRequestRepository.create({
+        itemId: createDto.itemId,
+        quantity: createDto.quantity,
+        status: EItemRequestStatus.PENDING,
+        borrow_start_date: createDto.borrow_start_date,
+        borrow_end_date: createDto.borrow_end_date,
+        requestedById: id,
+        history: [],
+      });
 
-    const savedRequest = await this.itemRequestRepository.save(itemRequest);
-    return this.toUserItemRequestResponseDto(savedRequest);
+      const savedRequest = await this.itemRequestRepository.save(itemRequest);
+      return this.toUserItemRequestResponseDto(savedRequest);
     } catch (error) {
       throw new HttpException({
         code: '1001',
@@ -69,12 +73,12 @@ export class UsersItemsRequestsService {
 
   async findOneEntity(id: string): Promise<UsersItemRequestEntity> {
     try {
-    const entity = await this.itemRequestRepository.findOne({
-      where: { id },
-      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
-    });
-    if (!entity) throw new Error('Item request not found');
-    return entity;
+      const entity = await this.itemRequestRepository.findOne({
+        where: { id },
+        relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
+      });
+      if (!entity) throw new Error('Item request not found');
+      return entity;
     } catch (error) {
       throw new HttpException({
         code: '1001',
@@ -96,45 +100,45 @@ export class UsersItemsRequestsService {
   ): Promise<ItemRequestResponseDto> {
     return await this.dataSource.transaction(async (manager) => {
       try {
-      const itemRequest = await manager.findOne(UsersItemRequestEntity, {
-        where: { id },
-        relations: ['item', 'requestedBy', 'approvedBy', 'history'],
-      });
+        const itemRequest = await manager.findOne(UsersItemRequestEntity, {
+          where: { id },
+          relations: ['item', 'requestedBy', 'approvedBy', 'history'],
+        });
 
-      if (!itemRequest) throw new HttpException(
-        {
-          code: '1001',
-          message: errorMessage['1001'],
-          statusCode: HttpStatus.NOT_FOUND,
-        },
-        HttpStatus.NOT_FOUND
-      );
+        if (!itemRequest) throw new HttpException(
+          {
+            code: '1001',
+            message: errorMessage['1001'],
+            statusCode: HttpStatus.NOT_FOUND,
+          },
+          HttpStatus.NOT_FOUND
+        );
 
-      itemRequest.status = updateDto.status;
-      itemRequest.updatedAt = new Date();
+        itemRequest.status = updateDto.status;
+        itemRequest.updatedAt = new Date();
 
-      if (updateDto.status === EItemRequestStatus.APPROVED) {
-        itemRequest.approvedById = updateDto.approveById;
-      } else {
-        itemRequest.approvedBy = null;
-      }
+        if (updateDto.status === EItemRequestStatus.APPROVED) {
+          itemRequest.approvedById = updateDto.approveById;
+        } else {
+          itemRequest.approvedBy = null;
+        }
 
-      await manager.save(itemRequest);
+        await manager.save(itemRequest);
 
-      const history = manager.create(UsersItemsRequestsHistoryEntity, {
-        requestId: itemRequest.id,
-        actionById: updateDto.approveById,
-        actionType: updateDto.status,
-      });
-      await manager.save(history);
+        const history = manager.create(UsersItemsRequestsHistoryEntity, {
+          requestId: itemRequest.id,
+          actionById: updateDto.approveById,
+          actionType: updateDto.status,
+        });
+        await manager.save(history);
 
 
-      const updated = await manager.findOne(UsersItemRequestEntity, {
-        where: { id: itemRequest.id },
-        relations: ['item', 'requestedBy', 'approvedBy', 'history'],
-      });
+        const updated = await manager.findOne(UsersItemRequestEntity, {
+          where: { id: itemRequest.id },
+          relations: ['item', 'requestedBy', 'approvedBy', 'history'],
+        });
 
-      return this.toUserItemRequestResponseDto(updated!);
+        return this.toUserItemRequestResponseDto(updated!);
       } catch (error) {
         throw new HttpException({
           code: '1001',
@@ -147,43 +151,78 @@ export class UsersItemsRequestsService {
 
 
 
-  async findAllByUser(userId: string): Promise<ItemRequestResponseDto[]> {
+  async findAllByUser(
+    userId: string,
+    page?: number,
+    limit?: number,
+  ): Promise<PaginatedResponseObject<ItemRequestResponseDto>> {
     try {
-      const itemRequests = await this.itemRequestRepository.find({
-        where: { requestedById: userId, deletedAt: null },
+      // ถ้าไม่มี page, limit → find all
+      if (!page || !limit) {
+        const data = await this.itemRequestRepository.find({
+          where: { requestedById: userId },
+          relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
+          order: { createdAt: 'DESC' },
+        });
+        return {
+          data,
+          pagination: {
+            totalItems: data.length,
+            totalPages: Math.ceil(data.length / limit),
+            page,
+            limit,
+          },
+        }; // return array ธรรมดา
+      }
+
+      // ถ้ามี page, limit → ทำ pagination
+      const skip = (page - 1) * limit;
+      const [data, total] = await this.itemRequestRepository.findAndCount({
+        where: { requestedById: userId },
         relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
         order: { createdAt: 'DESC' },
+        skip,
+        take: limit,
       });
-      
-      return itemRequests.map(entity => ({
-        ...this.toUserItemRequestResponseDto(entity),
-        itemName: entity.item?.name
-      }));
+
+      return {
+        data,
+        pagination: {
+          totalItems: total,
+          totalPages: Math.ceil(total / limit),
+          page,
+          limit,
+        },
+      };
     } catch (error) {
-      throw new HttpException({
-        code: '1001',
-        message: errorMessage['1001'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        {
+          code: '1001',
+          message: errorMessage['1001'],
+          statusCode: HttpStatus.BAD_REQUEST,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
+
   async softDelete(id: string, userId: string): Promise<ItemRequestResponseDto> {
     try {
-    const itemRequest = await this.findOneEntity(id);
-    itemRequest.deletedAt = new Date();
+      const itemRequest = await this.findOneEntity(id);
+      itemRequest.deletedAt = new Date();
 
-    // Create history record
-    const history = this.historyRepository.create({
-      request: itemRequest,
-      actionById: userId,
-      actionType: EItemRequestStatus.REJECTED,
-    });
+      // Create history record
+      const history = this.historyRepository.create({
+        request: itemRequest,
+        actionById: userId,
+        actionType: EItemRequestStatus.REJECTED,
+      });
 
-    await this.historyRepository.save(history);
+      await this.historyRepository.save(history);
 
-    const deletedRequest = await this.itemRequestRepository.save(itemRequest);
-    return this.toUserItemRequestResponseDto(deletedRequest);
+      const deletedRequest = await this.itemRequestRepository.save(itemRequest);
+      return this.toUserItemRequestResponseDto(deletedRequest);
     } catch (error) {
       throw new HttpException({
         code: '1001',
@@ -196,13 +235,13 @@ export class UsersItemsRequestsService {
 
   async findAllPending(): Promise<ItemRequestResponseDto[]> {
     try {
-    const itemRequests = await this.itemRequestRepository.find({
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
-      where: { status: EItemRequestStatus.PENDING, deletedAt: null },
-      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
-      order: { createdAt: 'DESC' },
-    });
-    return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+      const itemRequests = await this.itemRequestRepository.find({
+        select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
+        where: { status: EItemRequestStatus.PENDING, deletedAt: null },
+        relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
+        order: { createdAt: 'DESC' },
+      });
+      return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
     } catch (error) {
       throw new HttpException({
         code: '1001',
@@ -212,14 +251,24 @@ export class UsersItemsRequestsService {
     }
   }
 
-  async findAll(): Promise<ItemRequestResponseDto[]> {
+  async findAll(page?: number, limit?: number): Promise<PaginatedResponseObject<ItemRequestResponseDto>> {
     try {
-    const itemRequests = await this.itemRequestRepository.find({
-      select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt', 'borrow_start_date', 'borrow_end_date'],
-      relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
-      order: { createdAt: 'DESC' },
-    });
-    return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
+      const { skip, take } = getPaginationParams(page, limit);
+      const [data, total] = await this.itemRequestRepository.findAndCount({
+        relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
+        order: { createdAt: 'DESC' },
+        skip,
+        take,
+      });
+      return {
+        data,
+        pagination: {
+          totalItems: total,
+          totalPages: Math.ceil(total / limit),
+          page,
+          limit,
+        }
+      };
     } catch (error) {
       throw new HttpException({
         code: '1001',
@@ -231,32 +280,32 @@ export class UsersItemsRequestsService {
 
   async update(id: string, updateDto: UpdateItemRequestDto): Promise<ItemRequestResponseDto> {
     try {
-    const itemRequest = await this.findOneEntity(id);
+      const itemRequest = await this.findOneEntity(id);
 
-    if (updateDto.status !== undefined) {
-      itemRequest.status = updateDto.status;
-    }
+      if (updateDto.status !== undefined) {
+        itemRequest.status = updateDto.status;
+      }
 
-    if (updateDto.approveById !== undefined) {
-      itemRequest.approvedById = updateDto.approveById;
-    }
+      if (updateDto.approveById !== undefined) {
+        itemRequest.approvedById = updateDto.approveById;
+      }
 
-    if (updateDto.quantity !== undefined) {
-      itemRequest.quantity = updateDto.quantity;
-    }
+      if (updateDto.quantity !== undefined) {
+        itemRequest.quantity = updateDto.quantity;
+      }
 
-    if (updateDto.borrow_start_date !== undefined) {
-      itemRequest.borrow_start_date = new Date(updateDto.borrow_start_date);
-    }
+      if (updateDto.borrow_start_date !== undefined) {
+        itemRequest.borrow_start_date = new Date(updateDto.borrow_start_date);
+      }
 
-    if (updateDto.borrow_end_date !== undefined) {
-      itemRequest.borrow_end_date = new Date(updateDto.borrow_end_date);
-    }
+      if (updateDto.borrow_end_date !== undefined) {
+        itemRequest.borrow_end_date = new Date(updateDto.borrow_end_date);
+      }
 
-    itemRequest.updatedAt = new Date();
+      itemRequest.updatedAt = new Date();
 
-    const saved = await this.itemRequestRepository.save(itemRequest);
-    return this.toUserItemRequestResponseDto(saved);
+      const saved = await this.itemRequestRepository.save(itemRequest);
+      return this.toUserItemRequestResponseDto(saved);
     } catch (error) {
       throw new HttpException({
         code: '1001',
@@ -266,43 +315,44 @@ export class UsersItemsRequestsService {
     }
   }
 
+
 }
 
-  // async approve(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
-  //   const itemRequest = await this.findOneEntity(id);
+// async approve(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
+//   const itemRequest = await this.findOneEntity(id);
 
-  //   itemRequest.status = EItemRequestStatus.APPROVED;
+//   itemRequest.status = EItemRequestStatus.APPROVED;
 
-  //   const history = this.historyRepository.create({
-  //     request: itemRequest, // ใส่ object เลย
-  //     actionById: approvedBy,
-  //     actionType: EItemRequestStatus.APPROVED,
-  //   });
-
-
-  //   await this.historyRepository.save(history);
-
-  //   await this.itemRequestRepository.save(itemRequest);
-
-  //   // ✅ ดึง entity ใหม่หลัง save เพื่อให้ได้ relation `item` กลับมาครบ
-  //   const updatedRequest = await this.findOneEntity(id);
-  //   return this.toUserItemRequestResponseDto(updatedRequest);
-  // }
+//   const history = this.historyRepository.create({
+//     request: itemRequest, // ใส่ object เลย
+//     actionById: approvedBy,
+//     actionType: EItemRequestStatus.APPROVED,
+//   });
 
 
+//   await this.historyRepository.save(history);
 
-  // async reject(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
-  //   const itemRequest = await this.findOneEntity(id);
-  //   itemRequest.status = EItemRequestStatus.REJECTED;
+//   await this.itemRequestRepository.save(itemRequest);
 
-  //   // Create history record
-  //   const history = this.historyRepository.create({
-  //     request: itemRequest,
-  //     actionById: approvedBy,
-  //     actionType: EItemRequestStatus.REJECTED,
-  //   });
-  //   await this.historyRepository.save(history);
+//   // ✅ ดึง entity ใหม่หลัง save เพื่อให้ได้ relation `item` กลับมาครบ
+//   const updatedRequest = await this.findOneEntity(id);
+//   return this.toUserItemRequestResponseDto(updatedRequest);
+// }
 
-  //   const updatedRequest = await this.itemRequestRepository.save(itemRequest);
-  //   return this.toUserItemRequestResponseDto(updatedRequest);
-  // }
+
+
+// async reject(id: string, approvedBy: string): Promise<ItemRequestResponseDto> {
+//   const itemRequest = await this.findOneEntity(id);
+//   itemRequest.status = EItemRequestStatus.REJECTED;
+
+//   // Create history record
+//   const history = this.historyRepository.create({
+//     request: itemRequest,
+//     actionById: approvedBy,
+//     actionType: EItemRequestStatus.REJECTED,
+//   });
+//   await this.historyRepository.save(history);
+
+//   const updatedRequest = await this.itemRequestRepository.save(itemRequest);
+//   return this.toUserItemRequestResponseDto(updatedRequest);
+// }

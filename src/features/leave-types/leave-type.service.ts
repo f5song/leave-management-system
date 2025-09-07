@@ -24,6 +24,7 @@ export class LeaveTypeService {
         name: entity.name,
         leaves: entity.leaves,
         description: entity.description,
+        max_days: entity.max_days,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
         deletedAt: entity.deletedAt,

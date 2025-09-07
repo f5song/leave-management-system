@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Request, HttpStatus, Req, Put } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Request, HttpStatus, Req, Put, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersItemsRequestsService } from './users-items-requests.service';
 import { ItemRequestResponseDto } from './respones/users-items-requests.respones.dto';
@@ -16,6 +16,8 @@ import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
 import { ValidateParamUserId } from '../users/dto/users.validate';
 import { EItemRequestStatus } from '@src/common/constants/item-request-status.enum';
+import { PaginationDto } from '@src/common/dto/pagination.dto';
+import { PaginatedResponseObject } from '@src/common/dto/pagination-response.dto';
 
 @ApiTags('Users Items Requests')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -64,8 +66,10 @@ export class UsersItemsRequestsController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_USER_ITEM_REQUEST] })
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
   @Get()
-  async findAll(): Promise<ResponseObject<ItemRequestResponseDto[]>> {
-    const itemRequests = await this.usersItemsRequestsService.findAll();
+  async findAll(
+    @Query() query: PaginationDto,
+  ): Promise<ResponseObject<PaginatedResponseObject<ItemRequestResponseDto>>> {
+    const itemRequests = await this.usersItemsRequestsService.findAll(query.page, query.limit);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -212,17 +216,21 @@ export class UsersItemsRequestsController {
   @ApiOkResponse({ type: [ItemRequestResponseDto] })
   @Get('user/:userId')
   async findAllByUser(
-    @Req() req: RequestWithUser,
-    @Param() param: ValidateParamUserId): Promise<ResponseObject<ItemRequestResponseDto[]>> {
-    const itemRequests = await this.usersItemsRequestsService.findAllByUser(req.user.id);
-    console.log(param)
-    console.log(req.user)
+    @Param() param: ValidateParamUserId,
+    @Query() query: PaginationDto,
+  ): Promise<ResponseObject<PaginatedResponseObject<ItemRequestResponseDto>>> {
+    const itemRequests = await this.usersItemsRequestsService.findAllByUser(
+      param.userId,
+      query.page,
+      query.limit,
+    );
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
       data: itemRequests,
     };
   }
+
 
   @ApiResponseError([
     {
@@ -376,14 +384,14 @@ export class UsersItemsRequestsController {
     @Param('status') status: EItemRequestStatus,
     @Req() req: RequestWithUser,
   ): Promise<ResponseObject<ItemRequestResponseDto>> {
-    const itemRequest = await this.usersItemsRequestsService.updateStatus(id, {status, approveById: req.user.id});
+    const itemRequest = await this.usersItemsRequestsService.updateStatus(id, { status, approveById: req.user.id });
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
       data: this.usersItemsRequestsService.toUserItemRequestResponseDto(itemRequest),
     };
   }
-  
+
   @ApiResponseError([
     {
       code: '0901',
@@ -473,7 +481,7 @@ export class UsersItemsRequestsController {
   @Put(':id')
   async update(
     @Param() param: ValidateParamUsersItemRequestId,
-    @Body() body: UpdateItemRequestDto, // <-- เพิ่มตรงนี้
+    @Body() body: UpdateItemRequestDto,
     @Request() req: RequestWithUser
   ): Promise<ResponseObject<ItemRequestResponseDto>> {
     const itemRequest = await this.usersItemsRequestsService.update(param.id, {

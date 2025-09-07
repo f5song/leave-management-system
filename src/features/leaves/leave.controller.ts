@@ -36,6 +36,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { get } from 'http';
 import { PaginationDto } from '@src/common/dto/pagination.dto';
 import { PaginatedResponseObject } from '@src/common/dto/pagination-response.dto';
+import { LeavePaginationDto } from '@src/common/dto/user-pagination.dto';
 
 @ApiTags('Leaves')
 @Controller('leaves')
@@ -424,13 +425,22 @@ export class LeaveController {
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
   @ApiOkResponse({ type: LeaveResponseDto })
   @Get('/:page/:limit')
-  async getAllLeavesPagination(@Param() param: PaginationDto): Promise<ResponseObject<PaginatedResponseObject<LeaveResponseDto>>> {
-    const leaves = await this.leaveService.getAllLeavesPagination(param.page, param.limit); // query param
+  async getAllLeavesPagination(
+    @Query() query: PaginationDto,           
+    @Query() leavePaginationDto: LeavePaginationDto,        // 👈 อ่าน query string
+  ): Promise<ResponseObject<PaginatedResponseObject<LeaveResponseDto>>> {
+    const leaves = await this.leaveService.getAllLeavesPagination(
+      query.page,
+      query.limit,
+      leavePaginationDto.userId,
+      leavePaginationDto.status,
+    );
+
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
       data: leaves,
     };
   }
-
 }
+

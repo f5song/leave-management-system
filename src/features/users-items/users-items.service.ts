@@ -24,19 +24,15 @@ export class UsersItemsService {
     private historyRepository: Repository<UsersItemsRequestsHistoryEntity>,
   ) { }
 
-  // แปลง UsersItemsRequestsHistoryEntity เป็น DTO
   toHistoryResponseDto(entity: UsersItemsRequestsHistoryEntity): ItemsRequestsHistoryResponseDto {
     return {
       id: entity.id,
       actionAt: entity.actionAt,
       actionType: entity.actionType,
       actionById: entity.actionedBy?.id ?? entity.actionById ?? null,
-      // request: entity.request ? { id: entity.request.id } : undefined,
-      // เพิ่มเติมถ้ามี property อื่น ๆ ใน DTO
     };
   }
 
-  // แปลง UsersItemRequestEntity เป็น DTO พร้อมแปลง history ด้วย
   toUserItemRequestResponseDto(entity: UsersItemRequestEntity): ItemRequestResponseDto {
     return {
       id: entity.id,
@@ -52,7 +48,6 @@ export class UsersItemsService {
     
   }
 
-  // แปลง UsersItemEntity เป็น DTO พร้อมแปลง itemRequests เป็น DTO array
   toUserItemResponseDto(entity: UsersItemEntity): UserItemResponseDto {
     return {
       id: entity.id,
@@ -69,7 +64,6 @@ export class UsersItemsService {
     };
   }
 
-  // ดึงข้อมูลคำร้องขอทั้งหมด และแปลงเป็น DTO
   // async findAllRequests(): Promise<ItemRequestResponseDto[]> {
   //   const itemRequests = await this.itemRequestRepository.find({
   //     where: { deletedAt: null },
@@ -79,7 +73,6 @@ export class UsersItemsService {
   //   return itemRequests.map(entity => this.toUserItemRequestResponseDto(entity));
   // }
 
-  // ดึงข้อมูลอุปกรณ์ทั้งหมด พร้อมแปลงเป็น DTO
   async findAll(): Promise<UserItemResponseDto[]> {
     try {
     const items = await this.itemRepository.find({

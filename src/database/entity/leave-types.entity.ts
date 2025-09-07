@@ -14,6 +14,9 @@ export class LeaveTypeEntity {
   @Column()
   description?: string;
 
+  @Column()
+  max_days: number;
+
   @OneToMany(() => LeaveEntity, (leave) => leave.leaveType)
   leaves: LeaveEntity[];
 

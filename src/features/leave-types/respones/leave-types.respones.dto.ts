@@ -8,5 +8,6 @@ export class LeaveTypeResponseDto {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
+  max_days: number;
   leaves: LeaveEntity[];
 }
