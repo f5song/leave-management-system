@@ -11,9 +11,11 @@ import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-ite
 import { UsersFacilityRequestEntity } from '../../database/entity/users-facility-requests.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AwsS3Module } from '../aws-s3/aws-s3.module';
+import { LeaveTypeEntity } from '../../database/entity/leave-types.entity';
+import { LeaveEntity } from '../../database/entity/leaves.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity,JobTitleEntity,DepartmentEntity,RoleEntity,UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UsersFacilityRequestEntity]),
+  imports: [TypeOrmModule.forFeature([UserEntity,JobTitleEntity,DepartmentEntity,RoleEntity,UsersItemRequestEntity, UsersItemsRequestsHistoryEntity, UsersFacilityRequestEntity,LeaveTypeEntity,LeaveEntity]),
     AwsS3Module,
     JwtModule.register({
     secret: 'secretKey',

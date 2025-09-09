@@ -13,6 +13,9 @@ import { UserResponseDto } from './respones/users.respones.dto';
 import { ERole } from '@src/common/constants/roles.enum';
 import { errorMessage } from '@src/common/constants/error-message';
 import { AwsS3Service } from '../aws-s3/aws-s3.service';
+import { LeaveTypeEntity } from '../../database/entity/leave-types.entity';
+import { LeaveEntity } from '../../database/entity/leaves.entity';
+import { EStatus } from '@src/common/constants/status.enum';
 
 @Injectable()
 export class UserService {
@@ -25,7 +28,11 @@ export class UserService {
     @InjectRepository(DepartmentEntity)
     private departmentRepository: Repository<DepartmentEntity>,
     @InjectRepository(RoleEntity)
-    private roleRepository: Repository<RoleEntity>
+    private roleRepository: Repository<RoleEntity>,
+    @InjectRepository(LeaveTypeEntity)
+    private leaveTypeRepository: Repository<LeaveTypeEntity>,
+    @InjectRepository(LeaveEntity)
+    private leaveRepository: Repository<LeaveEntity>,
   ) { }
 
   toUserResponseDto(
@@ -423,5 +430,35 @@ export class UserService {
       }, HttpStatus.BAD_REQUEST);
     }
   }
+
+  async getUserLeaveBalance(userId: string) {
+    const leaveTypes = await this.leaveTypeRepository.find({
+      select: ['id', 'name', 'leaves','max_days'],
+      order: { id: 'ASC' },
+    });
+  
+    const leaves = await this.leaveRepository.find({
+      where: { userId, status: EStatus.APPROVED },
+    });
+  
+    const usedDays: Record<string, number> = {};
+  
+    leaves.forEach((leave) => {
+      const start = new Date(leave.startDate);
+      const end = new Date(leave.endDate);
+      const diffDays =
+        Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  
+      usedDays[leave.leaveTypeId] =
+        (usedDays[leave.leaveTypeId] || 0) + diffDays;
+    });
+  
+    return leaveTypes.map((lt) => ({
+      ...lt,
+      used_days: usedDays[lt.id] || 0,
+      remaining_days: lt.max_days - (usedDays[lt.id] || 0),
+    }));
+  }
+  
 
 }

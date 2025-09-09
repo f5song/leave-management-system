@@ -61,7 +61,7 @@ export class LeaveTypeService {
   async findAll(): Promise<LeaveTypeResponseDto[]> {
     try {
     const leaveTypes = await this.leaveTypeRepository.find({
-      select: ['id', 'name', 'leaves', 'description'],
+      select: ['id', 'name', 'leaves', 'description','max_days'],
       where: { deletedAt: null },
       order: { id: 'ASC' },
     });
@@ -78,7 +78,7 @@ export class LeaveTypeService {
   async findOne(id: ELeaveType): Promise<LeaveTypeResponseDto> {
     try {
     const leaveType = await this.leaveTypeRepository.findOne({
-      select: ['id', 'name', 'leaves', 'description'],
+      select: ['id', 'name', 'leaves', 'description','max_days'],
       where: { id, deletedAt: null },
     });
 

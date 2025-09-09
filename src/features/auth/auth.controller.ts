@@ -64,4 +64,12 @@ export class AuthController {
       throw error;
     }
   }
+
+  @Get('check')
+  checkAuth(@Req() req: Request) {
+    const token = req.cookies['authToken']; // อ่าน HttpOnly cookie
+    if (token) return { isAuthenticated: true };
+    return { isAuthenticated: false };
+  }
+
 }
