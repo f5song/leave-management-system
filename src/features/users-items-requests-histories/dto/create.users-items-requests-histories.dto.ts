@@ -1,5 +1,5 @@
 import { IsUUID, IsEnum, IsString, IsOptional, IsDate } from "class-validator";
-import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
+import { EStatus } from "@src/common/constants/status.enum";
 
 export class CreateItemsRequestsHistoryDto {
   @IsUUID()
@@ -8,8 +8,8 @@ export class CreateItemsRequestsHistoryDto {
   @IsUUID()
   requestId?: string;
 
-  @IsEnum(EItemRequestStatus)
-  status: EItemRequestStatus;
+  @IsEnum(EStatus)
+  status: EStatus;
   
   @IsDate()
   @IsOptional()

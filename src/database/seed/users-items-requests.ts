@@ -1,11 +1,11 @@
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
+import { EStatus } from '@common/constants/status.enum';
 import { UsersItemRequestEntity } from '../entity/users-items-requests.entity';
 
 export const usersItemRequestsSeedData: Partial<UsersItemRequestEntity>[] = [
   {
     id: 'uuid-request-1',
     itemId: 'uuid-item-1',
-    status: EItemRequestStatus.PENDING,
+    status: EStatus.PENDING,
     quantity: 2,
     requestedById: 'uuid-user-1',
     actionAt: new Date('2025-06-01T08:30:00Z'),
@@ -15,7 +15,7 @@ export const usersItemRequestsSeedData: Partial<UsersItemRequestEntity>[] = [
   {
     id: 'uuid-request-2',
     itemId: 'uuid-item-2',
-    status: EItemRequestStatus.APPROVED,
+    status: EStatus.APPROVED,
     quantity: 1,
     requestedById: 'uuid-user-2',
     actionAt: new Date('2025-06-02T10:00:00Z'),

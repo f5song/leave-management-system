@@ -12,12 +12,12 @@ import {
   CreateLeaveDto
 } from './dto/create.leaves.dto';
 import { ELeaveType } from '@common/constants/leave-type.enum';
-import { ELeaveStatus } from '@common/constants/leave-status.enum';
 import { LeaveResponseDto } from './respones/leaves.respones.dto';
 import { UpdateLeaveDto } from './dto/update.leaves.dto';
 import { errorMessage } from '@src/common/constants/error-message';
 import { getPaginationParams } from '@src/common/utils/pagination';
 import { PaginatedResponseObject } from '@src/common/dto/pagination-response.dto';
+import { EStatus } from '@src/common/constants/status.enum';
 
 @Injectable()
 export class LeaveService {
@@ -124,7 +124,7 @@ export class LeaveService {
       }, HttpStatus.BAD_REQUEST);
     }
 
-    if (leave.status !== ELeaveStatus.PENDING) {
+    if (leave.status !== EStatus.PENDING) {
       throw new HttpException({
         code: '0405',
         message: errorMessage['0405'],
@@ -168,7 +168,7 @@ export class LeaveService {
       startDate: start,
       endDate: end,
       totalDays: totalDays,
-      status: ELeaveStatus.PENDING,
+      status: EStatus.PENDING,
       createdById: id,
     });
 
@@ -199,7 +199,7 @@ export class LeaveService {
     });
   }
 
-async getAllLeavesPagination(page?: number, limit?: number, userId?:string, status?: ELeaveStatus): Promise<PaginatedResponseObject<LeaveResponseDto>>{
+async getAllLeavesPagination(page?: number, limit?: number, userId?:string, status?: EStatus): Promise<PaginatedResponseObject<LeaveResponseDto>>{
     const { skip, take } = getPaginationParams(page, limit);
   
     const [data, total] = await this.leaveRepository.findAndCount({
@@ -231,6 +231,26 @@ async getAllLeavesPagination(page?: number, limit?: number, userId?:string, stat
       }
     };
   }
+
+  // async getAllLeavesPagination(userId?:string, status?: ELeaveStatus): Promise<LeaveResponseDto[]>{
+  
+  //   const data = await this.leaveRepository.find({
+  //     relations: ['leaveType','userInfo'],
+  //     select: [
+  //       'id', 'userId', 'leaveTypeId', 'title', 'description',
+  //       'startDate', 'endDate', 'totalDays', 'status',
+  //       'createdAt',
+  //       'userInfo',
+  //     ],
+  //     where:{
+  //       userId: userId,
+  //       status: status,
+  //     },
+  //     order: { createdAt: 'DESC' },
+  //   });
+
+  //   return data;  
+  // }
   
   
 
@@ -261,7 +281,7 @@ async getAllLeavesPagination(page?: number, limit?: number, userId?:string, stat
       }, HttpStatus.BAD_REQUEST);
     }
 
-    if (existingLeave.status !== ELeaveStatus.PENDING) {
+    if (existingLeave.status !== EStatus.PENDING) {
       throw new HttpException({
         code: '0409',
         message: errorMessage['0409'],

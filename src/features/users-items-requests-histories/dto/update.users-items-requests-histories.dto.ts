@@ -1,5 +1,4 @@
-import { IsEnum, IsOptional, IsString, IsDate, IsDateString } from "class-validator";
-import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
+import { IsOptional, IsDate, IsDateString } from "class-validator";
 
 export class UpdateItemsRequestsHistoryDto {
 

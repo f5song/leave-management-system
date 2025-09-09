@@ -1,5 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { EStatus } from "../constants/status.enum";
 export class PaginationDto {
     @ApiProperty({ required: false, default: 1 })
     @IsOptional()           
@@ -8,5 +9,15 @@ export class PaginationDto {
     @ApiProperty({ required: false, default: 9 })
     @IsOptional()           
     limit?: number = 9;
+
+    @ApiPropertyOptional({ description: 'กรองตาม userId' })
+    @IsOptional()
+    @IsString()
+    userId?: string;
+  
+    @ApiPropertyOptional({ description: 'กรองตาม status' })
+    @IsOptional()
+    @IsString()
+    status?: EStatus;
   }
   

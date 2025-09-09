@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { UsersItemRequestEntity } from './users-items-requests.entity';
 import { UserEntity } from './users.entity';
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
+import { EStatus } from '@common/constants/status.enum';
 
 @Entity('users_items_requests_histories')
 export class UsersItemsRequestsHistoryEntity {
@@ -15,8 +15,8 @@ export class UsersItemsRequestsHistoryEntity {
   @Column('uuid', { nullable: true , name: 'request_id'})
   requestId?: string;
 
-  @Column('enum', { enum: EItemRequestStatus, nullable: false })
-  actionType: EItemRequestStatus;
+  @Column('enum', { enum: EStatus, nullable: false })
+  actionType: EStatus;
 
   @CreateDateColumn({ name: 'action_at' })
   actionAt: Date;

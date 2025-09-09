@@ -1,5 +1,5 @@
 import { IsUUID, IsOptional, IsNumber, Min, IsEnum, IsDateString } from "class-validator";
-import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
+import { EStatus } from "@src/common/constants/status.enum";
 
 export class UpdateItemRequestDto {
 
@@ -16,9 +16,9 @@ export class UpdateItemRequestDto {
   @IsOptional()
   quantity?: number;
 
-  @IsEnum(EItemRequestStatus)
+  @IsEnum(EStatus)
   @IsOptional()
-  status?: EItemRequestStatus;
+  status?: EStatus;
 
   @IsUUID()
   @IsOptional()

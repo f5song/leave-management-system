@@ -36,7 +36,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { get } from 'http';
 import { PaginationDto } from '@src/common/dto/pagination.dto';
 import { PaginatedResponseObject } from '@src/common/dto/pagination-response.dto';
-import { LeavePaginationDto } from '@src/common/dto/user-pagination.dto';
 
 @ApiTags('Leaves')
 @Controller('leaves')
@@ -92,49 +91,49 @@ export class LeaveController {
     };
   }
 
-  @ApiResponseError([
-    {
-      code: '0401',
-      message: errorMessage['0401'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0402',
-      message: errorMessage['0402'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0403',
-      message: errorMessage['0403'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0404',
-      message: errorMessage['0404'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: '0405',
-      message: errorMessage['0405'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    },
-    {
-      code: HttpStatus.INTERNAL_SERVER_ERROR + '',
-      message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-    }
-  ])
-  @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  @Get()
-  async getAllLeaves(@Query("start") start?: string,
-    @Query("end") end?: string): Promise<ResponseObject<LeaveResponseDto[]>> {
-    const leaves = await this.leaveService.getAllLeaves(start, end);
-    return {
-      code: HttpStatus.OK,
-      message: 'SUCCESS',
-      data: leaves,
-    };
-  }
+  // @ApiResponseError([
+  //   {
+  //     code: '0401',
+  //     message: errorMessage['0401'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0402',
+  //     message: errorMessage['0402'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0403',
+  //     message: errorMessage['0403'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0404',
+  //     message: errorMessage['0404'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: '0405',
+  //     message: errorMessage['0405'],
+  //     statusCode: HttpStatus.BAD_REQUEST,
+  //   },
+  //   {
+  //     code: HttpStatus.INTERNAL_SERVER_ERROR + '',
+  //     message: errorMessage[HttpStatus.INTERNAL_SERVER_ERROR],
+  //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //   }
+  // ])
+  // @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
+  // @Get()
+  // async getAllLeaves(@Query("start") start?: string,
+  //   @Query("end") end?: string): Promise<ResponseObject<LeaveResponseDto[]>> {
+  //   const leaves = await this.leaveService.getAllLeaves(start, end);
+  //   return {
+  //     code: HttpStatus.OK,
+  //     message: 'SUCCESS',
+  //     data: leaves,
+  //   };
+  // }
 
   @ApiOkResponse({ type: [LeaveResponseDto] })
   @ApiResponseError([
@@ -423,17 +422,16 @@ export class LeaveController {
     }
   ])
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.READ_LEAVE] })
-  @ApiOkResponse({ type: LeaveResponseDto })
-  @Get('/:page/:limit')
+  // @ApiOkResponse({ type: LeaveResponseDto })
+  @Get()
   async getAllLeavesPagination(
     @Query() query: PaginationDto,           
-    @Query() leavePaginationDto: LeavePaginationDto,        // 👈 อ่าน query string
   ): Promise<ResponseObject<PaginatedResponseObject<LeaveResponseDto>>> {
     const leaves = await this.leaveService.getAllLeavesPagination(
       query.page,
       query.limit,
-      leavePaginationDto.userId,
-      leavePaginationDto.status,
+      query.userId,
+      query.status,
     );
 
     return {
@@ -442,5 +440,6 @@ export class LeaveController {
       data: leaves,
     };
   }
+
 }
 

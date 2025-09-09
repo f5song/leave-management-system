@@ -1,6 +1,6 @@
 import { IsDateString, IsOptional, IsString, Length, IsInt, Min, IsEnum } from "class-validator";
 import { ELeaveType } from "@common/constants/leave-type.enum";
-import { ELeaveStatus } from "@common/constants/leave-status.enum";
+import { EStatus } from "@src/common/constants/status.enum";
 
 export class UpdateLeaveDto {
   @IsOptional()
@@ -26,8 +26,8 @@ export class UpdateLeaveDto {
   totalDays?: number;
 
   @IsOptional()
-  @IsEnum(ELeaveStatus)
-  status?: ELeaveStatus;
+  @IsEnum(EStatus)
+  status?: EStatus;
 
   @IsOptional()
   @IsString()

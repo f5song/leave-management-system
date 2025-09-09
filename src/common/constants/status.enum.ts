@@ -1,4 +1,4 @@
-export enum ELeaveStatus {
+export enum EStatus {
     PENDING = 'PENDING',
     APPROVED = 'APPROVED',
     REJECTED = 'REJECTED'

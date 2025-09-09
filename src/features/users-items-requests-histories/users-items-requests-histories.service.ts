@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-items-requests-histories.entity';
 import { CreateItemsRequestsHistoryDto } from './dto/create.users-items-requests-histories.dto';
 import { UpdateItemsRequestsHistoryDto } from './dto/update.users-items-requests-histories.dto';
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
 import { ItemsRequestsHistoryResponseDto } from './respones/users-items-requests-histories.respones.dto';
 import { errorMessage } from '@src/common/constants/error-message';
 

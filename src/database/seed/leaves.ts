@@ -1,4 +1,4 @@
-import { ELeaveStatus } from '@common/constants/leave-status.enum';
+import { EStatus } from '@src/common/constants/status.enum';
 import { ELeaveType } from '@common/constants/leave-type.enum';
 import { LeaveEntity } from '../entity/leaves.entity';
 
@@ -11,7 +11,7 @@ export const leavesSeedData: Partial<LeaveEntity>[] = [
     endDate: new Date('2025-06-05'),
     totalDays: 5,
     leaveTypeId: ELeaveType.ANNUAL,
-    status: ELeaveStatus.APPROVED,
+    status: EStatus.APPROVED,
     actionBy: 'uuid-admin-1',
     createdById: 'uuid-user-1',
     actionAt: new Date('2025-05-25'),
@@ -25,7 +25,7 @@ export const leavesSeedData: Partial<LeaveEntity>[] = [
     endDate: new Date('2025-06-12'),
     totalDays: 3,
     leaveTypeId: ELeaveType.SICK,
-    status: ELeaveStatus.PENDING,
+    status: EStatus.PENDING,
     createdById: 'uuid-user-2',
     createdAt: new Date('2025-06-09'),
   },

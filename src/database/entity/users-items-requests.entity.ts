@@ -5,7 +5,7 @@ import {
 } from 'typeorm';
 import { UsersItemEntity } from './users-items.entity';
 import { UserEntity } from './users.entity';
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
+import { EStatus } from '@common/constants/status.enum';
 import { UsersItemsRequestsHistoryEntity } from './users-items-requests-histories.entity';
 
 @Entity('users_item_requests')
@@ -16,8 +16,8 @@ export class UsersItemRequestEntity {
   @Column({ name: 'item_id' })
   itemId: string;
 
-  @Column({ type: 'enum', enum: EItemRequestStatus, default: EItemRequestStatus.PENDING })
-  status: EItemRequestStatus;
+  @Column({ type: 'enum', enum: EStatus, default: EStatus.PENDING })
+  status: EStatus;
 
   @Column()
   quantity: number;

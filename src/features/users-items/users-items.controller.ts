@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersItemsService } from './users-items.service';
 import { UsersItemEntity } from '../../database/entity/users-items.entity';
 import { UsersItemRequestEntity } from '../../database/entity/users-items-requests.entity';
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
+import { EStatus } from '@common/constants/status.enum';
 import { UserItemResponseDto } from './respones/users-items.respones.dto';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards/roles.guard';

@@ -5,7 +5,6 @@ import { UsersItemEntity } from '../../database/entity/users-items.entity';
 import { UsersItemRequestEntity } from '../../database/entity/users-items-requests.entity';
 import { ItemRequestResponseDto } from '../users-items-requests/respones/users-items-requests.respones.dto';
 import { UserEntity } from '../../database/entity/users.entity';
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
 import { CreateItemDto } from './dto/create.users-items.dto';
 import { UserItemResponseDto } from './respones/users-items.respones.dto';
 import { UpdateItemDto } from './dto/update.users-items.dto';
@@ -13,6 +12,7 @@ import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-ite
 import { ItemsRequestsHistoryResponseDto } from '../users-items-requests-histories/respones/users-items-requests-histories.respones.dto';
 import { EItemStatus } from '@src/common/constants/item-status.enum';
 import { errorMessage } from '@src/common/constants/error-message';
+
 @Injectable()
 export class UsersItemsService {
   constructor(

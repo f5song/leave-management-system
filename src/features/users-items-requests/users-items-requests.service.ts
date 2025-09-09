@@ -6,7 +6,7 @@ import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-ite
 import { ItemRequestResponseDto } from './respones/users-items-requests.respones.dto';
 import { CreateItemRequestDto } from './dto/create.users-items-requests.dto';
 import { UpdateItemRequestDto } from './dto/update.users-items-requests.dto';
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
+import { EStatus } from '@src/common/constants/status.enum';
 import { UserEntity } from '../../database/entity/users.entity';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -52,7 +52,7 @@ export class UsersItemsRequestsService {
       const itemRequest = this.itemRequestRepository.create({
         itemId: createDto.itemId,
         quantity: createDto.quantity,
-        status: EItemRequestStatus.PENDING,
+        status: EStatus.PENDING,
         borrow_start_date: createDto.borrow_start_date,
         borrow_end_date: createDto.borrow_end_date,
         requestedById: id,
@@ -117,7 +117,7 @@ export class UsersItemsRequestsService {
         itemRequest.status = updateDto.status;
         itemRequest.updatedAt = new Date();
 
-        if (updateDto.status === EItemRequestStatus.APPROVED) {
+        if (updateDto.status === EStatus.APPROVED) {
           itemRequest.approvedById = updateDto.approveById;
         } else {
           itemRequest.approvedBy = null;
@@ -216,7 +216,7 @@ export class UsersItemsRequestsService {
       const history = this.historyRepository.create({
         request: itemRequest,
         actionById: userId,
-        actionType: EItemRequestStatus.REJECTED,
+        actionType: EStatus.REJECTED,
       });
 
       await this.historyRepository.save(history);
@@ -237,7 +237,7 @@ export class UsersItemsRequestsService {
     try {
       const itemRequests = await this.itemRequestRepository.find({
         select: ['id', 'itemId', 'quantity', 'status', 'requestedById', 'createdAt', 'deletedAt'],
-        where: { status: EItemRequestStatus.PENDING, deletedAt: null },
+        where: { status: EStatus.PENDING, deletedAt: null },
         relations: ['item', 'requestedBy', 'approvedBy', 'history', 'history.actionedBy'],
         order: { createdAt: 'DESC' },
       });
@@ -251,7 +251,7 @@ export class UsersItemsRequestsService {
     }
   }
 
-  async findAll(page?: number, limit?: number): Promise<PaginatedResponseObject<ItemRequestResponseDto>> {
+  async findAll(page?: number, limit?: number, userId?: string, status?: EStatus): Promise<PaginatedResponseObject<ItemRequestResponseDto>> {
     try {
       const { skip, take } = getPaginationParams(page, limit);
       const [data, total] = await this.itemRequestRepository.findAndCount({
@@ -259,6 +259,10 @@ export class UsersItemsRequestsService {
         order: { createdAt: 'DESC' },
         skip,
         take,
+        where:{
+          requestedById: userId,
+          status: status,
+        },
       });
       return {
         data,

@@ -15,7 +15,7 @@ import { ValidateParamUsersItemRequestId } from './dto/users-items-requests.vali
 import { RequestWithUser } from '@src/common/interfaces/request-with-user';
 import { ResponseObject } from '@src/common/dto/common-response.dto';
 import { ValidateParamUserId } from '../users/dto/users.validate';
-import { EItemRequestStatus } from '@src/common/constants/item-request-status.enum';
+import { EStatus } from '@src/common/constants/status.enum';
 import { PaginationDto } from '@src/common/dto/pagination.dto';
 import { PaginatedResponseObject } from '@src/common/dto/pagination-response.dto';
 
@@ -69,7 +69,7 @@ export class UsersItemsRequestsController {
   async findAll(
     @Query() query: PaginationDto,
   ): Promise<ResponseObject<PaginatedResponseObject<ItemRequestResponseDto>>> {
-    const itemRequests = await this.usersItemsRequestsService.findAll(query.page, query.limit);
+    const itemRequests = await this.usersItemsRequestsService.findAll(query.page, query.limit,query.userId,query.status);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -376,12 +376,12 @@ export class UsersItemsRequestsController {
     permissions: [EPermission.APPROVE_USER_ITEM_REQUEST],
   })
   @ApiParam({ name: 'id', type: 'string', description: 'Item Request ID' })
-  @ApiParam({ name: 'status', enum: EItemRequestStatus, description: 'New status' })
+  @ApiParam({ name: 'status', enum: EStatus, description: 'New status' })
   @ApiOkResponse({ type: ItemRequestResponseDto })
   @Patch(':id/:status')
   async updateStatus(
     @Param('id') id: string,
-    @Param('status') status: EItemRequestStatus,
+    @Param('status') status: EStatus,
     @Req() req: RequestWithUser,
   ): Promise<ResponseObject<ItemRequestResponseDto>> {
     const itemRequest = await this.usersItemsRequestsService.updateStatus(id, { status, approveById: req.user.id });

@@ -1,4 +1,4 @@
-import { EItemRequestStatus } from '@common/constants/item-request-status.enum';
+import { EStatus } from '@common/constants/status.enum';
 import { UsersItemsRequestsHistoryEntity } from '../entity/users-items-requests-histories.entity';
 
 export const usersItemsRequestsHistorySeedData: Partial<UsersItemsRequestsHistoryEntity>[] = [
@@ -6,7 +6,7 @@ export const usersItemsRequestsHistorySeedData: Partial<UsersItemsRequestsHistor
     id: 'uuid-history-1',
     request: null,
     actionById: 'uuid-admin-1',
-    actionType: EItemRequestStatus.PENDING,
+    actionType: EStatus.PENDING,
     actionAt: new Date('2025-06-01T08:30:00Z'),
     // borrow_start_date: new Date('2025-06-10T09:00:00Z'),
     // borrow_end_date: new Date('2025-06-15T18:00:00Z'),
@@ -15,7 +15,7 @@ export const usersItemsRequestsHistorySeedData: Partial<UsersItemsRequestsHistor
     id: 'uuid-history-2',
     request: null,
     actionById: 'uuid-admin-1',
-    actionType: EItemRequestStatus.APPROVED,
+    actionType: EStatus.APPROVED,
     actionAt: new Date('2025-06-02T10:00:00Z'),
     // borrow_start_date: new Date('2025-06-10T09:00:00Z'),
     // borrow_end_date: new Date('2025-06-15T18:00:00Z'),

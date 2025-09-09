@@ -7,7 +7,7 @@ import {
     ValidateNested,
   } from "class-validator";
   import { Type } from "class-transformer";
-  import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
+  import { EStatus } from "@src/common/constants/status.enum";
   import { UserEntity } from "../../../database/entity/users.entity";
   import { UsersItemEntity } from "../../../database/entity/users-items.entity";
   import { ItemsRequestsHistoryResponseDto } from "../../users-items-requests-histories/respones/users-items-requests-histories.respones.dto";
@@ -19,8 +19,8 @@ import {
     @IsNumber()
     quantity: number;
   
-    @IsEnum(EItemRequestStatus)
-    status: EItemRequestStatus;
+    @IsEnum(EStatus)
+    status: EStatus;
   
     @IsOptional()
     requestedBy?: UserEntity;

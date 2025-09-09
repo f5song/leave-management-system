@@ -11,7 +11,7 @@ import {
 import { LeaveTypeEntity } from './leave-types.entity';
 import { UserEntity } from './users.entity';
 import { ELeaveType } from '@common/constants/leave-type.enum';
-import { ELeaveStatus } from '@common/constants/leave-status.enum';
+import { EStatus } from '@src/common/constants/status.enum';
 
 @Entity('leaves')
 export class LeaveEntity {
@@ -45,10 +45,10 @@ export class LeaveEntity {
 
   @Column({
     type: 'enum',
-    enum: ELeaveStatus,
-    default: ELeaveStatus.PENDING,
+    enum: EStatus,
+    default: EStatus.PENDING,
   })
-  status: ELeaveStatus;
+  status: EStatus;
 
   @Column({ name: 'action_by', type: 'uuid', nullable: true })
   actionBy?: string;

@@ -1,4 +1,4 @@
-import { EItemRequestStatus } from "@common/constants/item-request-status.enum";
+import { EStatus } from "@src/common/constants/status.enum";
 import { UserEntity } from "../../../database/entity/users.entity";
 import { UsersItemRequestEntity } from "../../../database/entity/users-items-requests.entity";
 
@@ -7,7 +7,7 @@ export class ItemsRequestsHistoryResponseDto {
 
   actionById?: string;
 
-  actionType: EItemRequestStatus;
+  actionType: EStatus;
 
   actionAt: Date;
 
