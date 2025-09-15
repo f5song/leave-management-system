@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards, UsePipes, Req } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create.users.dto';
@@ -214,7 +214,7 @@ export class UserController {
     };
   }
 
-  @Put(':userId')
+
   @ApiOkResponse({ type: UserResponseDto })
   @ApiResponseError([
     {
@@ -256,8 +256,11 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER] })
-  async updateUser(@Param() param: ValidateParamUserId,
-    @Req() req: RequestWithUser, @Body() updateData: UpdateUserDto): Promise<ResponseObject<UserResponseDto>> {
+  @Patch(':userId')
+  async updateUser(
+    @Param() param: ValidateParamUserId,
+    @Body() updateData: UpdateUserDto,
+  ): Promise<ResponseObject<UserResponseDto>> {
     const updatedUser = await this.userService.update(param.userId, updateData);
     return {
       code: HttpStatus.OK,
@@ -265,6 +268,35 @@ export class UserController {
       data: updatedUser,
     };
   }
+
+  @Post(':userId/avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  async updateAvatar(
+    @Param() param: ValidateParamUserId,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      return {
+        code: HttpStatus.BAD_REQUEST,
+        message: 'No file uploaded',
+      };
+    }
+
+    return this.userService.updateAvatar(param.userId, file);
+  }
+
 
   // @Patch(':id')
   // @ApiOkResponse({ type: UserResponseDto })

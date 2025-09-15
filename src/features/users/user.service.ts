@@ -51,7 +51,7 @@ export class UserService {
       roleId: entity.roleId,
       jobTitleId: entity.jobTitleId,
       departmentId: entity.departmentId,
-      avatar: entity.avatarUrl,
+      avatarUrl: entity.avatarUrl,
       approvedBy: entity.approvedBy,
       approvedAt: entity.approvedAt,
       createdAt: entity.createdAt,
@@ -202,7 +202,7 @@ export class UserService {
 
     if (isNaN(date.getTime())) {
       throw new HttpException({
-        code: '0707', 
+        code: '0707',
         message: errorMessage['0707'],
         statusCode: HttpStatus.BAD_REQUEST,
       }, HttpStatus.BAD_REQUEST);
@@ -223,32 +223,32 @@ export class UserService {
   }
 
   async create(data: CreateUserDto, file?: Express.Multer.File): Promise<UserEntity> {
-    if(data.email){
+    if (data.email) {
       await this.validateEmail(data.email);
     }
-    if(data.roleId){
+    if (data.roleId) {
       await this.validateRole(data.roleId);
     }
-    if(data.jobTitleId){
+    if (data.jobTitleId) {
       await this.validateJobTitle(data.jobTitleId);
     }
-    if(data.departmentId){
+    if (data.departmentId) {
       await this.validateDepartment(data.departmentId);
     }
-    if(data.firstName && data.lastName){
+    if (data.firstName && data.lastName) {
       await this.validateNames(data.firstName, data.lastName);
     }
- 
-    
 
-    if(data.birthDate){
+
+
+    if (data.birthDate) {
       await this.validateBirthDate(data.birthDate);
     }
 
     let avatar: string | null = null;
     if (file) {
       const result = await this.awsS3Service.uploadFile('profile', file);
-      avatar = result?.Location; 
+      avatar = result?.Location;
     }
 
     let nextNumber = 1;
@@ -264,7 +264,7 @@ export class UserService {
     }
     const paddedNumber = nextNumber.toString().padStart(3, '0');
 
-    
+
     const user = this.userInfoRepository.create({
       employeeCode: `fh-${paddedNumber}`,
       googleId: data.googleId,
@@ -302,63 +302,46 @@ export class UserService {
   }
 
   async update(userId: string, data: UpdateUserDto): Promise<UserResponseDto> {
-    console.log("update user: ", userId);
     await this.validateUserId(userId);
 
-    // ตรวจสอบค่าใหม่ที่ส่งมาทั้งหมด
-    if(data.email){
+    if (data.email) {
       await this.validateEmail(data.email, userId);
     }
-    if(data.firstName && data.lastName){
+    if (data.firstName && data.lastName) {
       await this.validateNames(data.firstName, data.lastName);
     }
-    if(data.birthDate){
+    if (data.birthDate) {
       await this.validateBirthDate(data.birthDate);
     }
-    if(data.roleId){
+    if (data.roleId) {
       await this.validateRole(data.roleId);
     }
-    if(data.jobTitleId){
+    if (data.jobTitleId) {
       await this.validateJobTitle(data.jobTitleId);
     }
-    if(data.departmentId){
+    if (data.departmentId) {
       await this.validateDepartment(data.departmentId);
     }
 
-    const user = await this.userInfoRepository.findOne({
-      select: [
-        'id'
-      ],
-      where: { id: userId },
-    });
-
-    console.log("update user: ", user);
-
+    const user = await this.userInfoRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new HttpException({
-        code: '0701',
-        message: errorMessage['0701'],
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { code: '0701', message: errorMessage['0701'], statusCode: HttpStatus.BAD_REQUEST },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    // เซตค่าทุก field ที่จำเป็นเสมอ (null ถ้าไม่ได้ส่งมา)
-    Object.assign(user, {
-      email: data.email ?? null,
-      firstName: data.firstName ?? null,
-      lastName: data.lastName ?? null,
-      birthDate: data.birthDate ?? null,
-      roleId: data.roleId ?? null,
-      jobTitleId: data.jobTitleId ?? null,
-      departmentId: data.departmentId ?? null,
-      nickName: data.nickName ?? null,
-      avatarUrl: data.avatar ?? null,
-      salary: data.salary ?? null,
-      updatedAt: new Date(),
+    // update เฉพาะ field ที่ถูกส่งมา
+    Object.keys(data).forEach((key) => {
+      if (data[key] !== undefined) {
+        (user as any)[key] = data[key];
+      }
     });
 
+    user.updatedAt = new Date();
     return this.toUserResponseDto(await this.userInfoRepository.save(user));
   }
+
 
   async deleteUser(id: string): Promise<UserResponseDto> {
     await this.validateUserId(id);
@@ -369,16 +352,16 @@ export class UserService {
         where: { id },
       });
 
-    if (!user) {
-      throw new HttpException({
-        code: '0701',
-        message: "User not found in deleteUser",
-        statusCode: HttpStatus.BAD_REQUEST,
-      }, HttpStatus.BAD_REQUEST);
-    }
+      if (!user) {
+        throw new HttpException({
+          code: '0701',
+          message: "User not found in deleteUser",
+          statusCode: HttpStatus.BAD_REQUEST,
+        }, HttpStatus.BAD_REQUEST);
+      }
 
-    user.deletedAt = new Date();
-    return this.toUserResponseDto(await this.userInfoRepository.save(user));
+      user.deletedAt = new Date();
+      return this.toUserResponseDto(await this.userInfoRepository.save(user));
     } catch (error) {
       throw new HttpException({
         code: '0701',
@@ -407,7 +390,7 @@ export class UserService {
   async getAllBirthDate(): Promise<UserEntity[]> {
     try {
       return this.userInfoRepository.find({
-        select: ['id', 'birthDate','nickName','firstName','lastName'],
+        select: ['id', 'birthDate', 'nickName', 'firstName', 'lastName'],
       });
     } catch (error) {
       throw new HttpException({
@@ -418,7 +401,7 @@ export class UserService {
     }
   }
 
-  
+
   async findByGoogleId(googleId: string): Promise<UserEntity | null> {
     try {
       return this.userInfoRepository.findOne({ where: { googleId } });
@@ -433,32 +416,62 @@ export class UserService {
 
   async getUserLeaveBalance(userId: string) {
     const leaveTypes = await this.leaveTypeRepository.find({
-      select: ['id', 'name', 'leaves','max_days'],
+      select: ['id', 'name', 'leaves', 'max_days'],
       order: { id: 'ASC' },
     });
-  
+
     const leaves = await this.leaveRepository.find({
       where: { userId, status: EStatus.APPROVED },
     });
-  
+
     const usedDays: Record<string, number> = {};
-  
+
     leaves.forEach((leave) => {
       const start = new Date(leave.startDate);
       const end = new Date(leave.endDate);
       const diffDays =
         Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  
+
       usedDays[leave.leaveTypeId] =
         (usedDays[leave.leaveTypeId] || 0) + diffDays;
     });
-  
+
     return leaveTypes.map((lt) => ({
       ...lt,
       used_days: usedDays[lt.id] || 0,
       remaining_days: lt.max_days - (usedDays[lt.id] || 0),
     }));
   }
-  
+
+  // user.service.ts
+  async updateAvatar(userId: string, file: Express.Multer.File) {
+    await this.validateUserId(userId);
+
+    const user = await this.userInfoRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // อัปโหลดไป S3
+    const result = await this.awsS3Service.uploadFile('profile', file);
+
+    user.avatarUrl = result?.Location;
+    user.updatedAt = new Date();
+
+    await this.userInfoRepository.save(user);
+
+    return {
+      message: 'Avatar updated successfully',
+      avatarUrl: user.avatarUrl,
+    };
+  }
+
+
 
 }
