@@ -20,10 +20,6 @@ export class CreateUserDto {
   @IsString()
   nickName?: string;
 
-  // @IsString()
-  // avatarUrl?: string;
-
-
   @IsString()
   @IsNotEmpty()
   roleId: ERole;
@@ -53,7 +49,7 @@ export class CreateUserDto {
   @IsString()
   color?: string;
 
-  @IsOptional()
   @IsString()
-  avatar?: string;
+  @IsOptional()
+  avatarUrl?: string;
 }

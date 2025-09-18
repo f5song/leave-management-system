@@ -239,16 +239,14 @@ export class UserService {
       await this.validateNames(data.firstName, data.lastName);
     }
 
-
-
     if (data.birthDate) {
       await this.validateBirthDate(data.birthDate);
     }
 
-    let avatar: string | null = null;
+    let avatarUrl: string | null = null;
     if (file) {
       const result = await this.awsS3Service.uploadFile('profile', file);
-      avatar = result?.Location;
+      avatarUrl = result?.Location;
     }
 
     let nextNumber = 1;
@@ -272,7 +270,7 @@ export class UserService {
       firstName: data.firstName,
       lastName: data.lastName,
       nickName: data.nickName,
-      avatarUrl: avatar,
+      avatarUrl: avatarUrl,
       birthDate: data.birthDate,
       salary: data.salary,
       roleId: data.roleId,

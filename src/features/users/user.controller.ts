@@ -85,7 +85,7 @@ export class UserController {
   }
 
 
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(FileInterceptor('avatarUrl'))
   @Post()
   async createUser(
     @UploadedFile() file: Express.Multer.File,
