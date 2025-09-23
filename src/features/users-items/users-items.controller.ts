@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, UsePipes, ValidationPipe, Req, HttpStatus } from '@nestjs/common';
-import { ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, UsePipes, ValidationPipe, Req, HttpStatus, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiProperty } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersItemsService } from './users-items.service';
 import { UsersItemEntity } from '../../database/entity/users-items.entity';
@@ -21,6 +21,7 @@ import { ApiResponseError } from '@src/common/decorators/api-response-error.deco
 import { ValidateParamUserId } from '../users/dto/users.validate';
 import { ValidateParamUsersItemId } from './dto/users-items.validate';
 import { ValidateParamUsersItemRequestId } from '../users-items-requests/dto/users-items-requests.validate';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 
 @ApiTags('Users Items')
@@ -155,10 +156,29 @@ export class UsersItemsController {
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ type: UserItemResponseDto })
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+        name: { type: 'string' },
+        description: { type: 'string' },
+        quantity: { type: 'number' },
+        status: { type: 'string' },
+      },
+      required: ['file', 'name', 'description', 'quantity', 'status'],
+    },
+  })
   async create(
+    @UploadedFile() file: Express.Multer.File,
     @Req() req: RequestWithUser,
     @Body() item: CreateItemDto): Promise<ResponseObject<UserItemResponseDto>> {
-    const createdItem = await this.usersItemsService.create(req.user.id, item);
+    const createdItem = await this.usersItemsService.create(req.user.id, item, file);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',

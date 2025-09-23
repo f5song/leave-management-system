@@ -15,6 +15,7 @@ export class CreateItemDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   quantity?: number;
 
   @IsEnum(EItemStatus)

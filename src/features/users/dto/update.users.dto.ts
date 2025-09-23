@@ -53,10 +53,5 @@ export class UpdateUserDto {
   @IsString()
   color?: string;
 
-  @IsOptional()
-  @IsString()
-  avatar?: string;
-
-  
 }
 

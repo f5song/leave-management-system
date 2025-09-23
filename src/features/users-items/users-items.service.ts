@@ -12,10 +12,12 @@ import { UsersItemsRequestsHistoryEntity } from '../../database/entity/users-ite
 import { ItemsRequestsHistoryResponseDto } from '../users-items-requests-histories/respones/users-items-requests-histories.respones.dto';
 import { EItemStatus } from '@src/common/constants/item-status.enum';
 import { errorMessage } from '@src/common/constants/error-message';
+import { AwsS3Service } from '../aws-s3/aws-s3.service';
 
 @Injectable()
 export class UsersItemsService {
   constructor(
+    private awsS3Service: AwsS3Service,
     @InjectRepository(UsersItemEntity)
     private itemRepository: Repository<UsersItemEntity>,
     @InjectRepository(UsersItemRequestEntity)
@@ -45,13 +47,14 @@ export class UsersItemsService {
       deletedAt: entity.deletedAt,
       history: entity.history ? entity.history.map(h => this.toHistoryResponseDto(h)) : [],
     };
-    
+
   }
 
   toUserItemResponseDto(entity: UsersItemEntity): UserItemResponseDto {
     return {
       id: entity.id,
       name: entity.name,
+      image: entity.image,
       description: entity.description,
       quantity: entity.quantity,
       status: entity.status,
@@ -75,89 +78,97 @@ export class UsersItemsService {
 
   async findAll(): Promise<UserItemResponseDto[]> {
     try {
-    const items = await this.itemRepository.find({
-      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
-      order: { createdAt: 'DESC' },
-    });
+      const items = await this.itemRepository.find({
+        relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
+        order: { createdAt: 'DESC' },
+      });
 
-    return items.map(entity => this.toUserItemResponseDto(entity));
-  } catch (error) {
-    throw new HttpException({
-      code: '0901',
-      message: errorMessage['0901'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    }, HttpStatus.BAD_REQUEST);
+      return items.map(entity => this.toUserItemResponseDto(entity));
+    } catch (error) {
+      throw new HttpException({
+        code: '0901',
+        message: errorMessage['0901'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
-}
 
   // ดึงข้อมูลอุปกรณ์ตาม ID พร้อมแปลงเป็น DTO
   async findOne(id: string): Promise<UserItemResponseDto> {
     try {
-    const item = await this.itemRepository.findOne({
-      where: { id },
-      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
-    });
-    return this.toUserItemResponseDto(item);
-  } catch (error) {
-    throw new HttpException({
-      code: '0901',
-      message: errorMessage['0901'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    }, HttpStatus.BAD_REQUEST);
+      const item = await this.itemRepository.findOne({
+        where: { id },
+        relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
+      });
+      return this.toUserItemResponseDto(item);
+    } catch (error) {
+      throw new HttpException({
+        code: '0901',
+        message: errorMessage['0901'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
-}
 
   // สร้างรายการอุปกรณ์ใหม่
-  async create(createdById: string, item: CreateItemDto): Promise<UserItemResponseDto> {
+  async create(createdById: string, item: CreateItemDto, file?: Express.Multer.File): Promise<UserItemResponseDto> {
     const newItem = this.itemRepository.create({
       ...item,
       status: EItemStatus.AVAILABLE,
     });
     newItem.createdById = createdById;
 
+    let image: string | null = null;
+    if (file) {
+      const result = await this.awsS3Service.uploadFile('profile', file);
+      image = result?.Location;
+    }
+    newItem.image = image;
+
+
     const savedItem = await this.itemRepository.save(newItem);
 
     try {
-    const fullItem = await this.itemRepository.findOne({
-      where: { id: savedItem.id },
-      relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
-    });
+      const fullItem = await this.itemRepository.findOne({
+        where: { id: savedItem.id },
+        relations: ['itemRequests', 'itemRequests.requestedBy', 'itemRequests.approvedBy', 'itemRequests.history', 'itemRequests.history.request'],
+      });
 
-    return this.toUserItemResponseDto(fullItem!);
-  } catch (error) {
-    throw new HttpException({
-      code: '0901',
-      message: errorMessage['0901'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    }, HttpStatus.BAD_REQUEST);
+      return this.toUserItemResponseDto(fullItem!);
+    } catch (error) {
+      throw new HttpException({
+        code: '0901',
+        message: errorMessage['0901'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
-}
 
 
   // อัพเดทรายการอุปกรณ์ตาม ID และคืนค่า DTO
   async update(id: string, item: UpdateItemDto): Promise<UserItemResponseDto> {
     try {
-    await this.itemRepository.update(id, item);
-    return this.findOne(id);
-  } catch (error) {
-    throw new HttpException({
-      code: '0901',
-      message: errorMessage['0901'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    }, HttpStatus.BAD_REQUEST);
+      await this.itemRepository.update(id, item);
+      return this.findOne(id);
+    } catch (error) {
+      throw new HttpException({
+        code: '0901',
+        message: errorMessage['0901'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
-}
 
   // ลบรายการอุปกรณ์แบบ soft delete
   async remove(id: string): Promise<void> {
     try {
-    await this.itemRepository.softDelete(id);
-  } catch (error) {
-    throw new HttpException({
-      code: '0901',
-      message: errorMessage['0901'],
-      statusCode: HttpStatus.BAD_REQUEST,
-    }, HttpStatus.BAD_REQUEST);
+      await this.itemRepository.softDelete(id);
+    } catch (error) {
+      throw new HttpException({
+        code: '0901',
+        message: errorMessage['0901'],
+        statusCode: HttpStatus.BAD_REQUEST,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
-}
 }

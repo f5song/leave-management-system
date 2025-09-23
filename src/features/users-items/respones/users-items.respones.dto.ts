@@ -8,6 +8,8 @@ export class UserItemResponseDto {
   @IsString()
   name: string;
   @IsString()
+  image: string;
+  @IsString()
   description: string;
   @IsNumber()
   quantity: number;

@@ -22,6 +22,9 @@ export class UsersItemEntity {
   @Column()
   name: string;
 
+  @Column()
+  image: string;
+
   @Column({ nullable: true })
   description?: string;
 

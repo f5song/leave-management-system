@@ -256,12 +256,15 @@ export class UserController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesPermission({ role: [ERole.ADMIN, ERole.EMPLOYEE], permissions: [EPermission.UPDATE_USER] })
+  @UseInterceptors(FileInterceptor('avatarUrl')) // 📷 เพิ่ม interceptor สำหรับไฟล์
   @Patch(':userId')
+  @ApiConsumes('multipart/form-data')
   async updateUser(
     @Param() param: ValidateParamUserId,
     @Body() updateData: UpdateUserDto,
+    @UploadedFile() file?: Express.Multer.File, // 📁 เพิ่มการรับไฟล์
   ): Promise<ResponseObject<UserResponseDto>> {
-    const updatedUser = await this.userService.update(param.userId, updateData);
+    const updatedUser = await this.userService.update(param.userId, updateData, file);
     return {
       code: HttpStatus.OK,
       message: 'SUCCESS',
@@ -269,33 +272,33 @@ export class UserController {
     };
   }
 
-  @Post(':userId/avatar')
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  async updateAvatar(
-    @Param() param: ValidateParamUserId,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) {
-      return {
-        code: HttpStatus.BAD_REQUEST,
-        message: 'No file uploaded',
-      };
-    }
+  // @Post(':userId/avatar')
+  // @UseInterceptors(FileInterceptor('file'))
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       file: {
+  //         type: 'string',
+  //         format: 'binary',
+  //       },
+  //     },
+  //   },
+  // })
+  // async updateAvatar(
+  //   @Param() param: ValidateParamUserId,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   if (!file) {
+  //     return {
+  //       code: HttpStatus.BAD_REQUEST,
+  //       message: 'No file uploaded',
+  //     };
+  //   }
 
-    return this.userService.updateAvatar(param.userId, file);
-  }
+  //   return this.userService.updateAvatar(param.userId, file);
+  // }
 
 
   // @Patch(':id')

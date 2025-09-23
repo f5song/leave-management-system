@@ -299,7 +299,8 @@ export class UserService {
     return users.map(user => this.toUserResponseDto(user));
   }
 
-  async update(userId: string, data: UpdateUserDto): Promise<UserResponseDto> {
+  // ✅ แก้ไข Service method ให้รองรับไฟล์ avatar
+  async update(userId: string, data: UpdateUserDto, file?: Express.Multer.File): Promise<UserResponseDto> {
     await this.validateUserId(userId);
 
     if (data.email) {
@@ -321,12 +322,33 @@ export class UserService {
       await this.validateDepartment(data.departmentId);
     }
 
-    const user = await this.userInfoRepository.findOne({ where: { id: userId } });
+    const user = await this.userInfoRepository.findOne({
+      where: { id: userId }
+    });
+
     if (!user) {
       throw new HttpException(
         { code: '0701', message: errorMessage['0701'], statusCode: HttpStatus.BAD_REQUEST },
         HttpStatus.BAD_REQUEST,
       );
+    }
+
+    // 📷 จัดการไฟล์ avatar ถ้ามี
+    if (file) {
+      console.log('🔄 กำลังอัพโหลด avatar ใหม่:', file.originalname);
+      try {
+        const result = await this.awsS3Service.uploadFile('profile', file);
+        if (result?.Location) {
+          data.avatarUrl = result.Location;
+          console.log('✅ อัพโหลด avatar สำเร็จ:', result.Location);
+        }
+      } catch (error) {
+        console.error('❌ อัพโหลด avatar ผิดพลาด:', error);
+        throw new HttpException(
+          { code: '0999', message: 'Failed to upload avatar', statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
 
     // update เฉพาะ field ที่ถูกส่งมา
@@ -337,7 +359,11 @@ export class UserService {
     });
 
     user.updatedAt = new Date();
-    return this.toUserResponseDto(await this.userInfoRepository.save(user));
+
+    const savedUser = await this.userInfoRepository.save(user);
+    console.log('✅ อัพเดทข้อมูลผู้ใช้สำเร็จ:', savedUser.id);
+
+    return this.toUserResponseDto(savedUser);
   }
 
 

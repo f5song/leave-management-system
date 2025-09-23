@@ -4,11 +4,11 @@ import { EStatus } from "../constants/status.enum";
 export class PaginationDto {
     @ApiProperty({ required: false, default: 1 })
     @IsOptional()           
-    page?: number = 1;      
+    page?: number;      
   
     @ApiProperty({ required: false, default: 9 })
     @IsOptional()           
-    limit?: number = 9;
+    limit?: number;
 
     @ApiPropertyOptional({ description: 'กรองตาม userId' })
     @IsOptional()
